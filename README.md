@@ -1,0 +1,164 @@
+# Anchor Code
+
+一个面向面试的学习和练习工具，支持按分类收集知识点和面试题，提供学习模式和练习模式。
+
+## 功能特性
+
+- 📚 **学习模式**：按照前端框架树级展示知识点，方便系统学习
+- 💪 **练习模式**：支持问答题和编程题练习
+  - 问答题：先展示题目，点击按钮查看答案
+  - 编程题：提供代码编辑器，可以编写代码，查看参考答案
+- 🎯 **分类管理**：支持多个分类（JavaScript、React、Web3等）
+- 🚀 **GitHub Pages 部署**：无需服务器，直接通过 GitHub Pages 部署
+
+## 技术栈
+
+- React 18
+- React Router
+- Vite
+- 自定义 Vite 插件（构建时处理 Markdown，类似 Gatsby）
+- GitHub Actions (自动部署)
+
+## 本地开发
+
+### 安装依赖
+
+```bash
+pnpm install
+```
+
+### 启动开发服务器
+
+```bash
+pnpm run dev
+```
+
+### 构建生产版本
+
+```bash
+pnpm run build
+```
+
+### 预览生产构建
+
+```bash
+pnpm run preview
+```
+
+## 部署到 GitHub Pages
+
+1. 确保仓库名称与 `vite.config.js` 中的 `base` 配置一致（当前为 `/anchor-code/`）
+2. 在 GitHub 仓库设置中启用 GitHub Pages
+3. 选择 GitHub Actions 作为部署源
+4. 推送代码到 `main` 分支，GitHub Actions 会自动构建并部署
+
+## 数据结构
+
+题目数据使用 Markdown 文件存储，类似 Gatsby 的内容管理方式。文件组织在 `src/content/` 目录下，按分类和子分类组织。
+
+### 目录结构
+
+```
+src/content/
+  ├── javascript/
+  │   ├── basics/
+  │   │   ├── var-let-const.md
+  │   │   └── closure.md
+  │   ├── advanced/
+  │   │   └── promise.md
+  │   └── questions/
+  │       ├── event-loop.md
+  │       └── deep-clone.md
+  ├── react/
+  │   └── ...
+  └── web3/
+      └── ...
+```
+
+### 知识点格式 (knowledge)
+
+在 `src/content/{category}/{subcategory}/` 目录下创建 `.md` 文件：
+
+```markdown
+---
+id: unique-id
+category: JavaScript
+subcategory: 基础语法
+type: knowledge
+title: 知识点标题
+---
+
+这里是知识点的详细内容，支持 Markdown 格式。
+```
+
+### 问答题格式 (practice - qa)
+
+在 `src/content/{category}/questions/` 目录下创建 `.md` 文件：
+
+```markdown
+---
+id: question-id
+category: JavaScript
+subcategory: 面试题
+type: practice
+questionType: qa
+question: 问题内容
+---
+
+这里是答案内容，支持 Markdown 格式。
+```
+
+### 编程题格式 (practice - coding)
+
+```markdown
+---
+id: coding-id
+category: JavaScript
+subcategory: 面试题
+type: practice
+questionType: coding
+question: 题目
+description: 题目描述（可选）
+template: |
+  function example() {
+    // 你的代码
+  }
+---
+
+```javascript
+function solution() {
+  // 参考答案代码
+}
+```
+```
+
+**注意**：
+- `category` 和 `subcategory` 用于组织文件结构
+- 编程题的答案写在 Markdown 的代码块中（第一个代码块会被识别为答案）
+- `template` 字段用于提供代码模板（可选）
+
+### 分类配置
+
+分类的图标和显示名称在 `src/data/categories.js` 中配置：
+
+```javascript
+export const categoryConfig = {
+  javascript: {
+    name: 'JavaScript',
+    icon: '📜'
+  },
+  // ...
+}
+```
+
+## 添加新题目
+
+1. **添加知识点**：在对应的分类目录下创建 `.md` 文件，使用 `type: knowledge`
+2. **添加问答题**：在 `questions/` 子目录下创建 `.md` 文件，使用 `type: practice` 和 `questionType: qa`
+3. **添加编程题**：在 `questions/` 子目录下创建 `.md` 文件，使用 `type: practice` 和 `questionType: coding`，并将答案写在代码块中
+
+**注意**：Markdown 文件会在构建时自动处理并生成 `src/data/questions.json`。开发模式下，修改 Markdown 文件后会自动重新生成数据并刷新页面。
+
+## License
+
+MIT

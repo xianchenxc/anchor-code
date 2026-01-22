@@ -1,0 +1,232 @@
+{
+  "categories": [
+    {
+      "id": "javascript",
+      "name": "JavaScript",
+      "icon": "📁",
+      "children": [
+        {
+          "id": "javascript-advanced",
+          "name": "高级特性",
+          "type": "knowledge",
+          "items": [
+            {
+              "id": "js-promise",
+              "title": "Promise 和 async/await",
+              "question": "",
+              "description": "",
+              "content": "Promise 用于处理异步操作，有三种状态：pending、fulfilled、rejected。async/await 是 Promise 的语法糖，使异步代码看起来像同步代码。",
+              "answer": "",
+              "template": ""
+            }
+          ]
+        },
+        {
+          "id": "javascript-basics",
+          "name": "基础语法",
+          "type": "knowledge",
+          "items": [
+            {
+              "id": "js-closure",
+              "title": "闭包的概念和应用",
+              "question": "",
+              "description": "",
+              "content": "闭包是指函数能够访问其外部作用域中的变量，即使外部函数已经返回。常用于数据私有化和函数工厂。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-var-let-const",
+              "title": "var、let、const 的区别",
+              "question": "",
+              "description": "",
+              "content": "var 是函数作用域，存在变量提升；let 和 const 是块级作用域，不存在变量提升。const 声明常量，不能重新赋值。",
+              "answer": "",
+              "template": ""
+            }
+          ]
+        },
+        {
+          "id": "javascript-questions",
+          "name": "面试题",
+          "type": "practice",
+          "items": [
+            {
+              "id": "js-q1",
+              "type": "qa",
+              "title": "解释 JavaScript 中的事件循环（Event Loop）机制",
+              "question": "解释 JavaScript 中的事件循环（Event Loop）机制",
+              "description": "",
+              "content": "",
+              "answer": "事件循环是 JavaScript 处理异步操作的机制。它包含调用栈、消息队列和微任务队列。同步代码在调用栈执行，异步回调进入消息队列，Promise.then 等进入微任务队列。微任务队列优先级高于消息队列。",
+              "template": ""
+            },
+            {
+              "id": "js-q2",
+              "type": "qa",
+              "title": "什么是原型链？如何实现继承？",
+              "question": "什么是原型链？如何实现继承？",
+              "description": "",
+              "content": "",
+              "answer": "原型链是 JavaScript 实现继承的机制。每个对象都有一个指向其原型对象的内部链接。当访问对象属性时，如果对象本身没有，会沿着原型链向上查找。可以通过 Object.create()、构造函数、class 语法实现继承。",
+              "template": ""
+            },
+            {
+              "id": "js-q3",
+              "type": "coding",
+              "title": "实现一个深拷贝函数",
+              "question": "实现一个深拷贝函数",
+              "description": "实现一个函数 deepClone，能够深拷贝对象和数组，处理循环引用。",
+              "content": "",
+              "answer": "function deepClone(obj, map = new WeakMap()) {\n  if (obj === null || typeof obj !== 'object') return obj;\n  if (map.has(obj)) return map.get(obj);\n  \n  const clone = Array.isArray(obj) ? [] : {};\n  map.set(obj, clone);\n  \n  for (let key in obj) {\n    if (obj.hasOwnProperty(key)) {\n      clone[key] = deepClone(obj[key], map);\n    }\n  }\n  \n  return clone;\n}",
+              "template": "function deepClone(obj) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q4",
+              "type": "coding",
+              "title": "手写 Promise 实现(实现状态管理, 实现 then、catch、finally 方法)",
+              "question": "手写 Promise 实现(实现状态管理, 实现 then、catch、finally 方法)",
+              "description": "",
+              "content": "",
+              "answer": "class SimplePromise {\n  constructor(executor) {\n    this.state = 'pending'\n    this.value = undefined\n    this.callbacks = []\n    \n    const resolve = value => {\n      if (this.state !== 'pending') return\n      \n      // 处理 promise 返回 promise 的情况\n      if (value instanceof SimplePromise) {\n        return value.then(resolve, reject)\n      }\n      \n      this.state = 'fulfilled'\n      this.value = value\n      this.callbacks.forEach(cb => this._handle(cb))\n    }\n    \n    const reject = reason => {\n      if (this.state !== 'pending') return\n      \n      this.state = 'rejected'\n      this.value = reason\n      this.callbacks.forEach(cb => this._handle(cb))\n    }\n    \n    // ✅ 修复：用 try-catch 包裹 executor\n    try {\n      executor(resolve, reject)\n    } catch (error) {\n      reject(error)  // 捕获 executor 中的同步错误\n    }\n  }\n\n  then(onFulfilled, onRejected) {\n    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value\n    onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw reason }\n    \n    return new SimplePromise((resolve, reject) => {\n      this._pushCallback({\n        onFulfilled,\n        onRejected,\n        resolve,\n        reject\n      })\n    })\n  }\n\n  catch(onRejected) {\n    return this.then(null, onRejected)\n  }\n\n  _pushCallback(callback) {\n    if (this.state === 'pending') {\n      this.callbacks.push(callback)\n    } else {\n      setTimeout(() => this._handle(callback), 0)\n    }\n  }\n\n  _handle(callback) {\n    const { onFulfilled, onRejected, resolve, reject } = callback\n    \n    try {\n      if (this.state === 'fulfilled') {\n        const result = onFulfilled(this.value)\n        resolve(result)\n      } else if (this.state === 'rejected') {\n        const result = onRejected(this.value)\n        resolve(result)\n      }\n    } catch (error) {\n      reject(error)  // 捕获回调函数中的错误\n    }\n  }\n}\n\nconst promise1 = new Promise((resolve) => setTimeout(resolve, 1000))",
+              "template": "function FakePromise(obj) {\n  // 你的代码\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "react",
+      "name": "React",
+      "icon": "📁",
+      "children": [
+        {
+          "id": "react-basics",
+          "name": "基础概念",
+          "type": "knowledge",
+          "items": [
+            {
+              "id": "react-components",
+              "title": "组件和 JSX",
+              "question": "",
+              "description": "",
+              "content": "React 组件是构建 UI 的基本单位。JSX 是 JavaScript 的语法扩展，用于描述 UI 结构。组件可以是函数组件或类组件。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-props-state",
+              "title": "Props 和 State",
+              "question": "",
+              "description": "",
+              "content": "Props 是组件的输入，从父组件传递，不可变。State 是组件的内部状态，可变，通过 setState 或 useState 更新。",
+              "answer": "",
+              "template": ""
+            }
+          ]
+        },
+        {
+          "id": "react-hooks",
+          "name": "Hooks",
+          "type": "knowledge",
+          "items": [
+            {
+              "id": "react-useeffect",
+              "title": "useEffect Hook",
+              "question": "",
+              "description": "",
+              "content": "useEffect 用于处理副作用，如数据获取、订阅、手动 DOM 操作。可以指定依赖数组来控制执行时机。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-usestate",
+              "title": "useState Hook",
+              "question": "",
+              "description": "",
+              "content": "useState 用于在函数组件中添加状态。返回一个状态值和一个更新状态的函数。",
+              "answer": "",
+              "template": ""
+            }
+          ]
+        },
+        {
+          "id": "react-questions",
+          "name": "面试题",
+          "type": "practice",
+          "items": [
+            {
+              "id": "react-q1",
+              "type": "qa",
+              "title": "React 中 key 的作用是什么？",
+              "question": "React 中 key 的作用是什么？",
+              "description": "",
+              "content": "",
+              "answer": "key 帮助 React 识别哪些元素改变了，用于优化列表渲染性能。key 应该是稳定、唯一、可预测的。",
+              "template": ""
+            },
+            {
+              "id": "react-q2",
+              "type": "coding",
+              "title": "实现一个自定义 Hook useCounter",
+              "question": "实现一个自定义 Hook useCounter",
+              "description": "实现一个 useCounter Hook，提供 count 值、increment、decrement 和 reset 方法。",
+              "content": "",
+              "answer": "function useCounter(initialValue = 0) {\n  const [count, setCount] = useState(initialValue);\n  \n  const increment = () => setCount(c => c + 1);\n  const decrement = () => setCount(c => c - 1);\n  const reset = () => setCount(initialValue);\n  \n  return { count, increment, decrement, reset };\n}",
+              "template": "function useCounter(initialValue = 0) {\n  // 你的代码\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "web3",
+      "name": "Web3",
+      "icon": "📁",
+      "children": [
+        {
+          "id": "web3-basics",
+          "name": "基础概念",
+          "type": "knowledge",
+          "items": [
+            {
+              "id": "web3-blockchain",
+              "title": "区块链基础",
+              "question": "",
+              "description": "",
+              "content": "区块链是一个分布式账本，由区块组成，每个区块包含交易数据和前一个区块的哈希值，形成不可篡改的链式结构。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "web3-smart-contract",
+              "title": "智能合约",
+              "question": "",
+              "description": "",
+              "content": "智能合约是运行在区块链上的程序，自动执行合约条款。以太坊是最主要的智能合约平台。",
+              "answer": "",
+              "template": ""
+            }
+          ]
+        },
+        {
+          "id": "web3-questions",
+          "name": "面试题",
+          "type": "practice",
+          "items": [
+            {
+              "id": "web3-q1",
+              "type": "qa",
+              "title": "什么是 gas？为什么需要 gas？",
+              "question": "什么是 gas？为什么需要 gas？",
+              "description": "",
+              "content": "",
+              "answer": "Gas 是以太坊网络中执行操作所需的计算资源单位。需要 gas 是为了防止网络滥用，确保交易费用与计算成本成正比。",
+              "template": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
