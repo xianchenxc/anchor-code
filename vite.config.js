@@ -11,7 +11,7 @@ export default defineConfig({
       outputFile: 'src/data/questions.json'
     })
   ],
-  base: '/',
+  base: '/anchor-code/',
   build: {
     outDir: 'dist'
   }
