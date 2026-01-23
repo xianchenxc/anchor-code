@@ -4,7 +4,7 @@ import questionsData from '../data/loadData.js'
 
 function QACard({ item, showAnswer, onToggleAnswer }) {
   return (
-    <div className="w-full">
+    <>
       <div className="mb-8">
         <span className="text-xs text-primary font-medium mb-4 block">问答题</span>
         <div className="text-base font-medium text-gray-900 leading-relaxed">{item.question}</div>
@@ -47,12 +47,12 @@ function QACard({ item, showAnswer, onToggleAnswer }) {
                 h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4 text-gray-900" {...props} />,
               }}
             >
-              {item.answer}
+              {item.content}
             </ReactMarkdown>
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -65,7 +65,7 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
   }, [item.id])
   
   return (
-    <div className="w-full">
+    <>
       <div className="mb-8">
         <span className="text-xs text-primary font-medium mb-4 block">编程题</span>
         <div className="text-base font-medium text-gray-900 leading-relaxed mb-3">{item.question}</div>
@@ -118,10 +118,10 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
       {showAnswer && (
         <div className="mt-8 pt-8 border-t border-gray-200">
           <h4 className="text-gray-900 mb-4 text-sm font-medium">参考答案</h4>
-          <pre className="bg-gray-50 border border-gray-200 p-4 overflow-x-auto m-0 font-mono text-sm leading-relaxed text-gray-900"><code>{item.answer}</code></pre>
+          <pre className="bg-gray-50 border border-gray-200 p-4 overflow-x-auto m-0 font-mono text-sm leading-relaxed text-gray-900"><code>{item.content}</code></pre>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -212,7 +212,7 @@ function PracticeMode() {
       
       {/* 题目计数器 */}
       <div className="mb-8 text-sm text-gray-500">
-        <span>{currentIndex + 1} / {total}</span>
+        {currentIndex + 1} / {total}
       </div>
       
       {/* 卡片容器 */}

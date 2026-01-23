@@ -54,12 +54,12 @@ pnpm run preview
 
 ## 数据结构
 
-题目数据使用 Markdown 文件存储，类似 Gatsby 的内容管理方式。文件组织在 `src/content/` 目录下，按分类和子分类组织。
+题目数据使用 Markdown 文件存储，类似 Gatsby 的内容管理方式。文件组织在 `content/` 目录下（根目录），按分类和子分类组织，保持内容和功能代码分离。
 
 ### 目录结构
 
 ```
-src/content/
+content/
   ├── javascript/
   │   ├── basics/
   │   │   ├── var-let-const.md
@@ -77,7 +77,7 @@ src/content/
 
 ### 知识点格式 (knowledge)
 
-在 `src/content/{category}/{subcategory}/` 目录下创建 `.md` 文件：
+在 `content/{category}/{subcategory}/` 目录下创建 `.md` 文件：
 
 ```markdown
 ---
@@ -93,7 +93,7 @@ title: 知识点标题
 
 ### 问答题格式 (practice - qa)
 
-在 `src/content/{category}/questions/` 目录下创建 `.md` 文件：
+在 `content/{category}/questions/` 目录下创建 `.md` 文件：
 
 ```markdown
 ---

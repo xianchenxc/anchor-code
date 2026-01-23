@@ -4,12 +4,14 @@ import PracticeMode from './components/PracticeMode'
 
 function NavLink({ to, children }) {
   const location = useLocation()
-  const isActive = location.hash === `#${to}` || (to === '/study' && location.hash === '#/')
+  // In HashRouter, use pathname instead of hash
+  // Default route '/' should activate '/study'
+  const isActive = location.pathname === to || (to === '/study' && location.pathname === '/')
 
   return (
     <Link
       to={to}
-      className={`text-white no-underline px-6 py-2 font-medium ${isActive ? 'border-b-2 border-white' : 'opacity-80 hover:opacity-100'}`}
+      className={`text-white no-underline px-4 py-1.5 text-sm font-medium transition-all ${isActive ? 'opacity-100 font-semibold' : 'opacity-80 hover:opacity-100'}`}
     >
       {children}
     </Link>
@@ -20,12 +22,15 @@ function App() {
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col bg-white">
-        <header className="bg-primary text-white px-12 py-8 border-b border-primary/20">
-          <h1 className="text-2xl font-light mb-6">Anchor Code</h1>
-          <nav className="flex gap-8">
-            <NavLink to="/study">学习模式</NavLink>
-            <NavLink to="/practice">练习模式</NavLink>
-          </nav>
+        <header className="sticky top-0 z-50 bg-primary text-white px-12 py-4 border-b border-primary/20 shadow-sm">
+          <h1 className="text-xl font-light m-0 mb-3 flex items-center gap-2">
+            <span className="text-2xl">🎯</span>
+            <span>Anchor Code</span>
+          </h1>
+            <nav className="flex gap-6">
+              <NavLink to="/study">📚 学习模式</NavLink>
+              <NavLink to="/practice">💪 练习模式</NavLink>
+            </nav>
         </header>
 
         <main className="flex-1 p-12 max-w-7xl w-full mx-auto">

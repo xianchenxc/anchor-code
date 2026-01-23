@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     markdownDataPlugin({
-      contentDir: 'src/content',
+      contentDir: 'content',
       outputFile: 'src/data/questions.json'
     })
   ],

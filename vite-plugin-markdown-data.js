@@ -165,40 +165,34 @@ function processMarkdownFiles(contentDir) {
     
     // Process content based on type
     let processedContent = body.trim()
-    let answer = ''
     let template = frontmatter.template ? frontmatter.template.trim() : ''
     let description = frontmatter.description || ''
     
-    if (frontmatter.type === 'practice') {
-      if (frontmatter.questionType === 'coding') {
-        // For coding questions, extract code from markdown
-        const codeBlocks = extractCodeBlocks(processedContent)
-        if (codeBlocks.length > 0) {
-          answer = codeBlocks[0] // First code block is the answer
-          const remainingContent = removeCodeBlocks(processedContent).trim()
-          // Use remaining content as description if description is not in frontmatter
-          if (!description && remainingContent) {
-            description = remainingContent
-          }
-        } else {
-          answer = processedContent
+    // For coding questions, extract code from markdown and use remaining content as description
+    if (frontmatter.type === 'practice' && frontmatter.questionType === 'coding') {
+      const codeBlocks = extractCodeBlocks(processedContent)
+      if (codeBlocks.length > 0) {
+        // Use first code block as content (answer)
+        processedContent = codeBlocks[0]
+        const remainingContent = removeCodeBlocks(body.trim()).trim()
+        // Use remaining content as description if description is not in frontmatter
+        if (!description && remainingContent) {
+          description = remainingContent
         }
-      } else {
-        // For QA questions, the body is the answer
-        answer = processedContent
       }
     }
     
     // Create item from markdown
+    // All types use 'content' field for main content (knowledge content or practice answer)
     const item = {
       id: frontmatter.id || `${categoryId}-${subcategory}-${fileName}`,
       type: frontmatter.questionType || (frontmatter.type === 'practice' ? 'qa' : undefined),
       title: frontmatter.title || frontmatter.question || fileName,
       question: frontmatter.question || '',
       description: description,
-      content: frontmatter.type === 'knowledge' ? processedContent : '',
-      answer: answer || frontmatter.answer || '',
+      content: processedContent || frontmatter.content || '',
       template: template,
+      _fileName: fileName, // Store original filename for sorting
     }
     
     categories[categoryId].children[subcategory].items.push(item)
@@ -207,11 +201,13 @@ function processMarkdownFiles(contentDir) {
   // Sort items by filename (supports numeric prefix for strict ordering)
   Object.values(categories).forEach(cat => {
     Object.values(cat.children).forEach(subcat => {
-      // Extract filename from item id (e.g., 'js-var-let-const' → 'var-let-const')
+      // Sort by actual filename, not by item id
       subcat.items.sort((a, b) => {
-        const aFileName = a.id.split('-').slice(-1)[0] || a.id
-        const bFileName = b.id.split('-').slice(-1)[0] || b.id
-        return sortByName(aFileName, bFileName)
+        return sortByName(a._fileName, b._fileName)
+      })
+      // Remove internal sorting field before output
+      subcat.items.forEach(item => {
+        delete item._fileName
       })
     })
   })
@@ -238,7 +234,7 @@ function processMarkdownFiles(contentDir) {
  */
 export default function markdownDataPlugin(options = {}) {
   const {
-    contentDir = 'src/content',
+    contentDir = 'content',
     outputFile = 'src/data/questions.json'
   } = options
   
