@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import ReactMarkdown from 'react-markdown'
 import questionsData from '../data/loadData.js'
+import MarkdownRenderer from './MarkdownRenderer.jsx'
 
 function QACard({ item, showAnswer, onToggleAnswer }) {
   return (
@@ -20,36 +20,7 @@ function QACard({ item, showAnswer, onToggleAnswer }) {
       {showAnswer && (
         <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
           <h4 className="text-gray-900 mb-3 sm:mb-4 text-xs sm:text-sm font-medium">答案</h4>
-          <div className="text-gray-700 leading-relaxed text-xs sm:text-sm prose prose-sm max-w-none">
-            <ReactMarkdown
-              components={{
-                p: ({ node, ...props }) => <p className="mb-3 sm:mb-4" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc pl-4 sm:pl-6 mb-3 sm:mb-4" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal pl-4 sm:pl-6 mb-3 sm:mb-4" {...props} />,
-                li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                strong: ({ node, children, ...props }) => (
-                  <strong className="font-semibold text-gray-900" {...props}>
-                    {children}
-                  </strong>
-                ),
-                code: ({ node, inline, className, children, ...props }) => {
-                  const childrenStr = typeof children === 'string' ? children : String(children || '');
-                  const hasNewlines = childrenStr.includes('\n');
-                  const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
-                  
-                  if (isCodeBlock) {
-                    return <code className={`block bg-gray-50 p-3 sm:p-4 rounded overflow-x-auto text-xs sm:text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
-                  }
-                  return <code className={`bg-gray-100 px-1 sm:px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono text-gray-800 inline ${className || ''}`} {...props}>{children}</code>;
-                },
-                h1: ({ node, ...props }) => <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 mt-4 sm:mt-6 text-gray-900" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 mt-3 sm:mt-5 text-gray-900" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-base sm:text-lg font-semibold mb-2 mt-3 sm:mt-4 text-gray-900" {...props} />,
-              }}
-            >
-              {item.content}
-            </ReactMarkdown>
-          </div>
+          <MarkdownRenderer content={item.content} />
         </div>
       )}
     </>
@@ -70,29 +41,13 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
         <span className="text-xs text-primary font-medium mb-3 sm:mb-4 block">编程题</span>
         <div className="text-sm sm:text-base font-medium text-gray-900 leading-relaxed mb-2 sm:mb-3">{item.question}</div>
         {item.description && (
-          <div className="text-gray-600 text-xs sm:text-sm leading-relaxed mt-2 sm:mt-3 p-3 sm:p-4 bg-gray-50 border-l-2 border-gray-300 prose prose-sm max-w-none">
-            <ReactMarkdown
+          <div className="text-gray-600 text-xs sm:text-sm leading-relaxed mt-2 sm:mt-3 p-3 sm:p-4 bg-gray-50 border-l-2 border-gray-300">
+            <MarkdownRenderer 
+              content={item.description} 
               components={{
                 p: ({ node, ...props }) => <p className="mb-2" {...props} />,
-                strong: ({ node, children, ...props }) => (
-                  <strong className="font-semibold" {...props}>
-                    {children}
-                  </strong>
-                ),
-                code: ({ node, inline, className, children, ...props }) => {
-                  const childrenStr = typeof children === 'string' ? children : String(children || '');
-                  const hasNewlines = childrenStr.includes('\n');
-                  const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
-                  
-                  if (isCodeBlock) {
-                    return <code className={`block bg-gray-50 p-3 sm:p-4 rounded overflow-x-auto text-xs sm:text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
-                  }
-                  return <code className={`bg-gray-200 px-1 sm:px-1.5 py-0.5 rounded text-xs font-mono inline ${className || ''}`} {...props}>{children}</code>;
-                },
               }}
-            >
-              {item.description}
-            </ReactMarkdown>
+            />
           </div>
         )}
       </div>
@@ -118,7 +73,7 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
       {showAnswer && (
         <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
           <h4 className="text-gray-900 mb-3 sm:mb-4 text-xs sm:text-sm font-medium">参考答案</h4>
-          <pre className="bg-gray-50 border border-gray-200 p-3 sm:p-4 overflow-x-auto m-0 font-mono text-xs sm:text-sm leading-relaxed text-gray-900"><code>{item.content}</code></pre>
+          <MarkdownRenderer content={item.content} />
         </div>
       )}
     </>

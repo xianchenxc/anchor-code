@@ -99,14 +99,22 @@ function getMarkdownFiles(dir, baseDir = dir, files = []) {
 
 /**
  * Extract code blocks from markdown content
+ * Returns array of objects with { content, language, fullBlock }
  */
 function extractCodeBlocks(content) {
-  const codeBlockRegex = /```[\w]*\n([\s\S]*?)```/g
+  const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g
   const matches = []
   let match
   
   while ((match = codeBlockRegex.exec(content)) !== null) {
-    matches.push(match[1].trim())
+    const language = match[1] || ''
+    const codeContent = match[2].trim()
+    const fullBlock = match[0] // Keep the full code block with ```
+    matches.push({
+      content: codeContent,
+      language: language,
+      fullBlock: fullBlock
+    })
   }
   
   return matches
@@ -172,8 +180,9 @@ function processMarkdownFiles(contentDir) {
     if (frontmatter.type === 'practice' && frontmatter.questionType === 'coding') {
       const codeBlocks = extractCodeBlocks(processedContent)
       if (codeBlocks.length > 0) {
-        // Use first code block as content (answer)
-        processedContent = codeBlocks[0]
+        // Use first code block's full block (with ``` markers) as content (answer)
+        // This preserves the code block format for ReactMarkdown to render correctly
+        processedContent = codeBlocks[0].fullBlock
         const remainingContent = removeCodeBlocks(body.trim()).trim()
         // Use remaining content as description if description is not in frontmatter
         if (!description && remainingContent) {
