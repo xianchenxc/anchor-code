@@ -303,6 +303,14 @@
               "template": ""
             },
             {
+              "id": "react-props-state",
+              "title": "Props 和 State",
+              "question": "",
+              "description": "",
+              "content": "Props 是组件的输入，从父组件传递，不可变。State 是组件的内部状态，可变，通过 setState 或 useState 更新。",
+              "template": ""
+            },
+            {
               "id": "react-lifecycle",
               "title": "组件生命周期",
               "question": "",
@@ -319,11 +327,11 @@
               "template": ""
             },
             {
-              "id": "react-props-state",
-              "title": "Props 和 State",
+              "id": "react-virtual-dom",
+              "title": "虚拟 DOM",
               "question": "",
               "description": "",
-              "content": "Props 是组件的输入，从父组件传递，不可变。State 是组件的内部状态，可变，通过 setState 或 useState 更新。",
+              "content": "虚拟 DOM（Virtual DOM）是 React 的核心概念：\n- 虚拟 DOM 是真实 DOM 的 JavaScript 表示\n- React 通过 diff 算法比较新旧虚拟 DOM，找出最小变更\n- 批量更新真实 DOM，提高性能\n\n优势：\n1. 减少直接操作 DOM 的次数\n2. 跨平台（React Native）\n3. 声明式编程，提高开发效率\n\nDiff 算法策略：\n- 同层比较，不跨层移动\n- 使用 key 优化列表渲染\n- 组件类型不同则直接替换",
               "template": ""
             },
             {
@@ -332,14 +340,6 @@
               "question": "",
               "description": "",
               "content": "协调是 React 更新 UI 的过程：\n\n1. **Diff 算法**：比较新旧虚拟 DOM 树，找出差异\n2. **更新策略**：\n   - 不同类型的元素：直接替换整个子树\n   - 相同类型的元素：更新改变的属性\n   - 列表元素：使用 key 优化比较\n\n3. **Fiber 架构**（React 16+）：\n   - 可中断的渲染过程\n   - 优先级调度\n   - 增量渲染\n\n优化建议：\n- 使用 key 帮助 React 识别元素\n- 避免在 render 中创建新对象/函数\n- 使用 `React.memo`、`useMemo`、`useCallback` 优化",
-              "template": ""
-            },
-            {
-              "id": "react-virtual-dom",
-              "title": "虚拟 DOM",
-              "question": "",
-              "description": "",
-              "content": "虚拟 DOM（Virtual DOM）是 React 的核心概念：\n- 虚拟 DOM 是真实 DOM 的 JavaScript 表示\n- React 通过 diff 算法比较新旧虚拟 DOM，找出最小变更\n- 批量更新真实 DOM，提高性能\n\n优势：\n1. 减少直接操作 DOM 的次数\n2. 跨平台（React Native）\n3. 声明式编程，提高开发效率\n\nDiff 算法策略：\n- 同层比较，不跨层移动\n- 使用 key 优化列表渲染\n- 组件类型不同则直接替换",
               "template": ""
             }
           ]
@@ -351,27 +351,11 @@
           "subcategory": "hooks",
           "items": [
             {
-              "id": "react-custom-hooks",
-              "title": "自定义 Hooks",
+              "id": "react-usestate",
+              "title": "useState Hook",
               "question": "",
               "description": "",
-              "content": "自定义 Hook 是一个以 \"use\" 开头的函数，可以在其中调用其他 Hook。\n\n规则：\n1. 必须以 \"use\" 开头\n2. 可以在多个组件中复用逻辑\n3. 每次调用都有独立的 state\n\n常见自定义 Hook：\n- `useCounter`：计数器逻辑\n- `useFetch`：数据获取逻辑\n- `useLocalStorage`：本地存储逻辑\n- `useDebounce`：防抖逻辑\n- `usePrevious`：获取上一轮的值\n\n优势：逻辑复用、代码组织、测试友好。",
-              "template": ""
-            },
-            {
-              "id": "react-usecallback",
-              "title": "useCallback Hook",
-              "question": "",
-              "description": "",
-              "content": "`useCallback` 用于缓存函数引用，避免每次渲染时创建新函数。\n\n```javascript\nconst memoizedCallback = useCallback(() => {\n  doSomething(a, b);\n}, [a, b]);\n```\n\n- 第一个参数：要缓存的函数\n- 第二个参数：依赖数组\n- 返回值：缓存的函数引用\n\n使用场景：\n- 将函数作为 props 传递给子组件（配合 `React.memo`）\n- 作为其他 Hook 的依赖项\n\n注意：`useCallback` 本身也有性能开销，只有真正需要时才使用。",
-              "template": ""
-            },
-            {
-              "id": "react-usecontext",
-              "title": "useContext Hook",
-              "question": "",
-              "description": "",
-              "content": "`useContext` 用于在函数组件中订阅 React Context。\n\n```javascript\nconst value = useContext(MyContext);\n```\n\n使用步骤：\n1. 使用 `React.createContext` 创建 Context\n2. 使用 `Provider` 提供值\n3. 在子组件中使用 `useContext` 获取值\n\n优势：\n- 避免 prop drilling（逐层传递 props）\n- 跨组件共享数据\n\n注意：\n- 每次 Provider 的 value 变化，所有使用该 Context 的组件都会重新渲染\n- 可以通过拆分 Context 或使用 `useMemo` 优化",
+              "content": "useState 用于在函数组件中添加状态。返回一个状态值和一个更新状态的函数。",
               "template": ""
             },
             {
@@ -383,11 +367,27 @@
               "template": ""
             },
             {
+              "id": "react-usecallback",
+              "title": "useCallback Hook",
+              "question": "",
+              "description": "",
+              "content": "`useCallback` 用于缓存函数引用，避免每次渲染时创建新函数。\n\n```javascript\nconst memoizedCallback = useCallback(() => {\n  doSomething(a, b);\n}, [a, b]);\n```\n\n- 第一个参数：要缓存的函数\n- 第二个参数：依赖数组\n- 返回值：缓存的函数引用\n\n使用场景：\n- 将函数作为 props 传递给子组件（配合 `React.memo`）\n- 作为其他 Hook 的依赖项\n\n注意：`useCallback` 本身也有性能开销，只有真正需要时才使用。",
+              "template": ""
+            },
+            {
               "id": "react-usememo",
               "title": "useMemo Hook",
               "question": "",
               "description": "",
               "content": "`useMemo` 用于缓存计算结果，避免每次渲染时重新计算。\n\n```javascript\nconst memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);\n```\n\n- 第一个参数：计算函数\n- 第二个参数：依赖数组\n- 返回值：缓存的值\n\n使用场景：\n- 昂贵的计算\n- 避免子组件不必要的重新渲染（配合 `React.memo`）\n- 缓存对象/数组引用\n\n注意：不要过度使用，只有真正需要优化时才使用。",
+              "template": ""
+            },
+            {
+              "id": "react-usecontext",
+              "title": "useContext Hook",
+              "question": "",
+              "description": "",
+              "content": "`useContext` 用于在函数组件中订阅 React Context。\n\n```javascript\nconst value = useContext(MyContext);\n```\n\n使用步骤：\n1. 使用 `React.createContext` 创建 Context\n2. 使用 `Provider` 提供值\n3. 在子组件中使用 `useContext` 获取值\n\n优势：\n- 避免 prop drilling（逐层传递 props）\n- 跨组件共享数据\n\n注意：\n- 每次 Provider 的 value 变化，所有使用该 Context 的组件都会重新渲染\n- 可以通过拆分 Context 或使用 `useMemo` 优化",
               "template": ""
             },
             {
@@ -399,11 +399,11 @@
               "template": ""
             },
             {
-              "id": "react-usestate",
-              "title": "useState Hook",
+              "id": "react-custom-hooks",
+              "title": "自定义 Hooks",
               "question": "",
               "description": "",
-              "content": "useState 用于在函数组件中添加状态。返回一个状态值和一个更新状态的函数。",
+              "content": "自定义 Hook 是一个以 \"use\" 开头的函数，可以在其中调用其他 Hook。\n\n规则：\n1. 必须以 \"use\" 开头\n2. 可以在多个组件中复用逻辑\n3. 每次调用都有独立的 state\n\n常见自定义 Hook：\n- `useCounter`：计数器逻辑\n- `useFetch`：数据获取逻辑\n- `useLocalStorage`：本地存储逻辑\n- `useDebounce`：防抖逻辑\n- `usePrevious`：获取上一轮的值\n\n优势：逻辑复用、代码组织、测试友好。",
               "template": ""
             }
           ]
@@ -536,6 +536,14 @@
               "template": ""
             },
             {
+              "id": "web3-smart-contract",
+              "title": "智能合约",
+              "question": "",
+              "description": "",
+              "content": "智能合约是运行在区块链上的程序，自动执行合约条款。以太坊是最主要的智能合约平台。",
+              "template": ""
+            },
+            {
               "id": "web3-defi",
               "title": "DeFi 基础",
               "question": "",
@@ -544,11 +552,59 @@
               "template": ""
             },
             {
-              "id": "web3-smart-contract",
-              "title": "智能合约",
+              "id": "web3-network-gas",
+              "title": "区块链网络与 Gas",
               "question": "",
               "description": "",
-              "content": "智能合约是运行在区块链上的程序，自动执行合约条款。以太坊是最主要的智能合约平台。",
+              "content": "区块链网络（如 Ethereum、BSC、Polygon 等）本质上是不同的链环境，每条链都有自己的：\n\n- 链 ID（chainId）\n- 原生代币（ETH、BNB、MATIC 等）\n- RPC 节点\n- 区块浏览器\n\n在 DApp 开发中，你需要理解以下几个关键概念：\n\n## 网络与 ChainId\n\n- **主网（Mainnet）**：真实资产、真实交易的生产网络\n- **测试网（Testnet）**：用于开发调试（如 Sepolia、Goerli、BSC Testnet 等）\n- **二层网络（L2）**：在主网之上进行扩容的网络（如 Arbitrum、Optimism）\n\n每个网络都有唯一的 `chainId`，前端需要根据 `chainId`：\n\n- 判断当前连接的是哪条链\n- 选择正确的合约地址\n- 生成正确的区块浏览器链接\n\n## 什么是 Gas？\n\n**Gas 是在 EVM 链上执行操作所需计算资源的计量单位。**\n\n- 每次调用合约或发送交易，都会消耗一定量的 Gas\n- Gas 消耗多少由操作的复杂度决定（如存储写入比读取更贵）\n- Gas 本身不是钱，但需要用链的原生代币去支付（例如以太坊上用 ETH 支付 Gas 费）\n\n## Gas Price 与 Gas Limit\n\n- **Gas Price**：你愿意为每个 Gas 单位支付多少费用（以前是 `gwei`，EIP-1559 后拆成 base fee + priority fee）\n- **Gas Limit**：你愿意为这次交易最多消耗多少 Gas\n\n交易费用大致为：\n\n- `Gas Used × Gas Price`\n\n如果实际执行消耗的 Gas 超过 Gas Limit，交易会失败，并且通常会消耗掉大部分 Gas 费用。\n\n## EIP-1559 与 Fee 结构\n\n在支持 EIP-1559 的链上，费用参数被拆成：\n\n- `maxFeePerGas`：用户愿意支付的每单位 Gas 的最高费用\n- `maxPriorityFeePerGas`：用户愿意给矿工/验证者的小费\n- 实际支付：`baseFee + priorityFee`，且不超过 `maxFeePerGas`\n\n前端常见做法：\n\n- 调用钱包或 RPC 获取当前建议的 fee 数据\n- 提供「慢 / 标准 / 快」预设选项\n- 显示预估的总 Gas 成本\n\n## 为什么需要 Gas？\n\nGas 的核心目的：\n\n- 防止恶意用户发起无限循环或超复杂计算，阻塞网络\n- 让计算资源变成「有价格的稀缺资源」\n- 鼓励开发者写更节省 Gas 的智能合约\n\n## 前端开发中的 Gas 相关实践\n\n- 在发送交易前，调用 `estimateGas` 预估所需 Gas\n- 向用户展示：\n  - 预估 Gas 消耗\n  - 预估手续费（换算成 USD）\n- 在网络拥堵时，提示用户 Gas 费用较高\n- 对新手用户：\n  - 解释「为什么要付手续费」\n  - 说明即使交易失败，Gas 费也可能会损失\n\n掌握网络与 Gas 的基本概念，是理解后续交易流程、Gas 优化、费用展示等内容的基础。",
+              "template": ""
+            },
+            {
+              "id": "web3-provider-rpc",
+              "title": "Web3 Provider 与 RPC",
+              "question": "",
+              "description": "",
+              "content": "在 DApp 前端中，**Provider** 和 **RPC 节点** 是你与区块链交互的入口。\n\n## 什么是 Provider？\n\nProvider 是一个「区块链访问客户端」，负责：\n\n- 发送读请求（例如查询余额、读取合约状态）\n- 发送写请求（例如发送交易、调用合约方法）\n- 订阅事件和新区块\n\n常见的 Provider 库：\n\n- **ethers.js**\n  - API 简洁，TypeScript 友好\n  - 区分 `Provider`（只读）和 `Signer`（带签名能力）\n- **web3.js**\n  - 较早期的库，功能全面\n  - 体积较大，API 风格偏旧\n- **viem**\n  - 现代化、类型安全优先\n  - 性能优秀，适合 TypeScript 项目\n\n## 什么是 RPC 节点？\n\nRPC 节点提供 JSON-RPC 接口，处理来自 DApp 的请求：\n\n- 公共 RPC：如 Infura、Alchemy、QuickNode、Ankr\n- 自建 RPC：团队自己运行的节点\n\n一个 Provider 通常需要一个或多个 RPC 端点：\n\n```javascript\nconst rpcEndpoints = {\n  mainnet: [\n    'https://mainnet.infura.io/v3/YOUR_KEY',\n    'https://eth-mainnet.alchemyapi.io/v2/YOUR_KEY',\n    'https://rpc.ankr.com/eth'\n  ]\n}\n```\n\n## 浏览器钱包与 Provider\n\n浏览器钱包（如 MetaMask）会在 `window` 上注入对象：\n\n- `window.ethereum`：EIP-1193 Provider 标准\n- 前端可以用它创建库自己的 Provider：\n\n```javascript\nimport { ethers } from 'ethers'\n\nif (window.ethereum) {\n  const provider = new ethers.BrowserProvider(window.ethereum)\n}\n```\n\n与浏览器钱包交互常见流程：\n\n- 检测是否存在 `window.ethereum`\n- 调用 `eth_requestAccounts` 请求连接账户\n- 监听 `accountsChanged` / `chainChanged` 等事件\n\n## Provider 类型：只读与可写\n\n- **只读 Provider**\n  - 只使用 RPC URL（如 Infura）\n  - 不需要用户钱包\n  - 适合：行情展示、公共数据查询\n- **带 Signer 的 Provider**\n  - 基于用户钱包（MetaMask 等）\n  - 可以发起签名、交易\n  - 适合：swap、质押、投票等操作\n\n在前端中，通常会同时维护：\n\n- 一个「公共只读 Provider」\n- 一个「用户钱包 Provider + Signer」\n\n## RPC 管理与容灾\n\n为了提高稳定性，前端应当：\n\n- 为每条链配置多个 RPC 端点\n- 实现基础的：\n  - 健康检查（探测延迟与失败率）\n  - 故障转移（当前端点失败时自动切到备用）\n  - 重试策略（有限次数重试）\n\n## 最佳实践小结\n\n- 区分「读」和「写」场景，合理选择 Provider\n- 对用户钱包使用 EIP-1193 标准接口（`window.ethereum`）\n- 为每个网络配置多个 RPC，避免单点故障\n- 尽量使用现代库（如 ethers.js / viem），简化类型和错误处理\n\n理解 Provider 与 RPC 的角色，是实现钱包连接、交易发送、事件监听等功能的前置知识。",
+              "template": ""
+            },
+            {
+              "id": "web3-wallet-signature",
+              "title": "钱包与签名",
+              "question": "",
+              "description": "",
+              "content": "在 DApp 中，「钱包」是用户身份与资产的载体，也是所有需要签名操作的入口。\n\n## 钱包的角色\n\n一个区块链钱包通常负责：\n\n- 管理私钥与地址\n- 展示资产余额与交易历史\n- 为 DApp 提供签名能力（消息签名、交易签名）\n\n常见钱包：\n\n- 浏览器扩展钱包：MetaMask、Coinbase Wallet、Rabby 等\n- 移动端钱包：Trust Wallet、imToken、Rainbow 等\n- 钱包连接协议：WalletConnect 等\n\n## 钱包连接流程（以 MetaMask 为例）\n\n1. 检测是否安装钱包：\n\n   ```javascript\n   const hasMetaMask = typeof window !== 'undefined' && !!window.ethereum\n   ```\n\n2. 请求连接账户：\n\n   ```javascript\n   const accounts = await window.ethereum.request({\n     method: 'eth_requestAccounts'\n   })\n   const account = accounts[0]\n   ```\n\n3. 监听账户与网络变化：\n\n   ```javascript\n   window.ethereum.on('accountsChanged', (accounts) => {\n     // 更新当前账户\n   })\n\n   window.ethereum.on('chainChanged', (chainId) => {\n     // 处理网络切换\n   })\n   ```\n\n## 签名与交易的区别\n\n- **消息签名（Sign Message）**\n  - 不上链，没有 Gas 费用\n  - 常用于登录、授权、链下证明\n  - 示例：EIP-712 Typed Data 签名\n\n- **交易签名（Sign & Send Transaction）**\n  - 需要被打包进区块，消耗 Gas\n  - 常用于转账、调用智能合约\n  - 包含 `to`、`data`、`value`、`gas` 等字段\n\n前端一般：\n\n- 用「消息签名」实现无 Gas 的登录/授权\n- 用「交易签名」执行真正的链上状态变更\n\n## 多钱包场景\n\n当用户安装了多个钱包时（如 MetaMask + Rabby）：\n\n- 浏览器中可能存在多个 Provider\n- 钱包扩展之间会争夺 `window.ethereum`\n- 需要提供「钱包选择弹窗」让用户显式选择\n\n常见实践：\n\n- 使用第三方 SDK（如 wagmi、rainbowkit、web3modal）统一管理多钱包\n- 或自己封装一层，抽象成统一的 `WalletManager`\n\n## 安全与 UX 注意点\n\n- 清楚提示用户当前连接的是哪个地址、哪条网络\n- 在签名弹窗前，给出清晰、简明的操作说明\n- 避免频繁弹出签名请求，尽可能合并操作\n- 不在前端暴露私钥、助记词等任何敏感信息\n\n钱包与签名是用户参与任何 Web3 交互的入口，理解其基本工作方式，有助于设计更安全、友好的连接和交互体验。",
+              "template": ""
+            },
+            {
+              "id": "web3-transaction-lifecycle",
+              "title": "交易生命周期",
+              "question": "",
+              "description": "",
+              "content": "在 EVM 链上，一笔交易从发起到最终确认，会经历多个阶段。前端需要正确感知并反馈这些状态。\n\n## 交易的基本组成\n\n一笔链上交易通常包含：\n\n- `from`：发送方地址\n- `to`：接收方地址（或合约地址）\n- `value`：转账金额（可为 0）\n- `data`：调用合约的编码数据\n- `gas` / `gasLimit`：最大 Gas 消耗\n- `maxFeePerGas` / `gasPrice`：每单位 Gas 费用\n- `nonce`：发送方地址的交易序号\n\n## 交易生命周期阶段\n\n1. **Created / Prepared（准备中）**\n   - 前端构建交易参数（目标合约、方法、参数、gas 预估等）\n   - 向用户展示交易摘要和费用\n\n2. **Signed（已签名，待发送）**\n   - 用户在钱包中确认交易并签名\n   - 钱包返回已签名交易或直接广播\n\n3. **Pending（待打包）**\n   - 交易已广播，等待被矿工/验证者打包进区块\n   - 前端通常：\n     - 显示「Pending」状态\n     - 提供区块浏览器链接（根据交易哈希）\n\n4. **Mined / Included（已打包）**\n   - 交易被打包进某个区块\n   - 可以获取交易收据（receipt），其中包含：\n     - `status`（1=成功，0=失败）\n     - `blockNumber`、`transactionIndex`\n     - `logs`（事件日志）\n\n5. **Confirmed（已确认）**\n   - 在交易所在区块之后，又追加了若干新区块\n   - 通常以「确认数」衡量安全性（比如 1 / 3 / 12 个确认）\n\n## 前端如何追踪交易状态\n\n- 发送交易后，获得 `txHash`\n- 使用 Provider：\n\n```javascript\n// 轮询方式\nconst receipt = await provider.waitForTransaction(txHash, confirmations)\n\nif (receipt.status === 1) {\n  // success\n} else {\n  // failed\n}\n```\n\n或结合区块事件、合约事件监听来更新 UI。\n\n## 常见失败原因\n\n- 用户在钱包中拒绝交易\n- Gas 不足（Out of Gas）\n- 交易被回滚（`revert`）\n- nonce 冲突或过低\n- 交易长时间未被打包而过期\n\n前端在处理失败时应：\n\n- 显示尽量友好的错误信息（而不是纯技术报错）\n- 给出「重试」或「修改参数后重试」的选项\n- 在必要时提示用户可以尝试「加速」或「取消」交易\n\n## UX 与工程实践\n\n- 使用 toast / modal 实时提示交易状态变化\n- 在 Pending 状态下，允许用户继续浏览，而不是「卡死」页面\n- 对资产余额等信息，可以采用「乐观更新」+ 失败回滚的模式\n- 提供交易历史列表，让用户可以回看和追踪\n\n理解交易的完整生命周期，是实现交易状态管理、错误处理和良好用户体验的基础。",
+              "template": ""
+            },
+            {
+              "id": "web3-defi-dex-basics",
+              "title": "DeFi 与 DEX 基础",
+              "question": "",
+              "description": "",
+              "content": "在 DeFi 世界中，去中心化交易所（DEX）和流动性池是最核心的基础设施之一。\n\n## AMM 与恒定乘积公式\n\n很多 DEX（如 Uniswap V2）的定价机制基于 AMM（自动做市商）：\n\n- 假设有一对代币池：`Token A` 和 `Token B`\n- 池子中当前储备量为：`x` 和 `y`\n- 满足近似恒定乘积公式：`x * y = k`\n\n当用户用 A 换 B 时：\n\n- 向池子增加一定数量的 A（Δx）\n- 从池子取出对应数量的 B（Δy）\n- 交易前后有：`(x + Δx) * (y - Δy) ≈ k`\n\n由于池子中代币比例发生变化，价格也会随之变动，这也是**价格影响（Price Impact）**产生的根源。\n\n## 流动性池与 LP Token\n\nDEX 并没有传统意义上的挂单簿，而是使用「流动性池」：\n\n- 用户可以向池子中存入一对代币（例如 ETH/USDC），成为「流动性提供者（LP）」\n- 作为回报，LP 会获得：\n  - 代表其份额的 **LP Token**\n  - 由交易手续费按比例分配的收益\n\n前端通常需要展示：\n\n- 池子总流动性（TVL）\n- 当前价格（由池子内资产比例决定）\n- 用户持有的 LP 数量与价值\n\n## 无常损失（Impermanent Loss）\n\n当池子内两种代币的价格发生变化时：\n\n- LP 的资产组合会自动被「再平衡」\n- 相比单纯持有两种代币，可能出现收益减少的情况\n\n这种差额被称为**无常损失**：\n\n- 如果价格最终回到初始状态，无常损失会消失\n- 如果价格永久偏离，无常损失就变成了「永久损失」\n\n前端在展示 DeFi 产品时，通常需要：\n\n- 对新手解释无常损失风险\n- 提示高波动交易对的风险更大\n\n## Swap、Add/Remove Liquidity 的基本流程\n\n1. **Swap（代币兑换）**\n   - 选择输入/输出代币\n   - 输入数量\n   - 获取报价（输出数量、价格影响、滑点）\n   - 检查余额与批准（Approval）\n   - 构建并发送交易\n\n2. **Add Liquidity（添加流动性）**\n   - 选择交易对\n   - 输入要提供的两种代币数量\n   - 检查比例是否合理（有些池要求固定比例）\n   - 显示预估获得的 LP Token 数量\n   - 发送添加流动性的交易\n\n3. **Remove Liquidity（移除流动性）**\n   - 选择要移除的 LP Token 数量或百分比\n   - 预估可获得的两种代币数量\n   - 显示价格影响与手续费收益\n   - 发送移除流动性的交易\n\n## 前端开发关注点\n\n- 实时价格与报价展示\n- 流动性池数据的获取与更新（RPC 或索引服务）\n- 用户持仓、收益的可视化（图表、统计）\n- 风险提示（无常损失、滑点、价格影响等）\n\n本篇打好 DeFi 与 DEX 的基础，后续在滑点、价格影响、流动性池细节、Swap 流程等 topics 中会进一步展开。",
+              "template": ""
+            },
+            {
+              "id": "web3-price-slippage-impact",
+              "title": "滑点与价格影响",
+              "question": "",
+              "description": "",
+              "content": "在 DEX 中，用户经常会看到两个相关概念：**滑点（Slippage）** 和 **价格影响（Price Impact）**。\n\n## 价格影响（Price Impact）\n\n价格影响描述的是：**这笔交易本身对池子价格造成了多大偏移**。\n\n- 由于 AMM 使用恒定乘积公式，池子越浅，单笔交易对价格的影响越大\n- 价格影响可以理解为「执行价格」相对于「当前参考价格」的偏差\n\n一个简单的近似公式：\n\n- \\[\n价格影响 \\approx \\frac{执行价格 - 当前价格}{当前价格} \\times 100\\%\n\\]\n\n在前端中，通常需要：\n\n- 调用合约接口（如 `getAmountsOut`）获取执行价格\n- 以池子当前状态为基准计算价格影响\n- 使用颜色和提示来突出高价格影响的风险\n\n## 滑点（Slippage）\n\n**滑点**指的是：**交易执行时的实际价格，与用户下单时看到的预期价格之间的差异**。\n\n产生原因包括：\n\n- 区块打包期间，其他交易改变了池子状态\n- 预估价格本身存在一定误差\n- 网络拥堵导致交易排队时间变长\n\n为了保护用户，DApp 通常允许用户设置「滑点容忍度」：\n\n- 当实际成交价格偏离超过该值时，交易会被回滚\n\n## 滑点容忍度与最小接收数量\n\n在前端构造交易时，会根据滑点容忍度计算：\n\n- 对于 Swap：\n  - 预期输出数量：`amountOut`\n  - 最小接收数量：`amountOutMin`\n\n示例：\n\n```javascript\n// slippage 以基点表示：100 = 1%\nconst amountOutMin = amountOut * (10000 - slippage) / 10000\n```\n\n如果执行时实际输出低于 `amountOutMin`，交易将失败，避免用户在极端情况下被「滑」出很差的价格。\n\n## 前端展示与交互设计\n\n在 DEX 前端，通常会：\n\n- 清晰展示：\n  - 预期价格\n  - 价格影响（%）\n  - 滑点容忍度\n  - 最小接收数量\n- 使用颜色区分风险：\n  - 低价格影响 / 低滑点：绿色\n  - 中等：黄色\n  - 高风险：橙色或红色，并显示警告文案\n- 提供滑点设置：\n  - 常用预设（0.1%、0.5%、1%、3% 等）\n  - 高级用户的自定义输入\n\n## 关系与区别\n\n- **价格影响**：这笔交易因为池子流动性深度有限，导致价格偏移了多少\n- **滑点**：最终执行价格相对于用户预期价格的偏差\n- 滑点容忍度是用户设定的「保护阈值」，其中一部分风险来自价格影响\n\n理解滑点与价格影响，有助于你设计出既安全又灵活的 Swap 体验，并在高风险场景下给予用户充分的提示。",
+              "template": ""
+            },
+            {
+              "id": "web3-multi-chain-bridges",
+              "title": "多链与跨链桥",
+              "question": "",
+              "description": "",
+              "content": "随着各类公链与二层网络的发展，越来越多 DApp 需要支持「多链」甚至「跨链」体验。\n\n## 多链（Multi-chain）基础\n\n多链 DApp 至少要处理好以下问题：\n\n- 识别当前网络（`chainId`）\n- 为不同链配置：\n  - RPC 端点\n  - 合约地址\n  - 区块浏览器链接\n  - 链的名称与图标\n\n一个典型的多链配置结构：\n\n```javascript\nconst chains = {\n  1:   { name: 'Ethereum',  rpcUrls: [...], explorer: 'https://etherscan.io' },\n  56:  { name: 'BSC',       rpcUrls: [...], explorer: 'https://bscscan.com' },\n  137: { name: 'Polygon',   rpcUrls: [...], explorer: 'https://polygonscan.com' },\n  42161: { name: 'Arbitrum', rpcUrls: [...], explorer: 'https://arbiscan.io' }\n}\n```\n\n前端需要根据 `chainId`：\n\n- 选择正确的 RPC 与 Provider\n- 实例化正确地址的合约\n- 构建正确的区块浏览器链接\n\n## 网络检测与切换\n\n典型流程：\n\n1. 读取当前网络 `chainId`\n2. 如果不是目标网络：\n   - 提示用户切换\n   - 提供一键调用 `wallet_switchEthereumChain` 或 `wallet_addEthereumChain`\n3. 监听 `chainChanged` 事件，重置状态\n\n常见用户体验：\n\n- 在不支持当前链时，展示「当前网络不支持」提示\n- 提供网络选择器（下拉列表）\n- 在切换链时，展示适当的加载态\n\n## 合约地址与多链部署\n\n同一套合约往往会在多个链分别部署：\n\n- 不同链上有不同的合约地址\n- 某些功能可能只在部分链上可用\n\n前端需要维护一份「合约地址映射表」：\n\n```javascript\nconst contracts = {\n  router: {\n    1: '0x...',\n    56: '0x...',\n    137: '0x...'\n  }\n}\n```\n\n并在运行时根据当前 `chainId` 选择合适地址。\n\n## 跨链桥（Bridge）基础\n\n跨链桥用于在不同链之间转移资产：\n\n- 锁定源链资产，在目标链铸造对应资产\n- 或在目标链释放之前锁定的资产\n\n从前端视角看，跨链交互通常涉及：\n\n- 选择源链与目标链\n- 选择资产与数量\n- 在源链上发起锁定/授权交易\n- 监听桥接进度与状态\n\n常见 UX 设计：\n\n- 清晰展示当前所处步骤（源链确认 / 中间状态 / 目标链到账）\n- 提供跨链时间预估与风险提示\n- 在异常时提供客服或故障说明\n\n## 多链与跨链的常见问题\n\n- 不同链的：\n  - Gas 代币不同（ETH、BNB、MATIC 等）\n  - Gas 价格与确认速度不同\n  - 区块时间与安全确认数不同\n- 用户可能：\n  - 拒绝网络切换\n  - 在错误的网络上操作\n  - 没有目标链的 Gas 代币，无法完成交易\n\n前端需要：\n\n- 在重要操作前检查当前网络是否正确\n- 提示用户在目标链上需要准备少量 Gas 代币\n- 对「不支持的网络」给出明确反馈，而不是静默失败\n\n掌握多链与跨链的基础概念，有助于你理解后续的多链支持题目和工程实现细节。",
               "template": ""
             }
           ]
@@ -560,12 +616,57 @@
           "subcategory": "questions",
           "items": [
             {
-              "id": "web3-dex-swap",
+              "id": "web3-provider",
               "type": "qa",
-              "title": "在 DEX 前端中，swap 交易的完整流程是什么？如何实现？",
-              "question": "在 DEX 前端中，swap 交易的完整流程是什么？如何实现？",
+              "title": "在 DApp 前端中，如何管理 Web3 Provider？有哪些常见的 Provider 库？",
+              "question": "在 DApp 前端中，如何管理 Web3 Provider？有哪些常见的 Provider 库？",
               "description": "",
-              "content": "**Swap 交易流程：**\n\n1. **用户输入**\n   - 选择输入/输出代币\n   - 输入交易数量\n   - 设置滑点容忍度\n\n2. **获取报价（Quote）**\n   - 调用 DEX 路由合约或 API 获取最优路径\n   - 计算预期输出数量\n   - 计算价格影响和滑点\n\n3. **检查余额和批准**\n   - 检查用户输入代币余额是否充足\n   - 检查是否已批准足够的代币额度\n   - 如果未批准，提示用户先批准\n\n4. **构建交易**\n   - 使用 Web3 库（ethers.js/web3.js）构建交易对象\n   - 设置 gas limit 和 gas price\n   - 估算交易费用\n\n5. **用户确认**\n   - 显示交易摘要（输入/输出、费用、滑点等）\n   - 用户确认后发送交易\n\n6. **交易执行**\n   - 调用钱包发送交易\n   - 监听交易状态（pending → success/failed）\n   - 更新 UI 状态\n\n**实现要点：**\n- 使用路由聚合器（如 1inch、0x）获取最优价格\n- 处理多跳交易（multi-hop swaps）\n- 实时更新报价（防止价格过期）\n- 处理交易失败和重试逻辑\n- 提供交易历史记录",
+              "content": "**常见的 Web3 Provider 库：**\n\n1. **ethers.js**\n   - 轻量级，API 简洁\n   - 支持 Provider 和 Signer\n   - 广泛使用，文档完善\n\n2. **web3.js**\n   - 功能全面，历史悠久\n   - 支持更多底层操作\n   - 体积较大\n\n3. **viem**\n   - 类型安全，TypeScript 优先\n   - 性能优秀，体积小\n   - 现代化设计\n\n**Provider 管理要点：**\n\n1. **Provider 初始化**\n   ```javascript\n   // 检测 MetaMask\n   if (window.ethereum) {\n     provider = new ethers.providers.Web3Provider(window.ethereum)\n   }\n   ```\n\n2. **Provider 切换**\n   - 支持多个 Provider（MetaMask、WalletConnect 等）\n   - 提供 Provider 选择界面\n   - 处理 Provider 断开和重连\n\n3. **网络管理**\n   - 检测当前网络\n   - 添加自定义网络（如测试网）\n   - 处理网络切换\n\n4. **错误处理**\n   - Provider 未安装\n   - Provider 连接失败\n   - 网络错误和超时\n   - RPC 限流处理\n\n5. **性能优化**\n   - Provider 单例模式\n   - 请求缓存和去重\n   - 批量请求（multicall）\n   - 使用 WebSocket Provider 实现实时更新",
+              "template": ""
+            },
+            {
+              "id": "web3-wallet-connection",
+              "type": "qa",
+              "title": "在 DApp 前端中，如何实现钱包连接？有哪些常见的钱包连接方式？",
+              "question": "在 DApp 前端中，如何实现钱包连接？有哪些常见的钱包连接方式？",
+              "description": "",
+              "content": "**钱包连接方式：**\n\n1. **MetaMask**：最常用的浏览器扩展钱包\n   - 使用 `window.ethereum` 对象\n   - 通过 `eth_requestAccounts` 请求连接\n   - 监听 `accountsChanged` 和 `chainChanged` 事件\n\n2. **WalletConnect**：支持移动端钱包\n   - 通过二维码或深度链接连接\n   - 支持多种钱包（Trust Wallet、Rainbow 等）\n\n3. **Coinbase Wallet**：Coinbase 官方钱包\n   - 类似 MetaMask 的 API\n   - 支持浏览器扩展和移动端\n\n**实现要点：**\n- 检测钱包是否安装\n- 处理用户拒绝连接的情况\n- 监听账户切换和网络切换\n- 提供清晰的连接状态反馈\n- 考虑多钱包同时安装的情况",
+              "template": ""
+            },
+            {
+              "id": "web3-q1",
+              "type": "qa",
+              "title": "什么是 gas？为什么需要 gas？",
+              "question": "什么是 gas？为什么需要 gas？",
+              "description": "",
+              "content": "Gas 是以太坊网络中执行操作所需的计算资源单位。需要 gas 是为了防止网络滥用，确保交易费用与计算成本成正比。",
+              "template": ""
+            },
+            {
+              "id": "web3-rpc-endpoints",
+              "type": "qa",
+              "title": "在 DApp 前端中，如何管理和优化 RPC 端点的使用？",
+              "question": "在 DApp 前端中，如何管理和优化 RPC 端点的使用？",
+              "description": "",
+              "content": "**RPC 端点管理：**\n\n1. **端点选择策略**\n   - 公共 RPC（Infura、Alchemy、QuickNode）\n   - 私有 RPC（自建节点）\n   - 备用 RPC（故障转移）\n\n2. **端点配置**\n   ```javascript\n   const rpcEndpoints = {\n     mainnet: [\n       'https://mainnet.infura.io/v3/YOUR_KEY',\n       'https://eth-mainnet.alchemyapi.io/v2/YOUR_KEY',\n       'https://rpc.ankr.com/eth' // 备用\n     ]\n   }\n   ```\n\n3. **故障转移（Failover）**\n   - 检测 RPC 响应时间\n   - 自动切换到备用端点\n   - 实现重试机制\n   - 记录失败端点，暂时禁用\n\n4. **请求优化**\n   - 使用 WebSocket 连接实现实时更新\n   - 批量请求（JSON-RPC batch）\n   - 请求去重和缓存\n   - 限制请求频率（rate limiting）\n\n5. **性能监控**\n   - 监控 RPC 响应时间\n   - 监控错误率\n   - 记录慢请求\n   - 使用 CDN 加速静态查询\n\n6. **成本优化**\n   - 区分读写操作（读操作可用公共端点）\n   - 使用索引服务（The Graph）减少链上查询\n   - 缓存常用数据（余额、价格等）\n   - 使用本地存储缓存\n\n**最佳实践：**\n- 实现 RPC 健康检查\n- 提供手动切换 RPC 的选项\n- 显示当前使用的 RPC 端点\n- 处理 RPC 限流和配额问题\n- 考虑使用多个 RPC 提供商分散风险",
+              "template": ""
+            },
+            {
+              "id": "web3-token-approval",
+              "type": "qa",
+              "title": "在 DEX 中，为什么需要 token approval？如何优化 approval 的用户体验？",
+              "question": "在 DEX 中，为什么需要 token approval？如何优化 approval 的用户体验？",
+              "description": "",
+              "content": "**为什么需要 Approval：**\nERC-20 代币需要用户授权（approve）智能合约才能代表用户转移代币。这是 ERC-20 标准的安全机制，防止未授权的代币转移。\n\n**用户体验优化：**\n\n1. **一次性批准（Infinite Approval）**\n   - 批准最大数量（`2^256 - 1`）而不是每次交易都批准\n   - 减少用户交互次数\n   - 注意：需要向用户说明风险\n\n2. **按需批准（Incremental Approval）**\n   - 只批准当前交易需要的数量\n   - 更安全，但需要频繁批准\n   - 适合大额交易或安全敏感场景\n\n3. **批准状态检测**\n   - 交易前检查是否已有足够批准额度\n   - 避免不必要的批准交易\n   - 显示当前批准额度和剩余可用额度\n\n4. **批量操作**\n   - 对于需要多种代币的场景，提供批量批准\n   - 使用 multicall 合约减少交易次数\n\n5. **UI 优化**\n   - 清晰说明为什么需要批准\n   - 显示批准费用（gas）\n   - 提供\"批准并交易\"的合并操作\n   - 记住用户的批准偏好设置",
+              "template": ""
+            },
+            {
+              "id": "web3-transaction-handling",
+              "type": "qa",
+              "title": "在 DApp 前端中，如何处理交易状态（pending、success、failed）？如何优化用户体验？",
+              "question": "在 DApp 前端中，如何处理交易状态（pending、success、failed）？如何优化用户体验？",
+              "description": "",
+              "content": "**交易状态处理：**\n\n1. **Pending（待确认）**\n   - 显示交易哈希，提供区块浏览器链接\n   - 显示加载动画和预计等待时间\n   - 可以取消交易（如果支持）\n\n2. **Success（成功）**\n   - 显示成功提示和交易确认数\n   - 更新 UI 状态（余额、持仓等）\n   - 提供交易详情链接\n\n3. **Failed（失败）**\n   - 显示错误原因（gas 不足、用户拒绝、交易回滚等）\n   - 提供重试或修改参数的选项\n   - 记录错误日志用于调试\n\n**优化用户体验：**\n- 使用 toast 通知实时反馈\n- 预估 gas 费用并提示用户\n- 支持交易加速（提高 gas price）\n- 提供交易历史记录\n- 处理网络拥堵时的超时情况\n- 使用乐观更新（Optimistic Update）提升响应速度",
               "template": ""
             },
             {
@@ -587,39 +688,12 @@
               "template": ""
             },
             {
-              "id": "web3-q1",
+              "id": "web3-slippage-tolerance",
               "type": "qa",
-              "title": "什么是 gas？为什么需要 gas？",
-              "question": "什么是 gas？为什么需要 gas？",
+              "title": "什么是滑点（Slippage）？在 DEX 前端中如何设置和显示滑点容忍度？",
+              "question": "什么是滑点（Slippage）？在 DEX 前端中如何设置和显示滑点容忍度？",
               "description": "",
-              "content": "Gas 是以太坊网络中执行操作所需的计算资源单位。需要 gas 是为了防止网络滥用，确保交易费用与计算成本成正比。",
-              "template": ""
-            },
-            {
-              "id": "web3-gas-optimization-frontend",
-              "type": "qa",
-              "title": "在前端层面，如何优化 DApp 的 gas 使用？有哪些优化策略？",
-              "question": "在前端层面，如何优化 DApp 的 gas 使用？有哪些优化策略？",
-              "description": "",
-              "content": "**前端 Gas 优化策略：**\n\n1. **交易批处理（Batching）**\n   - 使用 multicall 合约合并多个调用\n   - 减少交易次数，节省 gas\n   - 例如：同时批准和交易，或同时执行多个操作\n\n2. **Gas 价格优化**\n   - 实时获取当前网络 gas price\n   - 提供 gas price 选择（慢/标准/快）\n   - 使用 EIP-1559 的 maxFeePerGas 和 maxPriorityFeePerGas\n   - 根据网络拥堵情况动态调整\n\n3. **交易时机优化**\n   - 在 gas price 较低时提示用户\n   - 避免在网络拥堵时执行非紧急交易\n   - 提供\"稍后执行\"功能\n\n4. **减少链上操作**\n   - 将计算移到前端或后端\n   - 使用签名消息（Sign Message）替代链上验证\n   - 批量查询使用 multicall\n\n5. **智能合约交互优化**\n   - 选择 gas 效率更高的合约方法\n   - 避免不必要的链上读取\n   - 使用事件而非存储查询历史数据\n\n6. **用户体验优化**\n   - 显示预估 gas 费用\n   - 提供 gas 费用对比（不同操作）\n   - 允许用户设置 gas limit\n   - 显示 gas 节省提示\n\n**实现示例：**\n```javascript\n// 使用 multicall 批量查询\nconst calls = [\n  contract.balanceOf(userAddress),\n  contract.allowance(userAddress, spender),\n  contract.totalSupply()\n]\nconst results = await multicall(calls)\n\n// 估算 gas 并提示用户\nconst gasEstimate = await contract.estimateGas.swap(...)\nconst gasPrice = await provider.getGasPrice()\nconst gasCost = gasEstimate.mul(gasPrice)\n```",
-              "template": ""
-            },
-            {
-              "id": "web3-liquidity-pools",
-              "type": "qa",
-              "title": "在 DeFi DApp 前端中，如何显示和管理流动性池（Liquidity Pool）信息？",
-              "question": "在 DeFi DApp 前端中，如何显示和管理流动性池（Liquidity Pool）信息？",
-              "description": "",
-              "content": "**流动性池信息展示：**\n\n1. **池子基础信息**\n   - 交易对（Token Pair）\n   - 总流动性（TVL - Total Value Locked）\n   - 池子份额（LP Token 数量）\n   - 当前价格和价格变化\n\n2. **用户持仓信息**\n   - 用户提供的流动性数量\n   - 用户份额占比\n   - 当前价值（USD）\n   - 未领取的费用收益\n\n3. **实时数据更新**\n   - 监听池子状态变化事件\n   - 定期刷新余额和价格\n   - 使用 WebSocket 实现实时更新\n\n**前端实现要点：**\n\n1. **添加流动性（Add Liquidity）**\n   - 计算添加比例（50/50 或其他比例）\n   - 显示预估 LP Token 数量\n   - 处理首次创建池子的情况\n   - 显示价格范围（如果使用集中流动性）\n\n2. **移除流动性（Remove Liquidity）**\n   - 显示可移除的 LP Token 数量\n   - 计算将获得的代币数量\n   - 显示价格影响\n   - 支持部分移除\n\n3. **费用显示**\n   - 显示累计费用\n   - 显示费用占比\n   - 提供费用提取功能\n\n4. **价格图表**\n   - 显示池子价格历史\n   - 显示流动性分布\n   - 显示交易量统计\n\n5. **风险提示**\n   - 无常损失（Impermanent Loss）说明\n   - 流动性风险提示\n   - 价格波动影响\n\n**UI/UX 优化：**\n- 清晰的数值显示（大数字格式化）\n- 使用图表可视化数据\n- 提供详细的数据面板\n- 移动端适配",
-              "template": ""
-            },
-            {
-              "id": "web3-multi-chain",
-              "type": "qa",
-              "title": "如何实现多链 DApp？前端需要处理哪些多链相关的逻辑？",
-              "question": "如何实现多链 DApp？前端需要处理哪些多链相关的逻辑？",
-              "description": "",
-              "content": "**多链实现要点：**\n\n1. **网络检测和切换**\n   - 检测当前连接的网络（chainId）\n   - 如果不在目标网络，提示用户切换\n   - 提供一键切换网络功能\n   - 监听 `chainChanged` 事件\n\n2. **多链配置管理**\n   ```javascript\n   const chains = {\n     1: { name: 'Ethereum', rpc: '...', explorer: 'etherscan.io' },\n     56: { name: 'BSC', rpc: '...', explorer: 'bscscan.com' },\n     137: { name: 'Polygon', rpc: '...', explorer: 'polygonscan.com' }\n   }\n   ```\n\n3. **合约地址管理**\n   - 不同链使用不同的合约地址\n   - 根据 chainId 动态加载合约\n   - 使用多链部署的合约地址映射\n\n4. **RPC 端点管理**\n   - 为每个链配置 RPC 端点\n   - 支持公共 RPC 和私有 RPC\n   - 实现 RPC 故障转移（fallback）\n\n5. **跨链桥接**\n   - 集成跨链桥（如 Polygon Bridge、Arbitrum Bridge）\n   - 处理跨链资产转移\n   - 显示跨链交易状态\n\n6. **用户体验优化**\n   - 显示当前网络标识\n   - 网络切换时的加载状态\n   - 不支持的网络提示\n   - 保存用户偏好的网络设置\n\n**常见问题处理：**\n- 处理用户拒绝网络切换\n- 处理网络切换失败\n- 处理不同链的 gas 代币差异\n- 处理不同链的交易确认时间差异",
+              "content": "**滑点（Slippage）**：交易执行时的价格与预期价格的偏差。在 DEX 中，由于流动性池的价格会随交易量变化，实际成交价可能与报价不同。\n\n**设置滑点容忍度：**\n- 默认值：通常 0.5% - 1%（稳定币对）或 3% - 5%（其他代币对）\n- 允许用户自定义（高级设置）\n- 根据交易对类型和交易量动态建议\n\n**前端实现要点：**\n1. **价格影响显示**\n   - 实时计算并显示价格影响百分比\n   - 如果超过滑点容忍度，警告用户\n\n2. **滑点保护**\n   - 交易前检查：`实际价格变化 < 滑点容忍度`\n   - 如果超出，阻止交易或要求用户确认\n\n3. **UI 设计**\n   - 清晰显示预期价格和最小/最大接收量\n   - 使用颜色区分（绿色=安全，黄色=警告，红色=危险）\n   - 提供滑点容忍度调整滑块或输入框\n\n4. **特殊情况处理**\n   - 大额交易自动提高建议滑点\n   - 低流动性池警告\n   - MEV 保护提示",
               "template": ""
             },
             {
@@ -632,22 +706,13 @@
               "template": ""
             },
             {
-              "id": "web3-rpc-endpoints",
-              "type": "qa",
-              "title": "在 DApp 前端中，如何管理和优化 RPC 端点的使用？",
-              "question": "在 DApp 前端中，如何管理和优化 RPC 端点的使用？",
-              "description": "",
-              "content": "**RPC 端点管理：**\n\n1. **端点选择策略**\n   - 公共 RPC（Infura、Alchemy、QuickNode）\n   - 私有 RPC（自建节点）\n   - 备用 RPC（故障转移）\n\n2. **端点配置**\n   ```javascript\n   const rpcEndpoints = {\n     mainnet: [\n       'https://mainnet.infura.io/v3/YOUR_KEY',\n       'https://eth-mainnet.alchemyapi.io/v2/YOUR_KEY',\n       'https://rpc.ankr.com/eth' // 备用\n     ]\n   }\n   ```\n\n3. **故障转移（Failover）**\n   - 检测 RPC 响应时间\n   - 自动切换到备用端点\n   - 实现重试机制\n   - 记录失败端点，暂时禁用\n\n4. **请求优化**\n   - 使用 WebSocket 连接实现实时更新\n   - 批量请求（JSON-RPC batch）\n   - 请求去重和缓存\n   - 限制请求频率（rate limiting）\n\n5. **性能监控**\n   - 监控 RPC 响应时间\n   - 监控错误率\n   - 记录慢请求\n   - 使用 CDN 加速静态查询\n\n6. **成本优化**\n   - 区分读写操作（读操作可用公共端点）\n   - 使用索引服务（The Graph）减少链上查询\n   - 缓存常用数据（余额、价格等）\n   - 使用本地存储缓存\n\n**最佳实践：**\n- 实现 RPC 健康检查\n- 提供手动切换 RPC 的选项\n- 显示当前使用的 RPC 端点\n- 处理 RPC 限流和配额问题\n- 考虑使用多个 RPC 提供商分散风险",
-              "template": ""
-            },
-            {
-              "id": "web3-slippage-tolerance",
-              "type": "qa",
-              "title": "什么是滑点（Slippage）？在 DEX 前端中如何设置和显示滑点容忍度？",
-              "question": "什么是滑点（Slippage）？在 DEX 前端中如何设置和显示滑点容忍度？",
-              "description": "",
-              "content": "**滑点（Slippage）**：交易执行时的价格与预期价格的偏差。在 DEX 中，由于流动性池的价格会随交易量变化，实际成交价可能与报价不同。\n\n**设置滑点容忍度：**\n- 默认值：通常 0.5% - 1%（稳定币对）或 3% - 5%（其他代币对）\n- 允许用户自定义（高级设置）\n- 根据交易对类型和交易量动态建议\n\n**前端实现要点：**\n1. **价格影响显示**\n   - 实时计算并显示价格影响百分比\n   - 如果超过滑点容忍度，警告用户\n\n2. **滑点保护**\n   - 交易前检查：`实际价格变化 < 滑点容忍度`\n   - 如果超出，阻止交易或要求用户确认\n\n3. **UI 设计**\n   - 清晰显示预期价格和最小/最大接收量\n   - 使用颜色区分（绿色=安全，黄色=警告，红色=危险）\n   - 提供滑点容忍度调整滑块或输入框\n\n4. **特殊情况处理**\n   - 大额交易自动提高建议滑点\n   - 低流动性池警告\n   - MEV 保护提示",
-              "template": ""
+              "id": "web3-wallet-connection-impl",
+              "type": "coding",
+              "title": "实现一个钱包连接功能，支持检测 MetaMask、连接钱包、监听账户和网络变化，并处理各种错误情况。",
+              "question": "实现一个钱包连接功能，支持检测 MetaMask、连接钱包、监听账户和网络变化，并处理各种错误情况。",
+              "description": "需要实现：\n1. 检测 MetaMask 是否安装\n2. 连接钱包并获取账户\n3. 监听账户切换（accountsChanged）\n4. 监听网络切换（chainChanged）\n5. 处理用户拒绝连接的情况\n6. 处理网络错误\n",
+              "content": "```javascript\nimport { ethers } from 'ethers'\n\nclass WalletManager {\n  constructor() {\n    this.provider = null\n    this.signer = null\n    this.account = null\n    this.chainId = null\n  }\n\n  isMetaMaskInstalled() {\n    return typeof window !== 'undefined' && typeof window.ethereum !== 'undefined'\n  }\n\n  async connect() {\n    if (!this.isMetaMaskInstalled()) {\n      throw new Error('MetaMask is not installed')\n    }\n\n    try {\n      // 请求连接\n      await window.ethereum.request({ method: 'eth_requestAccounts' })\n      \n      // 创建 provider 和 signer\n      this.provider = new ethers.providers.Web3Provider(window.ethereum)\n      this.signer = this.provider.getSigner()\n      this.account = await this.signer.getAddress()\n      this.chainId = await this.signer.getChainId()\n      \n      return {\n        account: this.account,\n        chainId: this.chainId\n      }\n    } catch (error) {\n      if (error.code === 4001) {\n        throw new Error('User rejected the connection request')\n      }\n      throw error\n    }\n  }\n\n  onAccountsChanged(callback) {\n    if (!this.isMetaMaskInstalled()) return\n\n    window.ethereum.on('accountsChanged', async (accounts) => {\n      if (accounts.length === 0) {\n        this.account = null\n        this.signer = null\n        callback(null)\n      } else {\n        this.account = accounts[0]\n        this.signer = this.provider.getSigner()\n        callback(this.account)\n      }\n    })\n  }\n\n  onChainChanged(callback) {\n    if (!this.isMetaMaskInstalled()) return\n\n    window.ethereum.on('chainChanged', async (chainId) => {\n      // chainId 是十六进制字符串，需要转换为数字\n      this.chainId = parseInt(chainId, 16)\n      // 重新创建 provider（某些库需要）\n      this.provider = new ethers.providers.Web3Provider(window.ethereum)\n      this.signer = this.provider.getSigner()\n      callback(this.chainId)\n    })\n  }\n\n  getAccount() {\n    return this.account\n  }\n\n  async getChainId() {\n    if (this.provider) {\n      this.chainId = await this.provider.getNetwork().then(network => network.chainId)\n    }\n    return this.chainId\n  }\n}\n```",
+              "template": "import { ethers } from 'ethers'\n\nclass WalletManager {\n  constructor() {\n    this.provider = null\n    this.signer = null\n    this.account = null\n    this.chainId = null\n  }\n\n  // TODO: 检测 MetaMask 是否安装\n  isMetaMaskInstalled() {\n    // 你的代码\n  }\n\n  // TODO: 连接钱包\n  async connect() {\n    // 你的代码\n  }\n\n  // TODO: 监听账户变化\n  onAccountsChanged(callback) {\n    // 你的代码\n  }\n\n  // TODO: 监听网络变化\n  onChainChanged(callback) {\n    // 你的代码\n  }\n\n  // TODO: 获取当前账户\n  getAccount() {\n    // 你的代码\n  }\n\n  // TODO: 获取当前网络 ID\n  async getChainId() {\n    // 你的代码\n  }\n}"
             },
             {
               "id": "web3-swap-transaction",
@@ -659,48 +724,39 @@
               "template": "import { ethers } from 'ethers'\nimport ERC20_ABI from './ERC20_ABI.json'\nimport DEX_ROUTER_ABI from './DEX_ROUTER_ABI.json'\n\nclass SwapManager {\n  constructor(provider, routerAddress) {\n    this.provider = provider\n    this.router = new ethers.Contract(routerAddress, DEX_ROUTER_ABI, provider)\n  }\n\n  // TODO: 获取 swap 报价\n  async getQuote(tokenIn, tokenOut, amountIn, slippage = 500) {\n    // 参数：tokenIn, tokenOut 是代币地址\n    // amountIn 是输入数量（wei）\n    // slippage 是滑点容忍度（基点，500 = 5%）\n    // 返回：{ amountOut, amountOutMin, priceImpact }\n  }\n\n  // TODO: 检查余额\n  async checkBalance(tokenAddress, userAddress, requiredAmount) {\n    // 返回：{ hasBalance: boolean, balance: BigNumber }\n  }\n\n  // TODO: 检查并处理批准\n  async checkAndApprove(tokenAddress, spenderAddress, amount, signer) {\n    // 检查当前批准额度\n    // 如果不足，执行批准交易\n    // 返回：{ needsApproval: boolean, txHash?: string }\n  }\n\n  // TODO: 执行 swap\n  async executeSwap(tokenIn, tokenOut, amountIn, amountOutMin, to, deadline, signer) {\n    // 执行 swap 交易\n    // 返回：交易哈希\n  }\n\n  // TODO: 监听交易状态\n  async waitForTransaction(txHash, confirmations = 1) {\n    // 等待交易确认\n    // 返回：交易收据\n  }\n}"
             },
             {
-              "id": "web3-token-approval",
+              "id": "web3-liquidity-pools",
               "type": "qa",
-              "title": "在 DEX 中，为什么需要 token approval？如何优化 approval 的用户体验？",
-              "question": "在 DEX 中，为什么需要 token approval？如何优化 approval 的用户体验？",
+              "title": "在 DeFi DApp 前端中，如何显示和管理流动性池（Liquidity Pool）信息？",
+              "question": "在 DeFi DApp 前端中，如何显示和管理流动性池（Liquidity Pool）信息？",
               "description": "",
-              "content": "**为什么需要 Approval：**\nERC-20 代币需要用户授权（approve）智能合约才能代表用户转移代币。这是 ERC-20 标准的安全机制，防止未授权的代币转移。\n\n**用户体验优化：**\n\n1. **一次性批准（Infinite Approval）**\n   - 批准最大数量（`2^256 - 1`）而不是每次交易都批准\n   - 减少用户交互次数\n   - 注意：需要向用户说明风险\n\n2. **按需批准（Incremental Approval）**\n   - 只批准当前交易需要的数量\n   - 更安全，但需要频繁批准\n   - 适合大额交易或安全敏感场景\n\n3. **批准状态检测**\n   - 交易前检查是否已有足够批准额度\n   - 避免不必要的批准交易\n   - 显示当前批准额度和剩余可用额度\n\n4. **批量操作**\n   - 对于需要多种代币的场景，提供批量批准\n   - 使用 multicall 合约减少交易次数\n\n5. **UI 优化**\n   - 清晰说明为什么需要批准\n   - 显示批准费用（gas）\n   - 提供\"批准并交易\"的合并操作\n   - 记住用户的批准偏好设置",
+              "content": "**流动性池信息展示：**\n\n1. **池子基础信息**\n   - 交易对（Token Pair）\n   - 总流动性（TVL - Total Value Locked）\n   - 池子份额（LP Token 数量）\n   - 当前价格和价格变化\n\n2. **用户持仓信息**\n   - 用户提供的流动性数量\n   - 用户份额占比\n   - 当前价值（USD）\n   - 未领取的费用收益\n\n3. **实时数据更新**\n   - 监听池子状态变化事件\n   - 定期刷新余额和价格\n   - 使用 WebSocket 实现实时更新\n\n**前端实现要点：**\n\n1. **添加流动性（Add Liquidity）**\n   - 计算添加比例（50/50 或其他比例）\n   - 显示预估 LP Token 数量\n   - 处理首次创建池子的情况\n   - 显示价格范围（如果使用集中流动性）\n\n2. **移除流动性（Remove Liquidity）**\n   - 显示可移除的 LP Token 数量\n   - 计算将获得的代币数量\n   - 显示价格影响\n   - 支持部分移除\n\n3. **费用显示**\n   - 显示累计费用\n   - 显示费用占比\n   - 提供费用提取功能\n\n4. **价格图表**\n   - 显示池子价格历史\n   - 显示流动性分布\n   - 显示交易量统计\n\n5. **风险提示**\n   - 无常损失（Impermanent Loss）说明\n   - 流动性风险提示\n   - 价格波动影响\n\n**UI/UX 优化：**\n- 清晰的数值显示（大数字格式化）\n- 使用图表可视化数据\n- 提供详细的数据面板\n- 移动端适配",
               "template": ""
             },
             {
-              "id": "web3-transaction-handling",
+              "id": "web3-dex-swap",
               "type": "qa",
-              "title": "在 DApp 前端中，如何处理交易状态（pending、success、failed）？如何优化用户体验？",
-              "question": "在 DApp 前端中，如何处理交易状态（pending、success、failed）？如何优化用户体验？",
+              "title": "在 DEX 前端中，swap 交易的完整流程是什么？如何实现？",
+              "question": "在 DEX 前端中，swap 交易的完整流程是什么？如何实现？",
               "description": "",
-              "content": "**交易状态处理：**\n\n1. **Pending（待确认）**\n   - 显示交易哈希，提供区块浏览器链接\n   - 显示加载动画和预计等待时间\n   - 可以取消交易（如果支持）\n\n2. **Success（成功）**\n   - 显示成功提示和交易确认数\n   - 更新 UI 状态（余额、持仓等）\n   - 提供交易详情链接\n\n3. **Failed（失败）**\n   - 显示错误原因（gas 不足、用户拒绝、交易回滚等）\n   - 提供重试或修改参数的选项\n   - 记录错误日志用于调试\n\n**优化用户体验：**\n- 使用 toast 通知实时反馈\n- 预估 gas 费用并提示用户\n- 支持交易加速（提高 gas price）\n- 提供交易历史记录\n- 处理网络拥堵时的超时情况\n- 使用乐观更新（Optimistic Update）提升响应速度",
+              "content": "**Swap 交易流程：**\n\n1. **用户输入**\n   - 选择输入/输出代币\n   - 输入交易数量\n   - 设置滑点容忍度\n\n2. **获取报价（Quote）**\n   - 调用 DEX 路由合约或 API 获取最优路径\n   - 计算预期输出数量\n   - 计算价格影响和滑点\n\n3. **检查余额和批准**\n   - 检查用户输入代币余额是否充足\n   - 检查是否已批准足够的代币额度\n   - 如果未批准，提示用户先批准\n\n4. **构建交易**\n   - 使用 Web3 库（ethers.js/web3.js）构建交易对象\n   - 设置 gas limit 和 gas price\n   - 估算交易费用\n\n5. **用户确认**\n   - 显示交易摘要（输入/输出、费用、滑点等）\n   - 用户确认后发送交易\n\n6. **交易执行**\n   - 调用钱包发送交易\n   - 监听交易状态（pending → success/failed）\n   - 更新 UI 状态\n\n**实现要点：**\n- 使用路由聚合器（如 1inch、0x）获取最优价格\n- 处理多跳交易（multi-hop swaps）\n- 实时更新报价（防止价格过期）\n- 处理交易失败和重试逻辑\n- 提供交易历史记录",
               "template": ""
             },
             {
-              "id": "web3-wallet-connection",
+              "id": "web3-gas-optimization-frontend",
               "type": "qa",
-              "title": "在 DApp 前端中，如何实现钱包连接？有哪些常见的钱包连接方式？",
-              "question": "在 DApp 前端中，如何实现钱包连接？有哪些常见的钱包连接方式？",
+              "title": "在前端层面，如何优化 DApp 的 gas 使用？有哪些优化策略？",
+              "question": "在前端层面，如何优化 DApp 的 gas 使用？有哪些优化策略？",
               "description": "",
-              "content": "**钱包连接方式：**\n\n1. **MetaMask**：最常用的浏览器扩展钱包\n   - 使用 `window.ethereum` 对象\n   - 通过 `eth_requestAccounts` 请求连接\n   - 监听 `accountsChanged` 和 `chainChanged` 事件\n\n2. **WalletConnect**：支持移动端钱包\n   - 通过二维码或深度链接连接\n   - 支持多种钱包（Trust Wallet、Rainbow 等）\n\n3. **Coinbase Wallet**：Coinbase 官方钱包\n   - 类似 MetaMask 的 API\n   - 支持浏览器扩展和移动端\n\n**实现要点：**\n- 检测钱包是否安装\n- 处理用户拒绝连接的情况\n- 监听账户切换和网络切换\n- 提供清晰的连接状态反馈\n- 考虑多钱包同时安装的情况",
+              "content": "**前端 Gas 优化策略：**\n\n1. **交易批处理（Batching）**\n   - 使用 multicall 合约合并多个调用\n   - 减少交易次数，节省 gas\n   - 例如：同时批准和交易，或同时执行多个操作\n\n2. **Gas 价格优化**\n   - 实时获取当前网络 gas price\n   - 提供 gas price 选择（慢/标准/快）\n   - 使用 EIP-1559 的 maxFeePerGas 和 maxPriorityFeePerGas\n   - 根据网络拥堵情况动态调整\n\n3. **交易时机优化**\n   - 在 gas price 较低时提示用户\n   - 避免在网络拥堵时执行非紧急交易\n   - 提供\"稍后执行\"功能\n\n4. **减少链上操作**\n   - 将计算移到前端或后端\n   - 使用签名消息（Sign Message）替代链上验证\n   - 批量查询使用 multicall\n\n5. **智能合约交互优化**\n   - 选择 gas 效率更高的合约方法\n   - 避免不必要的链上读取\n   - 使用事件而非存储查询历史数据\n\n6. **用户体验优化**\n   - 显示预估 gas 费用\n   - 提供 gas 费用对比（不同操作）\n   - 允许用户设置 gas limit\n   - 显示 gas 节省提示\n\n**实现示例：**\n```javascript\n// 使用 multicall 批量查询\nconst calls = [\n  contract.balanceOf(userAddress),\n  contract.allowance(userAddress, spender),\n  contract.totalSupply()\n]\nconst results = await multicall(calls)\n\n// 估算 gas 并提示用户\nconst gasEstimate = await contract.estimateGas.swap(...)\nconst gasPrice = await provider.getGasPrice()\nconst gasCost = gasEstimate.mul(gasPrice)\n```",
               "template": ""
             },
             {
-              "id": "web3-wallet-connection-impl",
-              "type": "coding",
-              "title": "实现一个钱包连接功能，支持检测 MetaMask、连接钱包、监听账户和网络变化，并处理各种错误情况。",
-              "question": "实现一个钱包连接功能，支持检测 MetaMask、连接钱包、监听账户和网络变化，并处理各种错误情况。",
-              "description": "需要实现：\n1. 检测 MetaMask 是否安装\n2. 连接钱包并获取账户\n3. 监听账户切换（accountsChanged）\n4. 监听网络切换（chainChanged）\n5. 处理用户拒绝连接的情况\n6. 处理网络错误\n",
-              "content": "```javascript\nimport { ethers } from 'ethers'\n\nclass WalletManager {\n  constructor() {\n    this.provider = null\n    this.signer = null\n    this.account = null\n    this.chainId = null\n  }\n\n  isMetaMaskInstalled() {\n    return typeof window !== 'undefined' && typeof window.ethereum !== 'undefined'\n  }\n\n  async connect() {\n    if (!this.isMetaMaskInstalled()) {\n      throw new Error('MetaMask is not installed')\n    }\n\n    try {\n      // 请求连接\n      await window.ethereum.request({ method: 'eth_requestAccounts' })\n      \n      // 创建 provider 和 signer\n      this.provider = new ethers.providers.Web3Provider(window.ethereum)\n      this.signer = this.provider.getSigner()\n      this.account = await this.signer.getAddress()\n      this.chainId = await this.signer.getChainId()\n      \n      return {\n        account: this.account,\n        chainId: this.chainId\n      }\n    } catch (error) {\n      if (error.code === 4001) {\n        throw new Error('User rejected the connection request')\n      }\n      throw error\n    }\n  }\n\n  onAccountsChanged(callback) {\n    if (!this.isMetaMaskInstalled()) return\n\n    window.ethereum.on('accountsChanged', async (accounts) => {\n      if (accounts.length === 0) {\n        this.account = null\n        this.signer = null\n        callback(null)\n      } else {\n        this.account = accounts[0]\n        this.signer = this.provider.getSigner()\n        callback(this.account)\n      }\n    })\n  }\n\n  onChainChanged(callback) {\n    if (!this.isMetaMaskInstalled()) return\n\n    window.ethereum.on('chainChanged', async (chainId) => {\n      // chainId 是十六进制字符串，需要转换为数字\n      this.chainId = parseInt(chainId, 16)\n      // 重新创建 provider（某些库需要）\n      this.provider = new ethers.providers.Web3Provider(window.ethereum)\n      this.signer = this.provider.getSigner()\n      callback(this.chainId)\n    })\n  }\n\n  getAccount() {\n    return this.account\n  }\n\n  async getChainId() {\n    if (this.provider) {\n      this.chainId = await this.provider.getNetwork().then(network => network.chainId)\n    }\n    return this.chainId\n  }\n}\n```",
-              "template": "import { ethers } from 'ethers'\n\nclass WalletManager {\n  constructor() {\n    this.provider = null\n    this.signer = null\n    this.account = null\n    this.chainId = null\n  }\n\n  // TODO: 检测 MetaMask 是否安装\n  isMetaMaskInstalled() {\n    // 你的代码\n  }\n\n  // TODO: 连接钱包\n  async connect() {\n    // 你的代码\n  }\n\n  // TODO: 监听账户变化\n  onAccountsChanged(callback) {\n    // 你的代码\n  }\n\n  // TODO: 监听网络变化\n  onChainChanged(callback) {\n    // 你的代码\n  }\n\n  // TODO: 获取当前账户\n  getAccount() {\n    // 你的代码\n  }\n\n  // TODO: 获取当前网络 ID\n  async getChainId() {\n    // 你的代码\n  }\n}"
-            },
-            {
-              "id": "web3-provider",
+              "id": "web3-multi-chain",
               "type": "qa",
-              "title": "在 DApp 前端中，如何管理 Web3 Provider？有哪些常见的 Provider 库？",
-              "question": "在 DApp 前端中，如何管理 Web3 Provider？有哪些常见的 Provider 库？",
+              "title": "如何实现多链 DApp？前端需要处理哪些多链相关的逻辑？",
+              "question": "如何实现多链 DApp？前端需要处理哪些多链相关的逻辑？",
               "description": "",
-              "content": "**常见的 Web3 Provider 库：**\n\n1. **ethers.js**\n   - 轻量级，API 简洁\n   - 支持 Provider 和 Signer\n   - 广泛使用，文档完善\n\n2. **web3.js**\n   - 功能全面，历史悠久\n   - 支持更多底层操作\n   - 体积较大\n\n3. **viem**\n   - 类型安全，TypeScript 优先\n   - 性能优秀，体积小\n   - 现代化设计\n\n**Provider 管理要点：**\n\n1. **Provider 初始化**\n   ```javascript\n   // 检测 MetaMask\n   if (window.ethereum) {\n     provider = new ethers.providers.Web3Provider(window.ethereum)\n   }\n   ```\n\n2. **Provider 切换**\n   - 支持多个 Provider（MetaMask、WalletConnect 等）\n   - 提供 Provider 选择界面\n   - 处理 Provider 断开和重连\n\n3. **网络管理**\n   - 检测当前网络\n   - 添加自定义网络（如测试网）\n   - 处理网络切换\n\n4. **错误处理**\n   - Provider 未安装\n   - Provider 连接失败\n   - 网络错误和超时\n   - RPC 限流处理\n\n5. **性能优化**\n   - Provider 单例模式\n   - 请求缓存和去重\n   - 批量请求（multicall）\n   - 使用 WebSocket Provider 实现实时更新",
+              "content": "**多链实现要点：**\n\n1. **网络检测和切换**\n   - 检测当前连接的网络（chainId）\n   - 如果不在目标网络，提示用户切换\n   - 提供一键切换网络功能\n   - 监听 `chainChanged` 事件\n\n2. **多链配置管理**\n   ```javascript\n   const chains = {\n     1: { name: 'Ethereum', rpc: '...', explorer: 'etherscan.io' },\n     56: { name: 'BSC', rpc: '...', explorer: 'bscscan.com' },\n     137: { name: 'Polygon', rpc: '...', explorer: 'polygonscan.com' }\n   }\n   ```\n\n3. **合约地址管理**\n   - 不同链使用不同的合约地址\n   - 根据 chainId 动态加载合约\n   - 使用多链部署的合约地址映射\n\n4. **RPC 端点管理**\n   - 为每个链配置 RPC 端点\n   - 支持公共 RPC 和私有 RPC\n   - 实现 RPC 故障转移（fallback）\n\n5. **跨链桥接**\n   - 集成跨链桥（如 Polygon Bridge、Arbitrum Bridge）\n   - 处理跨链资产转移\n   - 显示跨链交易状态\n\n6. **用户体验优化**\n   - 显示当前网络标识\n   - 网络切换时的加载状态\n   - 不支持的网络提示\n   - 保存用户偏好的网络设置\n\n**常见问题处理：**\n- 处理用户拒绝网络切换\n- 处理网络切换失败\n- 处理不同链的 gas 代币差异\n- 处理不同链的交易确认时间差异",
               "template": ""
             }
           ]
