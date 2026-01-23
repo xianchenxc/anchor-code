@@ -1,6 +1,8 @@
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import StudyMode from './components/StudyMode'
 import PracticeMode from './components/PracticeMode'
+import ChatMode from './components/ChatMode'
+import InterviewMode from './components/InterviewMode'
 
 function NavLink({ to, children }) {
   const location = useLocation()
@@ -30,6 +32,8 @@ function App() {
             <nav className="flex gap-3 sm:gap-6">
               <NavLink to="/study">📚 学习模式</NavLink>
               <NavLink to="/practice">💪 练习模式</NavLink>
+              <NavLink to="/chat">💬 聊天学习</NavLink>
+              <NavLink to="/interview">🎯 模拟面试</NavLink>
             </nav>
         </header>
 
@@ -38,6 +42,8 @@ function App() {
             <Route path="/" element={<StudyMode />} />
             <Route path="/study" element={<StudyMode />} />
             <Route path="/practice" element={<PracticeMode />} />
+            <Route path="/chat" element={<ChatMode />} />
+            <Route path="/interview" element={<InterviewMode />} />
           </Routes>
         </main>
       </div>
