@@ -5,27 +5,27 @@ import questionsData from '../data/loadData.js'
 function QACard({ item, showAnswer, onToggleAnswer }) {
   return (
     <>
-      <div className="mb-8">
-        <span className="text-xs text-primary font-medium mb-4 block">问答题</span>
-        <div className="text-base font-medium text-gray-900 leading-relaxed">{item.question}</div>
+      <div className="mb-6 sm:mb-8">
+        <span className="text-xs text-primary font-medium mb-3 sm:mb-4 block">问答题</span>
+        <div className="text-sm sm:text-base font-medium text-gray-900 leading-relaxed">{item.question}</div>
       </div>
       
       <button 
-        className="bg-primary text-white border-none px-8 py-3 cursor-pointer text-sm font-medium hover:opacity-90"
+        className="bg-primary text-white border-none px-6 sm:px-8 py-2.5 sm:py-3 cursor-pointer text-xs sm:text-sm font-medium hover:opacity-90 w-full sm:w-auto"
         onClick={onToggleAnswer}
       >
         {showAnswer ? '隐藏答案' : '显示答案'}
       </button>
       
       {showAnswer && (
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <h4 className="text-gray-900 mb-4 text-sm font-medium">答案</h4>
-          <div className="text-gray-700 leading-relaxed text-sm prose prose-sm max-w-none">
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+          <h4 className="text-gray-900 mb-3 sm:mb-4 text-xs sm:text-sm font-medium">答案</h4>
+          <div className="text-gray-700 leading-relaxed text-xs sm:text-sm prose prose-sm max-w-none">
             <ReactMarkdown
               components={{
-                p: ({ node, ...props }) => <p className="mb-4" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                p: ({ node, ...props }) => <p className="mb-3 sm:mb-4" {...props} />,
+                ul: ({ node, ...props }) => <ul className="list-disc pl-4 sm:pl-6 mb-3 sm:mb-4" {...props} />,
+                ol: ({ node, ...props }) => <ol className="list-decimal pl-4 sm:pl-6 mb-3 sm:mb-4" {...props} />,
                 li: ({ node, ...props }) => <li className="mb-1" {...props} />,
                 strong: ({ node, children, ...props }) => (
                   <strong className="font-semibold text-gray-900" {...props}>
@@ -38,13 +38,13 @@ function QACard({ item, showAnswer, onToggleAnswer }) {
                   const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
                   
                   if (isCodeBlock) {
-                    return <code className={`block bg-gray-50 p-4 rounded overflow-x-auto text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
+                    return <code className={`block bg-gray-50 p-3 sm:p-4 rounded overflow-x-auto text-xs sm:text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
                   }
-                  return <code className={`bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 inline ${className || ''}`} {...props}>{children}</code>;
+                  return <code className={`bg-gray-100 px-1 sm:px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono text-gray-800 inline ${className || ''}`} {...props}>{children}</code>;
                 },
-                h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-gray-900" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 text-gray-900" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4 text-gray-900" {...props} />,
+                h1: ({ node, ...props }) => <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 mt-4 sm:mt-6 text-gray-900" {...props} />,
+                h2: ({ node, ...props }) => <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 mt-3 sm:mt-5 text-gray-900" {...props} />,
+                h3: ({ node, ...props }) => <h3 className="text-base sm:text-lg font-semibold mb-2 mt-3 sm:mt-4 text-gray-900" {...props} />,
               }}
             >
               {item.content}
@@ -66,11 +66,11 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
   
   return (
     <>
-      <div className="mb-8">
-        <span className="text-xs text-primary font-medium mb-4 block">编程题</span>
-        <div className="text-base font-medium text-gray-900 leading-relaxed mb-3">{item.question}</div>
+      <div className="mb-6 sm:mb-8">
+        <span className="text-xs text-primary font-medium mb-3 sm:mb-4 block">编程题</span>
+        <div className="text-sm sm:text-base font-medium text-gray-900 leading-relaxed mb-2 sm:mb-3">{item.question}</div>
         {item.description && (
-          <div className="text-gray-600 text-sm leading-relaxed mt-3 p-4 bg-gray-50 border-l-2 border-gray-300 prose prose-sm max-w-none">
+          <div className="text-gray-600 text-xs sm:text-sm leading-relaxed mt-2 sm:mt-3 p-3 sm:p-4 bg-gray-50 border-l-2 border-gray-300 prose prose-sm max-w-none">
             <ReactMarkdown
               components={{
                 p: ({ node, ...props }) => <p className="mb-2" {...props} />,
@@ -85,9 +85,9 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
                   const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
                   
                   if (isCodeBlock) {
-                    return <code className={`block bg-gray-50 p-4 rounded overflow-x-auto text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
+                    return <code className={`block bg-gray-50 p-3 sm:p-4 rounded overflow-x-auto text-xs sm:text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
                   }
-                  return <code className={`bg-gray-200 px-1.5 py-0.5 rounded text-xs font-mono inline ${className || ''}`} {...props}>{children}</code>;
+                  return <code className={`bg-gray-200 px-1 sm:px-1.5 py-0.5 rounded text-xs font-mono inline ${className || ''}`} {...props}>{children}</code>;
                 },
               }}
             >
@@ -97,10 +97,10 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
         )}
       </div>
       
-      <div className="my-6">
-        <label className="block font-medium mb-3 text-sm text-gray-900">你的代码</label>
+      <div className="my-4 sm:my-6">
+        <label className="block font-medium mb-2 sm:mb-3 text-xs sm:text-sm text-gray-900">你的代码</label>
         <textarea
-          className="w-full min-h-[200px] p-4 font-mono text-sm leading-relaxed border border-gray-300 resize-y bg-white text-gray-900 focus:outline-none focus:border-primary"
+          className="w-full min-h-[150px] sm:min-h-[200px] p-3 sm:p-4 font-mono text-xs sm:text-sm leading-relaxed border border-gray-300 resize-y bg-white text-gray-900 focus:outline-none focus:border-primary"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="在这里编写你的代码..."
@@ -109,16 +109,16 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
       </div>
       
       <button 
-        className="bg-primary text-white border-none px-8 py-3 cursor-pointer text-sm font-medium hover:opacity-90"
+        className="bg-primary text-white border-none px-6 sm:px-8 py-2.5 sm:py-3 cursor-pointer text-xs sm:text-sm font-medium hover:opacity-90 w-full sm:w-auto"
         onClick={onToggleAnswer}
       >
         {showAnswer ? '隐藏答案' : '显示答案'}
       </button>
       
       {showAnswer && (
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <h4 className="text-gray-900 mb-4 text-sm font-medium">参考答案</h4>
-          <pre className="bg-gray-50 border border-gray-200 p-4 overflow-x-auto m-0 font-mono text-sm leading-relaxed text-gray-900"><code>{item.content}</code></pre>
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+          <h4 className="text-gray-900 mb-3 sm:mb-4 text-xs sm:text-sm font-medium">参考答案</h4>
+          <pre className="bg-gray-50 border border-gray-200 p-3 sm:p-4 overflow-x-auto m-0 font-mono text-xs sm:text-sm leading-relaxed text-gray-900"><code>{item.content}</code></pre>
         </div>
       )}
     </>
@@ -192,11 +192,11 @@ function PracticeMode() {
   if (total === 0) {
     return (
       <div className="w-full">
-        <div className="mb-12">
-          <h2 className="mb-3 text-xl font-light text-gray-900">练习模式</h2>
-          <p className="text-gray-500 m-0 text-sm">练习面试题，先思考再看答案</p>
+        <div className="mb-6 sm:mb-8 md:mb-12">
+          <h2 className="mb-2 sm:mb-3 text-lg sm:text-xl font-light text-gray-900">练习模式</h2>
+          <p className="text-gray-500 m-0 text-xs sm:text-sm">练习面试题，先思考再看答案</p>
         </div>
-        <div className="text-center py-16 text-gray-400 text-sm">
+        <div className="text-center py-12 sm:py-14 md:py-16 text-gray-400 text-xs sm:text-sm">
           <p>暂无练习题目</p>
         </div>
       </div>
@@ -205,19 +205,19 @@ function PracticeMode() {
   
   return (
     <div className="w-full">
-      <div className="mb-12">
-        <h2 className="mb-3 text-xl font-light text-gray-900">练习模式</h2>
-        <p className="text-gray-500 m-0 text-sm">练习面试题，先思考再看答案</p>
+      <div className="mb-6 sm:mb-8 md:mb-12">
+        <h2 className="mb-2 sm:mb-3 text-lg sm:text-xl font-light text-gray-900">练习模式</h2>
+        <p className="text-gray-500 m-0 text-xs sm:text-sm">练习面试题，先思考再看答案</p>
       </div>
       
       {/* 题目计数器 */}
-      <div className="mb-8 text-sm text-gray-500">
+      <div className="mb-6 sm:mb-8 text-xs sm:text-sm text-gray-500">
         {currentIndex + 1} / {total}
       </div>
       
       {/* 卡片容器 */}
       <div className="relative">
-        <div className="bg-white border border-gray-200 p-12 min-h-[500px]">
+        <div className="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px]">
           {currentItem && (
             <PracticeCard 
               item={currentItem} 
@@ -228,9 +228,9 @@ function PracticeMode() {
         </div>
         
         {/* 导航按钮 */}
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex items-center justify-between mt-6 sm:mt-8 gap-3 sm:gap-4">
           <button
-            className="px-8 py-3 border border-gray-300 bg-white text-gray-900 text-sm font-medium hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 border border-gray-300 bg-white text-gray-900 text-xs sm:text-sm font-medium hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
             onClick={handlePrevious}
             disabled={currentIndex === 0}
           >
@@ -238,7 +238,7 @@ function PracticeMode() {
           </button>
           
           <button
-            className="px-8 py-3 border border-gray-300 bg-white text-gray-900 text-sm font-medium hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 border border-gray-300 bg-white text-gray-900 text-xs sm:text-sm font-medium hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
             onClick={handleNext}
             disabled={currentIndex === total - 1}
           >
