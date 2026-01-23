@@ -3,28 +3,12 @@
     {
       "id": "javascript",
       "name": "JavaScript",
-      "icon": "📁",
       "children": [
         {
-          "id": "javascript-advanced",
-          "name": "高级特性",
-          "type": "knowledge",
-          "items": [
-            {
-              "id": "js-promise",
-              "title": "Promise 和 async/await",
-              "question": "",
-              "description": "",
-              "content": "Promise 用于处理异步操作，有三种状态：pending、fulfilled、rejected。async/await 是 Promise 的语法糖，使异步代码看起来像同步代码。",
-              "answer": "",
-              "template": ""
-            }
-          ]
-        },
-        {
-          "id": "javascript-basics",
+          "id": "javascript-01-basics",
           "name": "基础语法",
           "type": "knowledge",
+          "subcategory": "01-basics",
           "items": [
             {
               "id": "js-closure",
@@ -43,6 +27,140 @@
               "content": "var 是函数作用域，存在变量提升；let 和 const 是块级作用域，不存在变量提升。const 声明常量，不能重新赋值。",
               "answer": "",
               "template": ""
+            },
+            {
+              "id": "js-type-conversion",
+              "title": "类型转换",
+              "question": "",
+              "description": "",
+              "content": "JavaScript 的类型转换：\n1. **隐式转换**：`==` 比较、`+` 运算、`if` 条件判断等\n2. **显式转换**：`Number()`、`String()`、`Boolean()`、`parseInt()`、`parseFloat()`\n\n转换规则：\n- 对象转原始值：先调用 `valueOf()`，再调用 `toString()`\n- `null` 和 `undefined`：`null == undefined` 为 `true`，但与其他值比较都为 `false`\n- 字符串和数字：字符串转数字，数字转字符串\n- 布尔值：`false`、`0`、`\"\"`、`null`、`undefined`、`NaN` 转为 `false`",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-event-delegation",
+              "title": "事件委托",
+              "question": "",
+              "description": "",
+              "content": "事件委托（事件代理）是将事件监听器添加到父元素上，利用事件冒泡机制处理子元素的事件。\n\n优点：\n1. 减少内存占用（只需一个事件监听器）\n2. 动态添加的子元素自动拥有事件处理\n3. 代码更简洁\n\n原理：事件冒泡，子元素的事件会向上传播到父元素。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-hoisting",
+              "title": "变量提升和函数提升",
+              "question": "",
+              "description": "",
+              "content": "**变量提升**：`var` 声明的变量会被提升到作用域顶部，但赋值不会提升（值为 `undefined`）。`let` 和 `const` 存在暂时性死区（TDZ），在声明前访问会报错。\n\n**函数提升**：函数声明会被完全提升，可以在声明前调用。函数表达式不会被提升。\n\n提升的本质是 JavaScript 引擎在代码执行前会先进行编译，将声明提升到作用域顶部。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-array-methods",
+              "title": "数组常用方法",
+              "question": "",
+              "description": "",
+              "content": "数组方法分类：\n1. **修改原数组**：`push`、`pop`、`shift`、`unshift`、`splice`、`sort`、`reverse`\n2. **不修改原数组**：`concat`、`slice`、`join`、`map`、`filter`、`reduce`、`find`、`some`、`every`\n3. **遍历方法**：`forEach`、`map`、`filter`、`reduce`、`find`、`some`、`every`\n4. **ES6+ 方法**：`findIndex`、`includes`、`flat`、`flatMap`、`from`\n\n`reduce` 是最强大的数组方法，可以实现 `map`、`filter`、`forEach` 等功能。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-object",
+              "title": "对象和属性描述符",
+              "question": "",
+              "description": "",
+              "content": "对象属性描述符：\n- **value**：属性的值\n- **writable**：是否可写\n- **enumerable**：是否可枚举（`for...in`、`Object.keys()`）\n- **configurable**：是否可配置（删除、修改描述符）\n\n方法：\n- `Object.defineProperty()`：定义单个属性\n- `Object.defineProperties()`：定义多个属性\n- `Object.getOwnPropertyDescriptor()`：获取属性描述符\n- `Object.freeze()`：冻结对象（不可修改、删除、添加）\n- `Object.seal()`：密封对象（不可添加、删除，但可修改）",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-scope",
+              "title": "作用域和作用域链",
+              "question": "",
+              "description": "",
+              "content": "作用域决定了变量和函数的可访问性：\n1. **全局作用域**：在函数外部定义的变量\n2. **函数作用域**：在函数内部定义的变量（`var`）\n3. **块级作用域**：在 `{}` 内定义的变量（`let`、`const`）\n\n作用域链：当访问变量时，JavaScript 会从当前作用域开始查找，如果找不到就向上查找，直到全局作用域。这形成了作用域链。",
+              "answer": "",
+              "template": ""
+            }
+          ]
+        },
+        {
+          "id": "javascript-advanced",
+          "name": "高级特性",
+          "type": "knowledge",
+          "subcategory": "advanced",
+          "items": [
+            {
+              "id": "js-arrow-function",
+              "title": "箭头函数的特点",
+              "question": "",
+              "description": "",
+              "content": "箭头函数的特点：\n1. **没有自己的 `this`**：继承外层作用域的 `this`\n2. **没有 `arguments` 对象**：需要使用剩余参数 `...args`\n3. **不能作为构造函数**：不能使用 `new` 调用\n4. **没有 `prototype` 属性**\n5. **不能使用 `yield`**：不能作为生成器函数\n6. **语法简洁**：适合回调函数和函数式编程",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-generator",
+              "title": "生成器函数",
+              "question": "",
+              "description": "",
+              "content": "生成器函数使用 `function*` 声明，通过 `yield` 暂停执行并返回值。调用生成器函数返回一个迭代器对象，可以通过 `next()` 方法逐步执行。\n\n特点：\n- 可以暂停和恢复执行\n- 通过 `yield` 传递值\n- 支持异步编程（配合 Promise 实现 async/await）\n- 可以用于实现迭代器协议",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-module",
+              "title": "模块化",
+              "question": "",
+              "description": "",
+              "content": "JavaScript 模块化方案：\n1. **CommonJS**：Node.js 使用，`require()` 和 `module.exports`，同步加载\n2. **ES6 Modules**：`import` 和 `export`，静态分析，支持 tree-shaking\n3. **AMD**：异步模块定义，适用于浏览器，如 RequireJS\n4. **UMD**：通用模块定义，兼容多种模块系统\n\nES6 Modules 的优势：编译时确定依赖关系，支持静态分析，更好的 tree-shaking，循环依赖检测。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-promise",
+              "title": "Promise 和 async/await",
+              "question": "",
+              "description": "",
+              "content": "Promise 用于处理异步操作，有三种状态：pending、fulfilled、rejected。async/await 是 Promise 的语法糖，使异步代码看起来像同步代码。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-proxy",
+              "title": "Proxy 和 Reflect",
+              "question": "",
+              "description": "",
+              "content": "`Proxy` 用于创建一个对象的代理，可以拦截并自定义对象的基本操作（如属性查找、赋值、枚举、函数调用等）。\n\n`Reflect` 是一个内置对象，提供拦截 JavaScript 操作的方法，与 `Proxy` 的方法一一对应。\n\n应用场景：数据绑定、数据验证、函数调用追踪、实现响应式系统（如 Vue 3）。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-this",
+              "title": "this 绑定规则",
+              "question": "",
+              "description": "",
+              "content": "`this` 的绑定取决于函数的调用方式：\n1. **默认绑定**：独立函数调用，`this` 指向全局对象（严格模式下为 `undefined`）\n2. **隐式绑定**：通过对象调用，`this` 指向调用对象\n3. **显式绑定**：通过 `call`、`apply`、`bind` 指定 `this`\n4. **new 绑定**：构造函数调用，`this` 指向新创建的对象\n5. **箭头函数**：`this` 继承外层作用域的 `this`，无法被改变",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-debounce-throttle",
+              "title": "防抖和节流",
+              "question": "",
+              "description": "",
+              "content": "**防抖（Debounce）**：在事件被触发 n 秒后再执行回调，如果在这 n 秒内又被触发，则重新计时。适用于搜索框输入、窗口 resize 等场景。\n\n**节流（Throttle）**：规定在一个单位时间内，只能触发一次函数。如果这个单位时间内触发多次函数，只有一次生效。适用于滚动事件、鼠标移动等场景。\n\n两者的区别：防抖是延迟执行，节流是限制执行频率。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "js-weakmap-weakset",
+              "title": "WeakMap 和 WeakSet",
+              "question": "",
+              "description": "",
+              "content": "`WeakMap` 和 `WeakSet` 是弱引用集合：\n- **WeakMap**：键必须是对象，键是弱引用，不会阻止垃圾回收\n- **WeakSet**：值必须是对象，值是弱引用，不会阻止垃圾回收\n\n特点：\n- 不可迭代（没有 `keys()`、`values()`、`entries()` 方法）\n- 没有 `size` 属性\n- 键/值被垃圾回收后，对应的条目会自动删除\n\n应用场景：存储对象的私有数据、缓存计算结果、DOM 节点关联数据。",
+              "answer": "",
+              "template": ""
             }
           ]
         },
@@ -50,6 +168,7 @@
           "id": "javascript-questions",
           "name": "面试题",
           "type": "practice",
+          "subcategory": "questions",
           "items": [
             {
               "id": "js-q1",
@@ -59,6 +178,56 @@
               "description": "",
               "content": "",
               "answer": "事件循环是 JavaScript 处理异步操作的机制。它包含调用栈、消息队列和微任务队列。同步代码在调用栈执行，异步回调进入消息队列，Promise.then 等进入微任务队列。微任务队列优先级高于消息队列。",
+              "template": ""
+            },
+            {
+              "id": "js-q10",
+              "type": "coding",
+              "title": "数组扁平化",
+              "question": "数组扁平化",
+              "description": "实现一个函数，将多维数组扁平化为一维数组。",
+              "content": "",
+              "answer": "// 方法1: 递归\nfunction flatten(arr) {\n  const result = [];\n  \n  for (let item of arr) {\n    if (Array.isArray(item)) {\n      result.push(...flatten(item));\n    } else {\n      result.push(item);\n    }\n  }\n  \n  return result;\n}\n\n// 方法2: reduce\nfunction flatten(arr) {\n  return arr.reduce((prev, curr) => {\n    return prev.concat(Array.isArray(curr) ? flatten(curr) : curr);\n  }, []);\n}\n\n// 方法3: 使用 flat (ES2019)\nfunction flatten(arr) {\n  return arr.flat(Infinity);\n}\n\n// 方法4: 使用扩展运算符\nfunction flatten(arr) {\n  while (arr.some(item => Array.isArray(item))) {\n    arr = [].concat(...arr);\n  }\n  return arr;\n}",
+              "template": "function flatten(arr) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q11",
+              "type": "coding",
+              "title": "函数柯里化",
+              "question": "函数柯里化",
+              "description": "实现一个函数柯里化工具函数，将多参数函数转换为单参数函数序列。",
+              "content": "",
+              "answer": "function curry(fn) {\n  return function curried(...args) {\n    // 如果参数数量足够，直接执行函数\n    if (args.length >= fn.length) {\n      return fn.apply(this, args);\n    }\n    // 否则返回一个新函数，继续接收参数\n    return function(...nextArgs) {\n      return curried.apply(this, [...args, ...nextArgs]);\n    };\n  };\n}\n\n// 使用示例\nfunction add(a, b, c) {\n  return a + b + c;\n}\n\nconst curriedAdd = curry(add);\nconsole.log(curriedAdd(1)(2)(3)); // 6\nconsole.log(curriedAdd(1, 2)(3)); // 6\nconsole.log(curriedAdd(1)(2, 3)); // 6",
+              "template": "function curry(fn) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q12",
+              "type": "coding",
+              "title": "实现 LRU 缓存",
+              "question": "实现 LRU 缓存",
+              "description": "实现一个 LRU (Least Recently Used) 缓存，支持 get 和 put 操作，当缓存达到容量上限时，删除最近最少使用的项。",
+              "content": "",
+              "answer": "class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.cache = new Map();\n  }\n  \n  get(key) {\n    if (!this.cache.has(key)) {\n      return -1;\n    }\n    \n    // 将访问的项移到末尾（最近使用）\n    const value = this.cache.get(key);\n    this.cache.delete(key);\n    this.cache.set(key, value);\n    \n    return value;\n  }\n  \n  put(key, value) {\n    if (this.cache.has(key)) {\n      // 如果已存在，删除后重新添加（移到末尾）\n      this.cache.delete(key);\n    } else if (this.cache.size >= this.capacity) {\n      // 如果容量已满，删除最久未使用的项（第一个）\n      const firstKey = this.cache.keys().next().value;\n      this.cache.delete(firstKey);\n    }\n    \n    // 添加新项到末尾\n    this.cache.set(key, value);\n  }\n}",
+              "template": "class LRUCache {\n  constructor(capacity) {\n    // 你的代码\n  }\n  \n  get(key) {\n    // 你的代码\n  }\n  \n  put(key, value) {\n    // 你的代码\n  }\n}"
+            },
+            {
+              "id": "js-q13",
+              "type": "qa",
+              "title": "解释 JavaScript 中 this 的绑定规则",
+              "question": "解释 JavaScript 中 this 的绑定规则",
+              "description": "",
+              "content": "",
+              "answer": "`this` 的绑定规则（优先级从低到高）：\n\n1. **默认绑定**：独立函数调用，非严格模式下 `this` 指向全局对象，严格模式下为 `undefined`\n2. **隐式绑定**：通过对象调用方法，`this` 指向调用该方法的对象\n3. **显式绑定**：通过 `call`、`apply`、`bind` 指定 `this`\n4. **new 绑定**：使用 `new` 调用构造函数，`this` 指向新创建的对象\n5. **箭头函数**：`this` 继承外层作用域的 `this`，无法被改变，优先级最高\n\n特殊情况：\n- 回调函数中的 `this` 可能丢失，需要使用箭头函数或 `bind`\n- 严格模式下，默认绑定的 `this` 为 `undefined`",
+              "template": ""
+            },
+            {
+              "id": "js-q14",
+              "type": "qa",
+              "title": "闭包的应用场景有哪些？",
+              "question": "闭包的应用场景有哪些？",
+              "description": "",
+              "content": "",
+              "answer": "闭包的应用场景：\n\n1. **模块化**：创建私有变量和方法，实现数据封装\n2. **函数工厂**：创建具有特定配置的函数\n3. **延迟执行**：保存函数执行上下文，延迟到需要时执行\n4. **缓存**：缓存计算结果，避免重复计算\n5. **事件处理**：在事件处理函数中访问外部变量\n6. **防抖节流**：保存定时器 ID，实现防抖和节流功能\n7. **循环问题解决**：在循环中创建闭包，保存循环变量的值\n\n注意：闭包会导致内存泄漏，因为外部函数的变量无法被垃圾回收，需要及时释放引用。",
               "template": ""
             },
             {
@@ -90,6 +259,56 @@
               "content": "",
               "answer": "class SimplePromise {\n  constructor(executor) {\n    this.state = 'pending'\n    this.value = undefined\n    this.callbacks = []\n    \n    const resolve = value => {\n      if (this.state !== 'pending') return\n      \n      // 处理 promise 返回 promise 的情况\n      if (value instanceof SimplePromise) {\n        return value.then(resolve, reject)\n      }\n      \n      this.state = 'fulfilled'\n      this.value = value\n      this.callbacks.forEach(cb => this._handle(cb))\n    }\n    \n    const reject = reason => {\n      if (this.state !== 'pending') return\n      \n      this.state = 'rejected'\n      this.value = reason\n      this.callbacks.forEach(cb => this._handle(cb))\n    }\n    \n    // ✅ 修复：用 try-catch 包裹 executor\n    try {\n      executor(resolve, reject)\n    } catch (error) {\n      reject(error)  // 捕获 executor 中的同步错误\n    }\n  }\n\n  then(onFulfilled, onRejected) {\n    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value\n    onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw reason }\n    \n    return new SimplePromise((resolve, reject) => {\n      this._pushCallback({\n        onFulfilled,\n        onRejected,\n        resolve,\n        reject\n      })\n    })\n  }\n\n  catch(onRejected) {\n    return this.then(null, onRejected)\n  }\n\n  _pushCallback(callback) {\n    if (this.state === 'pending') {\n      this.callbacks.push(callback)\n    } else {\n      setTimeout(() => this._handle(callback), 0)\n    }\n  }\n\n  _handle(callback) {\n    const { onFulfilled, onRejected, resolve, reject } = callback\n    \n    try {\n      if (this.state === 'fulfilled') {\n        const result = onFulfilled(this.value)\n        resolve(result)\n      } else if (this.state === 'rejected') {\n        const result = onRejected(this.value)\n        resolve(result)\n      }\n    } catch (error) {\n      reject(error)  // 捕获回调函数中的错误\n    }\n  }\n}\n\nconst promise1 = new Promise((resolve) => setTimeout(resolve, 1000))",
               "template": "function FakePromise(obj) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q5",
+              "type": "coding",
+              "title": "实现防抖函数",
+              "question": "实现防抖函数",
+              "description": "实现一个防抖函数 debounce，在事件被触发 n 秒后再执行回调，如果在这 n 秒内又被触发，则重新计时。",
+              "content": "",
+              "answer": "function debounce(func, delay) {\n  let timer = null;\n  \n  return function(...args) {\n    const context = this;\n    \n    // 清除之前的定时器\n    if (timer) {\n      clearTimeout(timer);\n    }\n    \n    // 设置新的定时器\n    timer = setTimeout(() => {\n      func.apply(context, args);\n    }, delay);\n  };\n}",
+              "template": "function debounce(func, delay) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q6",
+              "type": "coding",
+              "title": "实现节流函数",
+              "question": "实现节流函数",
+              "description": "实现一个节流函数 throttle，规定在一个单位时间内，只能触发一次函数。",
+              "content": "",
+              "answer": "// 时间戳版本\nfunction throttle(func, delay) {\n  let lastTime = 0;\n  \n  return function(...args) {\n    const context = this;\n    const now = Date.now();\n    \n    if (now - lastTime >= delay) {\n      func.apply(context, args);\n      lastTime = now;\n    }\n  };\n}\n\n// 定时器版本\nfunction throttle(func, delay) {\n  let timer = null;\n  \n  return function(...args) {\n    const context = this;\n    \n    if (!timer) {\n      timer = setTimeout(() => {\n        func.apply(context, args);\n        timer = null;\n      }, delay);\n    }\n  };\n}",
+              "template": "function throttle(func, delay) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q7",
+              "type": "coding",
+              "title": "手写 call、apply、bind 方法",
+              "question": "手写 call、apply、bind 方法",
+              "description": "实现 Function.prototype.call、apply 和 bind 方法。",
+              "content": "",
+              "answer": "// 实现 call\nFunction.prototype.myCall = function(context, ...args) {\n  // 如果 context 为 null 或 undefined，则指向全局对象\n  context = context || globalThis;\n  \n  // 将函数作为 context 的方法\n  const fn = Symbol('fn');\n  context[fn] = this;\n  \n  // 调用函数\n  const result = context[fn](...args);\n  \n  // 删除临时属性\n  delete context[fn];\n  \n  return result;\n};\n\n// 实现 apply\nFunction.prototype.myApply = function(context, args) {\n  context = context || globalThis;\n  const fn = Symbol('fn');\n  context[fn] = this;\n  \n  const result = args ? context[fn](...args) : context[fn]();\n  \n  delete context[fn];\n  \n  return result;\n};\n\n// 实现 bind\nFunction.prototype.myBind = function(context, ...args) {\n  const self = this;\n  \n  return function F(...newArgs) {\n    // 如果作为构造函数调用，this 指向新创建的对象\n    if (this instanceof F) {\n      return new self(...args, ...newArgs);\n    }\n    // 否则绑定 context\n    return self.apply(context, [...args, ...newArgs]);\n  };\n};",
+              "template": "Function.prototype.myCall = function(context, ...args) {\n  // 你的代码\n}\n\nFunction.prototype.myApply = function(context, args) {\n  // 你的代码\n}\n\nFunction.prototype.myBind = function(context, ...args) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q8",
+              "type": "coding",
+              "title": "手写 new 操作符",
+              "question": "手写 new 操作符",
+              "description": "实现一个 new 操作符的功能。",
+              "content": "",
+              "answer": "function myNew(constructor, ...args) {\n  // 1. 创建一个新对象，原型指向构造函数的 prototype\n  const obj = Object.create(constructor.prototype);\n  \n  // 2. 执行构造函数，将 this 绑定到新对象\n  const result = constructor.apply(obj, args);\n  \n  // 3. 如果构造函数返回对象，则返回该对象；否则返回新对象\n  return result instanceof Object ? result : obj;\n}",
+              "template": "function myNew(constructor, ...args) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "js-q9",
+              "type": "coding",
+              "title": "手写 instanceof",
+              "question": "手写 instanceof",
+              "description": "实现 instanceof 操作符的功能。",
+              "content": "",
+              "answer": "function myInstanceof(left, right) {\n  // 获取对象的原型\n  let proto = Object.getPrototypeOf(left);\n  // 获取构造函数的 prototype\n  const prototype = right.prototype;\n  \n  // 沿着原型链向上查找\n  while (proto !== null) {\n    if (proto === prototype) {\n      return true;\n    }\n    proto = Object.getPrototypeOf(proto);\n  }\n  \n  return false;\n}",
+              "template": "function myInstanceof(left, right) {\n  // 你的代码\n}"
             }
           ]
         }
@@ -98,12 +317,12 @@
     {
       "id": "react",
       "name": "React",
-      "icon": "📁",
       "children": [
         {
           "id": "react-basics",
           "name": "基础概念",
           "type": "knowledge",
+          "subcategory": "basics",
           "items": [
             {
               "id": "react-components",
@@ -111,6 +330,42 @@
               "question": "",
               "description": "",
               "content": "React 组件是构建 UI 的基本单位。JSX 是 JavaScript 的语法扩展，用于描述 UI 结构。组件可以是函数组件或类组件。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-virtual-dom",
+              "title": "虚拟 DOM",
+              "question": "",
+              "description": "",
+              "content": "虚拟 DOM（Virtual DOM）是 React 的核心概念：\n- 虚拟 DOM 是真实 DOM 的 JavaScript 表示\n- React 通过 diff 算法比较新旧虚拟 DOM，找出最小变更\n- 批量更新真实 DOM，提高性能\n\n优势：\n1. 减少直接操作 DOM 的次数\n2. 跨平台（React Native）\n3. 声明式编程，提高开发效率\n\nDiff 算法策略：\n- 同层比较，不跨层移动\n- 使用 key 优化列表渲染\n- 组件类型不同则直接替换",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-lifecycle",
+              "title": "组件生命周期",
+              "question": "",
+              "description": "",
+              "content": "类组件生命周期（三个阶段）：\n\n**挂载阶段**：\n- `constructor`：初始化状态和绑定方法\n- `getDerivedStateFromProps`：根据 props 更新 state\n- `render`：渲染组件\n- `componentDidMount`：组件挂载后，适合发起请求\n\n**更新阶段**：\n- `getDerivedStateFromProps`：props 或 state 变化时\n- `shouldComponentUpdate`：决定是否重新渲染\n- `render`：重新渲染\n- `getSnapshotBeforeUpdate`：获取更新前的快照\n- `componentDidUpdate`：更新完成后\n\n**卸载阶段**：\n- `componentWillUnmount`：清理工作，取消订阅、定时器等\n\n函数组件使用 `useEffect` Hook 模拟生命周期。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-performance",
+              "title": "性能优化",
+              "question": "",
+              "description": "",
+              "content": "React 性能优化方法：\n\n1. **避免不必要的渲染**：\n   - `React.memo`：缓存组件\n   - `useMemo`：缓存计算结果\n   - `useCallback`：缓存函数引用\n\n2. **代码分割**：\n   - `React.lazy`：懒加载组件\n   - `Suspense`：处理加载状态\n\n3. **虚拟化长列表**：\n   - `react-window`、`react-virtualized`\n\n4. **优化渲染**：\n   - 避免在 render 中创建新对象/函数\n   - 使用 key 优化列表渲染\n   - 避免在 JSX 中使用内联函数\n\n5. **状态管理**：\n   - 合理拆分组件状态\n   - 使用 Context 避免 prop drilling",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-reconciliation",
+              "title": "协调（Reconciliation）",
+              "question": "",
+              "description": "",
+              "content": "协调是 React 更新 UI 的过程：\n\n1. **Diff 算法**：比较新旧虚拟 DOM 树，找出差异\n2. **更新策略**：\n   - 不同类型的元素：直接替换整个子树\n   - 相同类型的元素：更新改变的属性\n   - 列表元素：使用 key 优化比较\n\n3. **Fiber 架构**（React 16+）：\n   - 可中断的渲染过程\n   - 优先级调度\n   - 增量渲染\n\n优化建议：\n- 使用 key 帮助 React 识别元素\n- 避免在 render 中创建新对象/函数\n- 使用 `React.memo`、`useMemo`、`useCallback` 优化",
               "answer": "",
               "template": ""
             },
@@ -129,13 +384,59 @@
           "id": "react-hooks",
           "name": "Hooks",
           "type": "knowledge",
+          "subcategory": "hooks",
           "items": [
+            {
+              "id": "react-custom-hooks",
+              "title": "自定义 Hooks",
+              "question": "",
+              "description": "",
+              "content": "自定义 Hook 是一个以 \"use\" 开头的函数，可以在其中调用其他 Hook。\n\n规则：\n1. 必须以 \"use\" 开头\n2. 可以在多个组件中复用逻辑\n3. 每次调用都有独立的 state\n\n常见自定义 Hook：\n- `useCounter`：计数器逻辑\n- `useFetch`：数据获取逻辑\n- `useLocalStorage`：本地存储逻辑\n- `useDebounce`：防抖逻辑\n- `usePrevious`：获取上一轮的值\n\n优势：逻辑复用、代码组织、测试友好。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-usecallback",
+              "title": "useCallback Hook",
+              "question": "",
+              "description": "",
+              "content": "`useCallback` 用于缓存函数引用，避免每次渲染时创建新函数。\n\n```javascript\nconst memoizedCallback = useCallback(() => {\n  doSomething(a, b);\n}, [a, b]);\n```\n\n- 第一个参数：要缓存的函数\n- 第二个参数：依赖数组\n- 返回值：缓存的函数引用\n\n使用场景：\n- 将函数作为 props 传递给子组件（配合 `React.memo`）\n- 作为其他 Hook 的依赖项\n\n注意：`useCallback` 本身也有性能开销，只有真正需要时才使用。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-usecontext",
+              "title": "useContext Hook",
+              "question": "",
+              "description": "",
+              "content": "`useContext` 用于在函数组件中订阅 React Context。\n\n```javascript\nconst value = useContext(MyContext);\n```\n\n使用步骤：\n1. 使用 `React.createContext` 创建 Context\n2. 使用 `Provider` 提供值\n3. 在子组件中使用 `useContext` 获取值\n\n优势：\n- 避免 prop drilling（逐层传递 props）\n- 跨组件共享数据\n\n注意：\n- 每次 Provider 的 value 变化，所有使用该 Context 的组件都会重新渲染\n- 可以通过拆分 Context 或使用 `useMemo` 优化",
+              "answer": "",
+              "template": ""
+            },
             {
               "id": "react-useeffect",
               "title": "useEffect Hook",
               "question": "",
               "description": "",
               "content": "useEffect 用于处理副作用，如数据获取、订阅、手动 DOM 操作。可以指定依赖数组来控制执行时机。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-usememo",
+              "title": "useMemo Hook",
+              "question": "",
+              "description": "",
+              "content": "`useMemo` 用于缓存计算结果，避免每次渲染时重新计算。\n\n```javascript\nconst memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);\n```\n\n- 第一个参数：计算函数\n- 第二个参数：依赖数组\n- 返回值：缓存的值\n\n使用场景：\n- 昂贵的计算\n- 避免子组件不必要的重新渲染（配合 `React.memo`）\n- 缓存对象/数组引用\n\n注意：不要过度使用，只有真正需要优化时才使用。",
+              "answer": "",
+              "template": ""
+            },
+            {
+              "id": "react-useref",
+              "title": "useRef Hook",
+              "question": "",
+              "description": "",
+              "content": "`useRef` 返回一个可变的 ref 对象，其 `.current` 属性被初始化为传入的参数。\n\n特点：\n- 返回的 ref 对象在组件的整个生命周期内保持不变\n- 修改 `.current` 不会触发重新渲染\n- 可以访问 DOM 元素或保存任意可变值\n\n使用场景：\n1. **访问 DOM 元素**：\n```javascript\nconst inputRef = useRef(null);\n<input ref={inputRef} />\n```\n\n2. **保存可变值**（类似实例变量）：\n```javascript\nconst timerRef = useRef(null);\n```\n\n3. **获取上一轮的 props 或 state**：\n```javascript\nconst prevCountRef = useRef();\n```",
               "answer": "",
               "template": ""
             },
@@ -154,6 +455,7 @@
           "id": "react-questions",
           "name": "面试题",
           "type": "practice",
+          "subcategory": "questions",
           "items": [
             {
               "id": "react-q1",
@@ -166,6 +468,26 @@
               "template": ""
             },
             {
+              "id": "react-q10",
+              "type": "qa",
+              "title": "如何优化 Context 的性能问题？",
+              "question": "如何优化 Context 的性能问题？",
+              "description": "",
+              "content": "",
+              "answer": "Context 性能优化方法：\n\n1. **拆分 Context**：\n   - 将频繁变化的数据和稳定数据分开\n   - 避免所有数据放在一个 Context 中\n\n2. **使用 useMemo 优化 value**：\n```javascript\nconst value = useMemo(() => ({\n  user,\n  theme\n}), [user, theme]);\n```\n\n3. **使用多个 Provider**：\n   - 不同层级使用不同的 Context\n   - 减少不必要的重新渲染\n\n4. **使用选择器模式**：\n   - 自定义 Hook 只订阅需要的部分\n   - 使用 `use-context-selector` 库\n\n5. **考虑状态管理库**：\n   - 对于复杂状态，使用 Redux、Zustand 等\n   - 它们有更好的性能优化机制",
+              "template": ""
+            },
+            {
+              "id": "react-q11",
+              "type": "qa",
+              "title": "什么是错误边界（Error Boundary）？如何使用？",
+              "question": "什么是错误边界（Error Boundary）？如何使用？",
+              "description": "",
+              "content": "",
+              "answer": "错误边界是 React 组件，可以捕获子组件树中的 JavaScript 错误，记录错误并展示降级 UI。\n\n特点：\n- 只能捕获子组件的错误，不能捕获自身的错误\n- 不能捕获事件处理、异步代码、服务端渲染的错误\n\n使用方式：\n```javascript\nclass ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false };\n  }\n  \n  static getDerivedStateFromError(error) {\n    return { hasError: true };\n  }\n  \n  componentDidCatch(error, errorInfo) {\n    // 记录错误\n    console.error(error, errorInfo);\n  }\n  \n  render() {\n    if (this.state.hasError) {\n      return <h1>出错了</h1>;\n    }\n    return this.props.children;\n  }\n}\n```\n\n函数组件可以使用 `react-error-boundary` 库。",
+              "template": ""
+            },
+            {
               "id": "react-q2",
               "type": "coding",
               "title": "实现一个自定义 Hook useCounter",
@@ -174,6 +496,76 @@
               "content": "",
               "answer": "function useCounter(initialValue = 0) {\n  const [count, setCount] = useState(initialValue);\n  \n  const increment = () => setCount(c => c + 1);\n  const decrement = () => setCount(c => c - 1);\n  const reset = () => setCount(initialValue);\n  \n  return { count, increment, decrement, reset };\n}",
               "template": "function useCounter(initialValue = 0) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "react-q3",
+              "type": "qa",
+              "title": "useEffect 的依赖数组有什么作用？如何正确使用？",
+              "question": "useEffect 的依赖数组有什么作用？如何正确使用？",
+              "description": "",
+              "content": "",
+              "answer": "依赖数组的作用：\n- 控制 `useEffect` 的执行时机\n- 空数组 `[]`：只在组件挂载和卸载时执行\n- 有依赖：依赖变化时执行\n- 无依赖数组：每次渲染都执行\n\n正确使用：\n1. **包含所有外部依赖**：函数、变量、props、state\n2. **使用 ESLint 规则**：`eslint-plugin-react-hooks` 自动检查\n3. **函数依赖**：使用 `useCallback` 缓存函数\n4. **对象/数组依赖**：使用 `useMemo` 或提取原始值\n\n常见错误：\n- 遗漏依赖导致闭包问题\n- 依赖过多导致频繁执行\n- 依赖函数但未使用 `useCallback`",
+              "template": ""
+            },
+            {
+              "id": "react-q4",
+              "type": "qa",
+              "title": "React 中 setState 是同步还是异步的？如何获取更新后的值？",
+              "question": "React 中 setState 是同步还是异步的？如何获取更新后的值？",
+              "description": "",
+              "content": "",
+              "answer": "`setState` 的行为：\n- **React 18 之前**：在事件处理函数中是异步的（批处理），在 `setTimeout`、`Promise` 中是同步的\n- **React 18+**：所有 `setState` 都是异步的（自动批处理）\n\n批处理（Batching）：\n- 多个 `setState` 调用会被合并，只触发一次重新渲染\n- 提高性能，避免不必要的渲染\n\n获取更新后的值：\n1. **使用回调函数**：\n```javascript\nsetCount(count => count + 1);\n```\n\n2. **使用 useEffect**：\n```javascript\nuseEffect(() => {\n  // 获取最新的 count\n}, [count]);\n```\n\n3. **使用 useRef**：\n```javascript\nconst countRef = useRef(count);\ncountRef.current = count;\n```",
+              "template": ""
+            },
+            {
+              "id": "react-q5",
+              "type": "qa",
+              "title": "受控组件和非受控组件的区别",
+              "question": "受控组件和非受控组件的区别",
+              "description": "",
+              "content": "",
+              "answer": "**受控组件**：\n- 表单数据由 React 组件状态管理\n- 使用 `value` 和 `onChange` 控制\n- 数据流是单向的\n- 推荐使用\n\n```javascript\n<input value={name} onChange={e => setName(e.target.value)} />\n```\n\n**非受控组件**：\n- 表单数据由 DOM 节点管理\n- 使用 `ref` 获取值\n- 数据流是双向的\n- 适合简单场景\n\n```javascript\nconst inputRef = useRef();\n<input ref={inputRef} defaultValue=\"初始值\" />\n```\n\n选择建议：\n- 大多数情况使用受控组件\n- 表单验证、实时反馈使用受控组件\n- 简单表单、性能敏感场景可考虑非受控组件",
+              "template": ""
+            },
+            {
+              "id": "react-q6",
+              "type": "qa",
+              "title": "HOC 和 Render Props 的区别？现在更推荐哪种方式？",
+              "question": "HOC 和 Render Props 的区别？现在更推荐哪种方式？",
+              "description": "",
+              "content": "",
+              "answer": "**HOC（高阶组件）**：\n- 接受组件作为参数，返回新组件\n- 用于逻辑复用\n- 可能产生组件嵌套过深的问题\n\n```javascript\nconst withAuth = (Component) => {\n  return (props) => {\n    if (!isAuthenticated) return <Login />;\n    return <Component {...props} />;\n  };\n};\n```\n\n**Render Props**：\n- 通过 props 传递渲染函数\n- 更灵活，但代码可能较复杂\n\n```javascript\n<DataProvider render={data => <Component data={data} />} />\n```\n\n**现在推荐**：\n- **自定义 Hooks**：React 16.8+ 推荐方式\n- 逻辑复用更简单\n- 避免组件嵌套\n- 更好的类型推断（TypeScript）\n\n```javascript\nconst useAuth = () => {\n  // 逻辑\n  return { isAuthenticated, user };\n};\n```",
+              "template": ""
+            },
+            {
+              "id": "react-q7",
+              "type": "coding",
+              "title": "实现一个 useFetch Hook",
+              "question": "实现一个 useFetch Hook",
+              "description": "实现一个 useFetch Hook，用于数据获取，支持加载状态、错误处理和取消请求。",
+              "content": "",
+              "answer": "function useFetch(url) {\n  const [data, setData] = useState(null);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(null);\n  \n  useEffect(() => {\n    let cancelled = false;\n    \n    const fetchData = async () => {\n      try {\n        setLoading(true);\n        setError(null);\n        \n        const response = await fetch(url);\n        if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n        }\n        \n        const result = await response.json();\n        \n        if (!cancelled) {\n          setData(result);\n          setLoading(false);\n        }\n      } catch (err) {\n        if (!cancelled) {\n          setError(err.message);\n          setLoading(false);\n        }\n      }\n    };\n    \n    fetchData();\n    \n    // 清理函数：取消请求\n    return () => {\n      cancelled = true;\n    };\n  }, [url]);\n  \n  return { data, loading, error };\n}",
+              "template": "function useFetch(url) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "react-q8",
+              "type": "coding",
+              "title": "实现一个 useDebounce Hook",
+              "question": "实现一个 useDebounce Hook",
+              "description": "实现一个 useDebounce Hook，用于防抖处理，常用于搜索框输入。",
+              "content": "",
+              "answer": "function useDebounce(value, delay) {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n  \n  useEffect(() => {\n    // 设置定时器\n    const timer = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n    \n    // 清理函数：清除定时器\n    return () => {\n      clearTimeout(timer);\n    };\n  }, [value, delay]);\n  \n  return debouncedValue;\n}\n\n// 使用示例\nfunction SearchComponent() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const debouncedSearchTerm = useDebounce(searchTerm, 500);\n  \n  useEffect(() => {\n    if (debouncedSearchTerm) {\n      // 执行搜索\n      performSearch(debouncedSearchTerm);\n    }\n  }, [debouncedSearchTerm]);\n  \n  return (\n    <input\n      value={searchTerm}\n      onChange={e => setSearchTerm(e.target.value)}\n    />\n  );\n}",
+              "template": "function useDebounce(value, delay) {\n  // 你的代码\n}"
+            },
+            {
+              "id": "react-q9",
+              "type": "coding",
+              "title": "实现一个 usePrevious Hook",
+              "question": "实现一个 usePrevious Hook",
+              "description": "实现一个 usePrevious Hook，用于获取上一轮的 props 或 state 值。",
+              "content": "",
+              "answer": "function usePrevious(value) {\n  const ref = useRef();\n  \n  useEffect(() => {\n    ref.current = value;\n  });\n  \n  return ref.current;\n}\n\n// 使用示例\nfunction Counter() {\n  const [count, setCount] = useState(0);\n  const prevCount = usePrevious(count);\n  \n  return (\n    <div>\n      <p>当前: {count}</p>\n      <p>之前: {prevCount}</p>\n      <button onClick={() => setCount(count + 1)}>增加</button>\n    </div>\n  );\n}",
+              "template": "function usePrevious(value) {\n  // 你的代码\n}"
             }
           ]
         }
@@ -182,12 +574,12 @@
     {
       "id": "web3",
       "name": "Web3",
-      "icon": "📁",
       "children": [
         {
           "id": "web3-basics",
           "name": "基础概念",
           "type": "knowledge",
+          "subcategory": "basics",
           "items": [
             {
               "id": "web3-blockchain",
@@ -213,6 +605,7 @@
           "id": "web3-questions",
           "name": "面试题",
           "type": "practice",
+          "subcategory": "questions",
           "items": [
             {
               "id": "web3-q1",

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import questionsData from '../data/loadData.js'
 
 function TreeNode({ node, level = 0, selectedId, onSelect }) {
@@ -73,7 +74,6 @@ function TreeNode({ node, level = 0, selectedId, onSelect }) {
         ) : (
           <span className="mr-3 text-sm shrink-0 w-4 h-4 flex items-center justify-center">·</span>
         )}
-        {node.icon && <span className="mr-3 text-lg shrink-0">{node.icon}</span>}
         <span className={`flex-1 truncate text-sm ${isSelected ? 'text-white' : 'text-gray-900'}`}>
           {node.name || node.title}
         </span>
@@ -111,7 +111,6 @@ function ContentView({ node }) {
   return (
     <div className="bg-white h-full">
       <div className="mb-12 pb-8 border-b border-gray-200">
-        {node.icon && <span className="text-2xl mr-3">{node.icon}</span>}
         <h2 className="text-2xl font-light text-gray-900 m-0 inline">{node.name || node.title}</h2>
       </div>
 
@@ -121,7 +120,45 @@ function ContentView({ node }) {
             {node.items.map(item => (
               <div key={item.id} className="border-l-2 border-primary pl-8">
                 <h3 className="text-lg font-medium mb-6 text-gray-900">{item.title}</h3>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">{item.content || '暂无内容'}</div>
+                <div className="text-gray-700 leading-relaxed text-sm prose prose-sm max-w-none">
+                  {item.content ? (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ node, ...props }) => <p className="mb-4" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                        li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                        strong: ({ node, children, ...props }) => (
+                          <strong className="font-semibold text-gray-900" {...props}>
+                            {children}
+                          </strong>
+                        ),
+                        code: ({ node, inline, className, children, ...props }) => {
+                          // Determine if this is a code block:
+                          // 1. inline is explicitly false
+                          // 2. className contains 'language-' (from fenced code blocks)
+                          // 3. children is a string containing newlines
+                          const childrenStr = typeof children === 'string' ? children : String(children || '');
+                          const hasNewlines = childrenStr.includes('\n');
+                          const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
+                          
+                          if (isCodeBlock) {
+                            return <code className={`block bg-gray-50 p-4 rounded overflow-x-auto text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
+                          }
+                          // All other cases: render as inline code
+                          return <code className={`bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 inline ${className || ''}`} {...props}>{children}</code>;
+                        },
+                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-gray-900" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 text-gray-900" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4 text-gray-900" {...props} />,
+                      }}
+                    >
+                      {item.content}
+                    </ReactMarkdown>
+                  ) : (
+                    <p className="text-gray-400">暂无内容</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -131,7 +168,6 @@ function ContentView({ node }) {
             <ul className="list-none p-0 m-0 mb-12 flex flex-col gap-2">
               {node.children.map(child => (
                 <li key={child.id} className="py-3 flex items-center gap-3 text-sm text-gray-700">
-                  {child.icon && <span>{child.icon}</span>}
                   <span>{child.name}</span>
                 </li>
               ))}
@@ -159,7 +195,7 @@ function StudyMode() {
       </div>
 
       <div className="flex gap-12 flex-1 min-h-0 flex-row">
-        <div className="w-72 min-w-[240px] max-w-[280px] shrink-0 flex-shrink-0">
+        <div className="w-72 min-w-[240px] max-w-[280px] flex-shrink-0">
           <div className="bg-white border-r border-gray-200 h-full overflow-y-auto pr-6">
             {questionsData.categories.map(category => (
               <TreeNode

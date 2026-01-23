@@ -3,6 +3,81 @@ import { join, relative, resolve } from 'path'
 import matter from 'gray-matter'
 
 /**
+ * Format directory name to display name
+ * Uses minimal mapping table for special cases,
+ * otherwise applies kebab-case to Title Case conversion
+ */
+const categoryNameMap = {
+  // Special cases that cannot be auto-converted
+  'javascript': 'JavaScript',
+  'node-js': 'Node.js',
+  'web3': 'Web3',
+  'react-native': 'React Native',
+  'web-assembly': 'WebAssembly'
+}
+
+/**
+ * Format category name from directory name
+ * @param {string} dirName - Directory name (e.g., 'javascript', 'node-js')
+ * @returns {string} Formatted display name (e.g., 'JavaScript', 'Node.js')
+ */
+function formatCategoryName(dirName) {
+  // Check mapping table first
+  if (categoryNameMap[dirName]) {
+    return categoryNameMap[dirName]
+  }
+  
+  // Generic rule: kebab-case → Title Case
+  // e.g., 'react-hooks' → 'React Hooks'
+  return dirName
+    .split('-')
+    .map(word => {
+      // Handle words starting with numbers (e.g., 'web3')
+      if (/^\d/.test(word)) {
+        return word.charAt(0).toUpperCase() + word.slice(1)
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1)
+    })
+    .join(' ')
+}
+
+/**
+ * Sort function for directories/files with numeric prefix support
+ * Numeric prefixes (e.g., '01-basics') sort before semantic names (e.g., 'basics')
+ * @param {string} a - First name
+ * @param {string} b - Second name
+ * @returns {number} Comparison result
+ */
+function sortByName(a, b) {
+  // Extract numeric prefix if exists (e.g., '01-basics' → 1, 'basics' → null)
+  const getNumericPrefix = (name) => {
+    const match = name.match(/^(\d+)-/)
+    return match ? parseInt(match[1], 10) : null
+  }
+  
+  const aPrefix = getNumericPrefix(a)
+  const bPrefix = getNumericPrefix(b)
+  
+  // If both have numeric prefixes, sort by prefix
+  if (aPrefix !== null && bPrefix !== null) {
+    return aPrefix - bPrefix
+  }
+  
+  // If only a has prefix, a comes first
+  if (aPrefix !== null) {
+    return -1
+  }
+  
+  // If only b has prefix, b comes first
+  if (bPrefix !== null) {
+    return 1
+  }
+  
+  // If neither has prefix, sort alphabetically
+  return a.localeCompare(b)
+}
+
+/**
  * Recursively get all markdown files from a directory
  */
 function getMarkdownFiles(dir, baseDir = dir, files = []) {
@@ -46,8 +121,9 @@ function removeCodeBlocks(content) {
 
 /**
  * Process markdown files and generate structured data
+ * Uses convention-over-configuration: directory names are auto-formatted to display names
  */
-function processMarkdownFiles(contentDir, categoriesConfig) {
+function processMarkdownFiles(contentDir) {
   const categories = {}
   const files = getMarkdownFiles(contentDir)
   
@@ -65,21 +141,24 @@ function processMarkdownFiles(contentDir, categoriesConfig) {
     
     // Initialize category if not exists
     if (!categories[categoryId]) {
-      const config = categoriesConfig[categoryId] || {}
+      // Priority: frontmatter.category > formatted directory name
+      const categoryName = frontmatter.category || formatCategoryName(categoryId)
       categories[categoryId] = {
         id: categoryId,
-        name: config.name || frontmatter.category || categoryId,
-        icon: config.icon || frontmatter.icon || '📁',
+        name: categoryName,
         children: {}
       }
     }
     
     // Initialize subcategory if not exists
     if (!categories[categoryId].children[subcategory]) {
+      // Priority: frontmatter.subcategory > formatted directory name
+      const subcategoryName = frontmatter.subcategory || formatCategoryName(subcategory)
       categories[categoryId].children[subcategory] = {
         id: `${categoryId}-${subcategory}`,
-        name: frontmatter.subcategory || subcategory,
+        name: subcategoryName,
         type: frontmatter.type || 'knowledge',
+        subcategory: subcategory, // Store original subcategory name for sorting
         items: []
       }
     }
@@ -125,19 +204,32 @@ function processMarkdownFiles(contentDir, categoriesConfig) {
     categories[categoryId].children[subcategory].items.push(item)
   }
   
-  // Sort items by id for consistent ordering
+  // Sort items by filename (supports numeric prefix for strict ordering)
   Object.values(categories).forEach(cat => {
     Object.values(cat.children).forEach(subcat => {
-      subcat.items.sort((a, b) => a.id.localeCompare(b.id))
+      // Extract filename from item id (e.g., 'js-var-let-const' → 'var-let-const')
+      subcat.items.sort((a, b) => {
+        const aFileName = a.id.split('-').slice(-1)[0] || a.id
+        const bFileName = b.id.split('-').slice(-1)[0] || b.id
+        return sortByName(aFileName, bFileName)
+      })
     })
   })
   
-  // Convert to array format
+  // Convert to array format and sort by filename (numeric prefix or alphabetical)
   return {
-    categories: Object.values(categories).map(cat => ({
-      ...cat,
-      children: Object.values(cat.children)
-    }))
+    categories: Object.values(categories)
+      .sort((a, b) => sortByName(a.id, b.id))
+      .map(cat => {
+        // Convert children object to array and sort by directory name
+        const childrenArray = Object.values(cat.children)
+          .sort((a, b) => sortByName(a.subcategory, b.subcategory))
+        
+        return {
+          ...cat,
+          children: childrenArray
+        }
+      })
   }
 }
 
@@ -147,8 +239,7 @@ function processMarkdownFiles(contentDir, categoriesConfig) {
 export default function markdownDataPlugin(options = {}) {
   const {
     contentDir = 'src/content',
-    outputFile = 'src/data/questions.json',
-    categoriesConfig = {}
+    outputFile = 'src/data/questions.json'
   } = options
   
   let config
@@ -163,26 +254,6 @@ export default function markdownDataPlugin(options = {}) {
     },
     
     async buildStart() {
-      // Load categories config
-      const categoriesConfigPath = resolve(root, 'src/data/categories.js')
-      let categoriesConfigData = {}
-      
-      if (existsSync(categoriesConfigPath)) {
-        try {
-          // Read and parse categories config
-          const categoriesConfigContent = readFileSync(categoriesConfigPath, 'utf-8')
-          // Extract the object from export statement using regex
-          // Match multiline object with nested structures
-          const exportMatch = categoriesConfigContent.match(/export\s+(?:const|let|var)\s+categoryConfig\s*=\s*(\{[\s\S]*?\});/m)
-          if (exportMatch) {
-            // Safely evaluate the object literal
-            categoriesConfigData = Function(`"use strict"; return (${exportMatch[1]})`)()
-          }
-        } catch (error) {
-          console.warn('Could not load categories config:', error.message)
-        }
-      }
-      
       const fullContentDir = resolve(root, contentDir)
       const fullOutputFile = resolve(root, outputFile)
       
@@ -192,8 +263,8 @@ export default function markdownDataPlugin(options = {}) {
         mkdirSync(outputDir, { recursive: true })
       }
       
-      // Process markdown files
-      const data = processMarkdownFiles(fullContentDir, categoriesConfigData)
+      // Process markdown files (no config needed - convention over configuration)
+      const data = processMarkdownFiles(fullContentDir)
       
       // Write output file
       writeFileSync(fullOutputFile, JSON.stringify(data, null, 2), 'utf-8')
@@ -201,36 +272,110 @@ export default function markdownDataPlugin(options = {}) {
       console.log(`✓ Processed ${data.categories.length} categories from Markdown files`)
     },
     
-    handleHotUpdate({ file, server }) {
-      // Watch for changes in content directory or categories config
+    configureServer(server) {
+      // Watch the entire content directory for changes (including directory renames)
       const contentPath = resolve(root, contentDir)
-      const categoriesConfigPath = resolve(root, 'src/data/categories.js')
-      const filePath = resolve(root, file)
+      const fullOutputFile = resolve(root, outputFile)
       
-      if ((filePath.startsWith(contentPath) && file.endsWith('.md')) || 
-          filePath === categoriesConfigPath) {
-        // Reload categories config
-        let categoriesConfigData = {}
+      // Use Vite's watcher to monitor directory structure changes
+      // This is needed to catch directory renames, which handleHotUpdate doesn't catch
+      server.watcher.add(contentPath)
+      
+      // Track if we're already processing to avoid duplicate processing
+      let isProcessing = false
+      
+      // Handle file and directory changes
+      const handleChange = async (path, eventType = 'change') => {
+        const filePath = resolve(path)
         
-        if (existsSync(categoriesConfigPath)) {
-          try {
-            const categoriesConfigContent = readFileSync(categoriesConfigPath, 'utf-8')
-            const exportMatch = categoriesConfigContent.match(/export\s+(?:const|let|var)\s+categoryConfig\s*=\s*(\{[\s\S]*?\});/m)
-            if (exportMatch) {
-              categoriesConfigData = Function(`"use strict"; return (${exportMatch[1]})`)()
-            }
-          } catch (error) {
-            console.warn('Could not load categories config:', error.message)
-          }
+        // Only process if the change is within the content directory
+        if (!filePath.startsWith(contentPath)) {
+          return
         }
         
+        // Skip markdown file changes - they're handled by handleHotUpdate
+        // This avoids duplicate processing
+        if (filePath.endsWith('.md') && (eventType === 'change' || eventType === 'add' || eventType === 'unlink')) {
+          return
+        }
+        
+        // Prevent concurrent processing
+        if (isProcessing) {
+          return
+        }
+        isProcessing = true
+        
+        try {
+          // Small delay to ensure file system operations are complete
+          // This is especially important for directory renames
+          await new Promise(resolve => setTimeout(resolve, 150))
+          
+          // Reprocess all markdown files
+          const data = processMarkdownFiles(contentPath)
+          writeFileSync(fullOutputFile, JSON.stringify(data, null, 2), 'utf-8')
+          
+          // Determine change type for better logging
+          let changeType = 'file'
+          try {
+            if (existsSync(filePath)) {
+              const stat = statSync(filePath)
+              changeType = stat.isDirectory() ? 'directory' : 'file'
+            } else {
+              changeType = eventType.includes('Dir') ? 'directory' : 'file'
+            }
+          } catch {
+            // If we can't determine, use event type
+            changeType = eventType.includes('Dir') ? 'directory' : 'file'
+          }
+          
+          const relativePath = relative(contentPath, filePath)
+          const eventName = eventType === 'addDir' ? 'created' : 
+                           eventType === 'unlinkDir' ? 'deleted' :
+                           eventType === 'add' ? 'added' :
+                           eventType === 'unlink' ? 'removed' : 'changed'
+          console.log(`✓ Updated data from ${changeType} ${eventName}: ${relativePath || 'root'}`)
+          
+          // Trigger HMR
+          server.ws.send({
+            type: 'full-reload'
+          })
+        } catch (error) {
+          console.warn('Error processing markdown files:', error.message)
+        } finally {
+          isProcessing = false
+        }
+      }
+      
+      // Listen to directory events (these are not caught by handleHotUpdate)
+      server.watcher.on('addDir', (path) => handleChange(path, 'addDir'))
+      server.watcher.on('unlinkDir', (path) => handleChange(path, 'unlinkDir'))
+      // Also listen to non-markdown file changes (e.g., metadata files)
+      server.watcher.on('add', (path) => {
+        if (!path.endsWith('.md')) {
+          handleChange(path, 'add')
+        }
+      })
+      server.watcher.on('unlink', (path) => {
+        if (!path.endsWith('.md')) {
+          handleChange(path, 'unlink')
+        }
+      })
+    },
+    
+    handleHotUpdate({ file, server }) {
+      // Watch for markdown file changes in content directory
+      const contentPath = resolve(root, contentDir)
+      const filePath = resolve(root, file)
+      
+      // Handle markdown file changes (this is faster for file edits)
+      if (filePath.startsWith(contentPath) && file.endsWith('.md')) {
         // Reprocess all markdown files
         const fullContentDir = resolve(root, contentDir)
         const fullOutputFile = resolve(root, outputFile)
-        const data = processMarkdownFiles(fullContentDir, categoriesConfigData)
+        const data = processMarkdownFiles(fullContentDir)
         writeFileSync(fullOutputFile, JSON.stringify(data, null, 2), 'utf-8')
         
-        console.log(`✓ Updated data from ${file.endsWith('.md') ? 'Markdown' : 'categories config'} file`)
+        console.log(`✓ Updated data from Markdown file: ${relative(contentPath, filePath)}`)
         
         // Trigger HMR
         server.ws.send({

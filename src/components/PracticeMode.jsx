@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
 import questionsData from '../data/loadData.js'
 
 function QACard({ item, showAnswer, onToggleAnswer }) {
@@ -19,7 +20,36 @@ function QACard({ item, showAnswer, onToggleAnswer }) {
       {showAnswer && (
         <div className="mt-8 pt-8 border-t border-gray-200">
           <h4 className="text-gray-900 mb-4 text-sm font-medium">答案</h4>
-          <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">{item.answer}</div>
+          <div className="text-gray-700 leading-relaxed text-sm prose prose-sm max-w-none">
+            <ReactMarkdown
+              components={{
+                p: ({ node, ...props }) => <p className="mb-4" {...props} />,
+                ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4" {...props} />,
+                ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                strong: ({ node, children, ...props }) => (
+                  <strong className="font-semibold text-gray-900" {...props}>
+                    {children}
+                  </strong>
+                ),
+                code: ({ node, inline, className, children, ...props }) => {
+                  const childrenStr = typeof children === 'string' ? children : String(children || '');
+                  const hasNewlines = childrenStr.includes('\n');
+                  const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
+                  
+                  if (isCodeBlock) {
+                    return <code className={`block bg-gray-50 p-4 rounded overflow-x-auto text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
+                  }
+                  return <code className={`bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800 inline ${className || ''}`} {...props}>{children}</code>;
+                },
+                h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-gray-900" {...props} />,
+                h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 text-gray-900" {...props} />,
+                h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4 text-gray-900" {...props} />,
+              }}
+            >
+              {item.answer}
+            </ReactMarkdown>
+          </div>
         </div>
       )}
     </div>
@@ -40,7 +70,30 @@ function CodingCard({ item, showAnswer, onToggleAnswer }) {
         <span className="text-xs text-primary font-medium mb-4 block">编程题</span>
         <div className="text-base font-medium text-gray-900 leading-relaxed mb-3">{item.question}</div>
         {item.description && (
-          <div className="text-gray-600 text-sm leading-relaxed mt-3 p-4 bg-gray-50 border-l-2 border-gray-300">{item.description}</div>
+          <div className="text-gray-600 text-sm leading-relaxed mt-3 p-4 bg-gray-50 border-l-2 border-gray-300 prose prose-sm max-w-none">
+            <ReactMarkdown
+              components={{
+                p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+                strong: ({ node, children, ...props }) => (
+                  <strong className="font-semibold" {...props}>
+                    {children}
+                  </strong>
+                ),
+                code: ({ node, inline, className, children, ...props }) => {
+                  const childrenStr = typeof children === 'string' ? children : String(children || '');
+                  const hasNewlines = childrenStr.includes('\n');
+                  const isCodeBlock = inline === false || (className && className.includes('language-')) || hasNewlines;
+                  
+                  if (isCodeBlock) {
+                    return <code className={`block bg-gray-50 p-4 rounded overflow-x-auto text-sm font-mono ${className || ''}`} {...props}>{children}</code>;
+                  }
+                  return <code className={`bg-gray-200 px-1.5 py-0.5 rounded text-xs font-mono inline ${className || ''}`} {...props}>{children}</code>;
+                },
+              }}
+            >
+              {item.description}
+            </ReactMarkdown>
+          </div>
         )}
       </div>
       

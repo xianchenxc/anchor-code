@@ -137,19 +137,23 @@ function solution() {
 - 编程题的答案写在 Markdown 的代码块中（第一个代码块会被识别为答案）
 - `template` 字段用于提供代码模板（可选）
 
-### 分类配置
+### 分类配置（约定优于配置）
 
-分类的图标和显示名称在 `src/data/categories.js` 中配置：
+项目采用**约定优于配置**的方式，无需手动配置文件：
 
-```javascript
-export const categoryConfig = {
-  javascript: {
-    name: 'JavaScript',
-    icon: '📜'
-  },
-  // ...
-}
-```
+1. **分类名称**：自动从目录名格式化
+   - 目录名使用 kebab-case（如 `javascript`, `node-js`）
+   - 自动转换为显示名称（如 `JavaScript`, `Node.js`）
+   - 特殊格式通过映射表处理（如 `javascript` → `JavaScript`, `web3` → `Web3`）
+
+2. **子目录排序**：通过文件名控制
+   - **严格顺序**：使用数字前缀（如 `01-basics/`, `02-advanced/`）
+   - **语义化顺序**：使用语义化名称（如 `basics/`, `advanced/`），按字母序排序
+   - 数字前缀的目录会排在语义化名称之前
+
+3. **显示名称优先级**：
+   - 优先使用 frontmatter 中的 `category` 和 `subcategory` 字段
+   - 如果 frontmatter 中没有，则使用目录名自动格式化
 
 ## 添加新题目
 
