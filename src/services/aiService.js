@@ -15,6 +15,8 @@ class AIService {
     this.workerReady = false
     this.workerSupported = this._checkWorkerSupport()
     this.initializingWorker = false // Prevent concurrent initialization
+    this.streamingCallbacks = new Map() // Store streaming callbacks by request ID
+    this.requestIdCounter = 0
   }
 
   /**
@@ -112,6 +114,20 @@ class AIService {
         this.workerReady = false
         this.initializingWorker = false
       }
+
+      // Handle streaming messages from worker
+      // Use addEventListener to avoid conflicts with Comlink's message handling
+      this.worker.addEventListener('message', (event) => {
+        // Check if this is a streaming chunk message (not a Comlink message)
+        // Comlink messages have a special format, so we check for our custom type
+        if (event.data && typeof event.data === 'object' && event.data.type === 'streaming-chunk') {
+          const { requestId, chunk, fullText } = event.data
+          const callback = this.streamingCallbacks.get(requestId)
+          if (callback) {
+            callback(chunk, fullText)
+          }
+        }
+      })
     } catch (error) {
       console.error('Failed to initialize worker:', error)
       this.worker = null
@@ -159,6 +175,7 @@ class AIService {
 
   /**
    * Generate text based on input prompt or chat messages (Worker mode only)
+   * Always uses streaming via async generator
    * @param {string|Array<{role: string, content: string}>} promptOrMessages - Input prompt (string) or chat messages (array)
    * @param {Object} options - Generation options
    * @param {number} options.maxLength - Maximum output length
@@ -179,18 +196,31 @@ class AIService {
 
     const { onChunk, ...generationOptions } = options
 
-    try {
-      // Wrap onChunk callback with Comlink.proxy if provided
-      const onChunkProxy = onChunk ? Comlink.proxy(onChunk) : null
+    // Use event-based streaming since Comlink doesn't natively support async generators
+    let requestId = null
+    if (onChunk) {
+      requestId = `stream-${++this.requestIdCounter}`
+      this.streamingCallbacks.set(requestId, onChunk)
+    }
 
-      // Call generateText directly via Comlink proxy
-      const text = await this.workerProxy.generateText(promptOrMessages, {
+    try {
+      // Call generateTextStream which will use postMessage for streaming
+      const fullText = await this.workerProxy.generateTextStream(promptOrMessages, {
         ...generationOptions,
-        onChunk: onChunkProxy
+        requestId: requestId // Pass request ID for event-based streaming
       })
 
-      return text
+      // Clean up callback after generation completes
+      if (requestId) {
+        this.streamingCallbacks.delete(requestId)
+      }
+
+      return fullText
     } catch (error) {
+      // Clean up callback on error
+      if (requestId) {
+        this.streamingCallbacks.delete(requestId)
+      }
       throw error
     }
   }

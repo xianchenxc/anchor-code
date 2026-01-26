@@ -47,28 +47,46 @@ const workerAPI = {
   },
 
   /**
-   * Generate text using the loaded model
+   * Generate text using async generator for streaming
+   * Uses postMessage for chunks since Comlink doesn't natively support async generators
    * @param {string|Array<{role: string, content: string}>} promptOrMessages - Input prompt or chat messages
    * @param {Object} options - Generation options
    * @param {number} options.maxLength - Maximum output length
    * @param {number} options.temperature - Sampling temperature
    * @param {number} options.topK - Top-k sampling
    * @param {number} options.topP - Top-p (nucleus) sampling
-   * @param {boolean} options.streaming - Whether to use streaming
-   * @param {Function} options.onChunk - Optional callback for streaming chunks (chunk: string, fullText: string) => void
+   * @param {string} options.requestId - Request ID for event-based streaming
    * @returns {Promise<string>}
    */
-  async generateText(promptOrMessages, options = {}) {
-    // Extract and wrap onChunk callback if provided
-    const { onChunk, ...generationOptions } = options
-    const onChunkProxy = onChunk ? Comlink.proxy(onChunk) : null
+  async generateTextStream(promptOrMessages, options = {}) {
+    const { requestId, ...generationOptions } = options
 
-    return await modelService.generateText(promptOrMessages, {
-      ...generationOptions,
-      streaming: !!onChunkProxy,
-      onChunk: onChunkProxy
-    })
+    // Create a callback that sends messages via postMessage
+    // This bridges the async generator to event-based communication
+    const onChunk = requestId ? (chunk, fullText) => {
+      // Send streaming chunk via postMessage to avoid callback serialization issues
+      self.postMessage({
+        type: 'streaming-chunk',
+        requestId: requestId,
+        chunk: chunk,
+        fullText: fullText
+      })
+    } : null
+
+    // Use the async generator internally but convert to callback-based for Comlink
+    let fullText = ''
+    const stream = modelService.generateTextStream(promptOrMessages, generationOptions)
+    
+    for await (const { chunk, fullText: newFullText } of stream) {
+      fullText = newFullText
+      if (onChunk) {
+        onChunk(chunk, fullText)
+      }
+    }
+
+    return fullText
   },
+
 
   /**
    * Get current model status

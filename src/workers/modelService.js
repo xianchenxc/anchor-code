@@ -255,18 +255,16 @@ export class ModelService {
   }
 
   /**
-   * Generate text using the loaded model with streaming support
+   * Generate text using async generator for streaming
    * @param {string|Array<{role: string, content: string}>} promptOrMessages - Input prompt or chat messages
    * @param {Object} options - Generation options
    * @param {number} options.maxLength - Maximum output length
    * @param {number} options.temperature - Sampling temperature
    * @param {number} options.topK - Top-k sampling
    * @param {number} options.topP - Top-p (nucleus) sampling
-   * @param {boolean} options.streaming - Whether to use streaming
-   * @param {Function} options.onChunk - Optional callback for streaming chunks (chunk: string, fullText: string) => void
-   * @returns {Promise<string>}
+   * @returns {AsyncGenerator<{chunk: string, fullText: string}, string>}
    */
-  async generateText(promptOrMessages, options = {}) {
+  async *generateTextStream(promptOrMessages, options = {}) {
     if (!this.generator) {
       throw new Error('Model not loaded')
     }
@@ -275,9 +273,7 @@ export class ModelService {
       maxLength = 512,
       temperature = 0.7,
       topK = 50,
-      topP = 0.9,
-      streaming = false,
-      onChunk = null
+      topP = 0.9
     } = options
 
     try {
@@ -294,96 +290,113 @@ export class ModelService {
         throw new Error('Input must be a string or an array of chat messages')
       }
 
-      // If streaming is enabled, use TextStreamer
-      if (streaming) {
-        try {
-          let fullText = ''
-          
-          // Get tokenizer from generator (pipeline object has tokenizer property)
-          // Try different possible locations for tokenizer
-          const tokenizer = this.generator.tokenizer || 
-                           this.generator.processor?.tokenizer ||
-                           (this.generator.model && this.generator.model.tokenizer)
-          
-          if (!tokenizer) {
-            // Fallback to non-streaming if tokenizer not available
-            console.warn('Tokenizer not available for streaming, falling back to non-streaming mode')
-          } else {
-            // Create a streamer that sends chunks via callback
-            const streamer = new TextStreamer(tokenizer, {
-              callback_function: (text) => {
-                fullText += text
-                if (onChunk) {
-                  onChunk(text, fullText)
-                }
-              },
-              skip_prompt: true,
-              skip_special_tokens: true
-            })
-
-            // Generate with streamer
-            await this.generator(input, {
-              max_new_tokens: maxLength,
-              temperature,
-              top_k: topK,
-              top_p: topP,
-              do_sample: temperature > 0,
-              return_full_text: false,
-              streamer: streamer
-            })
-
-            // Return final result
-            return fullText.trim()
-          }
-        } catch (streamError) {
-          // If streaming fails, fallback to non-streaming
-          console.warn('Streaming failed, falling back to non-streaming mode:', streamError.message)
-        }
+      // Get tokenizer from generator
+      const tokenizer = this.generator.tokenizer || 
+                       this.generator.processor?.tokenizer ||
+                       (this.generator.model && this.generator.model.tokenizer)
+      
+      if (!tokenizer) {
+        throw new Error('Tokenizer not available for streaming')
       }
 
-      // Non-streaming generation (original behavior)
-      const output = await this.generator(input, {
+      let fullText = ''
+      let lastYieldedLength = 0
+      let generationComplete = false
+      let generationError = null
+      
+      // Queue to store pending chunks for async generator
+      // Using a queue to bridge synchronous callback and async generator
+      const chunkQueue = []
+      let waitingResolver = null
+
+      // Create a streamer that accumulates text and queues chunks
+      const streamer = new TextStreamer(tokenizer, {
+        callback_function: (text) => {
+          // TextStreamer callback is synchronous, so we can safely update state
+          fullText += text
+          const chunk = fullText.slice(lastYieldedLength)
+          lastYieldedLength = fullText.length
+          
+          // Queue the chunk for async generator to yield
+          chunkQueue.push({ chunk, fullText })
+          
+          // Wake up waiting generator if any
+          if (waitingResolver) {
+            const resolver = waitingResolver
+            waitingResolver = null
+            resolver()
+          }
+        },
+        skip_prompt: true,
+        skip_special_tokens: true
+      })
+
+      // Start generation in background (non-blocking)
+      const generationPromise = this.generator(input, {
         max_new_tokens: maxLength,
         temperature,
         top_k: topK,
         top_p: topP,
         do_sample: temperature > 0,
-        return_full_text: false
+        return_full_text: false,
+        streamer: streamer
+      }).then(() => {
+        generationComplete = true
+        // Wake up generator to check completion
+        if (waitingResolver) {
+          const resolver = waitingResolver
+          waitingResolver = null
+          resolver()
+        }
+      }).catch((error) => {
+        generationError = error
+        generationComplete = true
+        // Wake up generator to handle error
+        if (waitingResolver) {
+          const resolver = waitingResolver
+          waitingResolver = null
+          resolver()
+        }
       })
 
-      // Extract generated text
-      let generatedText = null
-      
-      if (Array.isArray(output)) {
-        if (output.length > 0 && output[0]?.generated_text) {
-          generatedText = output[0].generated_text
+      // Yield chunks as they arrive
+      while (!generationComplete || chunkQueue.length > 0) {
+        // Yield all queued chunks immediately (batch processing for efficiency)
+        while (chunkQueue.length > 0) {
+          yield chunkQueue.shift()
         }
-      } else if (output?.generated_text) {
-        generatedText = output.generated_text
-      }
 
-      // Handle chat format
-      if (Array.isArray(generatedText)) {
-        const assistantMessage = generatedText
-          .slice()
-          .reverse()
-          .find(msg => msg.role === 'assistant')
-        if (assistantMessage?.content) {
-          return assistantMessage.content
+        // If generation is complete and queue is empty, we're done
+        if (generationComplete) {
+          break
         }
-        return ''
+
+        // Wait for next chunk with shorter timeout for better responsiveness
+        await new Promise((resolve) => {
+          waitingResolver = resolve
+          // Reduced timeout from 100ms to 20ms for better real-time performance
+          // This timeout is a safety mechanism to prevent infinite waiting
+          setTimeout(() => {
+            if (waitingResolver === resolve) {
+              waitingResolver = null
+              resolve()
+            }
+          }, 20)
+        })
       }
 
-      // Handle plain text format
-      if (typeof generatedText === 'string') {
-        return generatedText
+      // Throw error if generation failed
+      if (generationError) {
+        throw generationError
       }
 
-      return ''
+      // Return final text (this value is accessible via generator's return value)
+      return fullText.trim()
     } catch (error) {
-      throw new Error(`Generation failed: ${error.message}`)
+      throw new Error(`Streaming generation failed: ${error.message}`)
     }
   }
+
 
   /**
    * Get current model status

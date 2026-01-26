@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import ModelLoader from './ModelLoader.jsx'
 import ChatInterface from './ChatInterface.jsx'
 import aiService from '../services/aiService.js'
@@ -49,6 +49,7 @@ export default function ChatMode({ currentTopic = null }) {
       const chatMessages = buildChatMessages(userMessage, conversationHistory)
       
       // Generate response with streaming support
+      // Use ref to access setMessages to avoid closure serialization issues with Comlink.proxy
       const response = await aiService.generate(chatMessages, {
         maxLength: 512,
         temperature: 0.7,
@@ -56,7 +57,6 @@ export default function ChatMode({ currentTopic = null }) {
         topP: 0.9,
         // Enable streaming for real-time updates
         onChunk: (chunk, fullText) => {
-          // Update assistant message in real-time using functional update
           setMessages((prevMessages) => {
             const newMessages = [...prevMessages]
             const lastIndex = newMessages.length - 1
