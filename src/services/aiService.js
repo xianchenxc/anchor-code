@@ -1,16 +1,18 @@
 /**
  * AI Service - Pure communication layer
- * Handles communication with Worker, all model configuration and state is managed in Worker
+ * Uses Comlink to simplify Web Worker communication
+ * All model configuration and state is managed in Worker
  * This abstraction allows easy switching to API-based implementations in the future
  * UI layer should not be aware of implementation details (Web Worker, API, etc.)
  */
+
+import * as Comlink from 'comlink'
+
 class AIService {
   constructor() {
     this.worker = null
+    this.workerProxy = null
     this.workerReady = false
-    this.pendingRequests = new Map() // Map<requestId, {resolve, reject, onChunk?}>
-    this.pendingLoadRequests = new Map() // Map<requestId, {resolve, reject}>
-    this.requestIdCounter = 0
     this.workerSupported = this._checkWorkerSupport()
     this.initializingWorker = false // Prevent concurrent initialization
   }
@@ -44,7 +46,7 @@ class AIService {
 
   /**
    * Initialize model inference backend (internal)
-   * Currently uses Web Worker, but implementation can be swapped without affecting UI
+   * Currently uses Web Worker with Comlink, but implementation can be swapped without affecting UI
    * @private
    * @returns {Promise<void>}
    */
@@ -79,111 +81,52 @@ class AIService {
 
     this.initializingWorker = true
 
-    return new Promise((resolve, reject) => {
+    try {
+      this.worker = new Worker(
+        new URL('../workers/modelWorker.js', import.meta.url),
+        { type: 'module' }
+      )
+
+      // Wrap worker with Comlink
+      this.workerProxy = Comlink.wrap(this.worker)
+
+      // Wait for worker to be ready (Comlink handles this automatically)
+      // We can check if the proxy is ready by trying to call a method
       try {
-        this.worker = new Worker(
-          new URL('../workers/modelWorker.js', import.meta.url),
-          { type: 'module' }
-        )
-
-        this.worker.onmessage = (event) => {
-          const { type, ...data } = event.data
-
-          switch (type) {
-            case 'worker-ready':
-              this.workerReady = true
-              this.initializingWorker = false
-              resolve()
-              break
-
-            case 'load-complete':
-              // Handle load-complete with requestId matching
-              const loadRequest = data.requestId
-                ? this.pendingLoadRequests.get(data.requestId)
-                : null
-              if (loadRequest) {
-                this.pendingLoadRequests.delete(data.requestId)
-                if (data.success) {
-                  loadRequest.resolve()
-                } else {
-                  loadRequest.reject(new Error(data.message || 'Failed to load model'))
-                }
-              }
-              break
-
-            case 'generate-chunk':
-              const chunkRequest = this.pendingRequests.get(data.requestId)
-              if (chunkRequest && chunkRequest.onChunk) {
-                chunkRequest.onChunk(data.chunk, data.fullText)
-              }
-              break
-
-            case 'generate-complete':
-              const request = this.pendingRequests.get(data.requestId)
-              if (request) {
-                this.pendingRequests.delete(data.requestId)
-                if (data.success) {
-                  request.resolve(data.text)
-                } else {
-                  request.reject(new Error(data.message || 'Generation failed'))
-                }
-              }
-              break
-
-            case 'model-info':
-              // Model info response - handled by getModelInfo()
-              break
-
-            case 'status':
-              // Status response - handled by isModelLoaded()
-              break
-
-            case 'error':
-              const errorRequest = data.requestId
-                ? this.pendingRequests.get(data.requestId)
-                : null
-              if (errorRequest) {
-                this.pendingRequests.delete(data.requestId)
-                errorRequest.reject(new Error(data.message || 'Unknown error'))
-              } else {
-                console.error('Worker error:', data.message)
-              }
-              break
-
-            default:
-              console.warn('Unknown worker message type:', type)
-          }
-        }
-
-        this.worker.onerror = (error) => {
-          console.error('Worker error:', error)
-          this.worker = null
-          this.workerReady = false
-          this.initializingWorker = false
-          reject(error)
-        }
-
-        // Timeout for worker initialization
-        setTimeout(() => {
-          if (!this.workerReady) {
-            this.initializingWorker = false
-            reject(new Error('Worker initialization timeout'))
-          }
-        }, 10000)
+        await this.workerProxy.getStatus()
+        this.workerReady = true
+        this.initializingWorker = false
       } catch (error) {
-        console.error('Failed to initialize worker:', error)
+        // Worker might not be ready yet, wait a bit and retry
+        await new Promise(resolve => setTimeout(resolve, 100))
+        await this.workerProxy.getStatus()
+        this.workerReady = true
+        this.initializingWorker = false
+      }
+
+      // Handle worker errors
+      this.worker.onerror = (error) => {
+        console.error('Worker error:', error)
         this.worker = null
+        this.workerProxy = null
         this.workerReady = false
         this.initializingWorker = false
-        reject(error)
       }
-    })
+    } catch (error) {
+      console.error('Failed to initialize worker:', error)
+      this.worker = null
+      this.workerProxy = null
+      this.workerReady = false
+      this.initializingWorker = false
+      throw error
+    }
   }
 
   /**
    * Load the text generation model
    * @param {Object} options - Loading options
    * @param {string|null} options.modelName - Optional model name, uses default if not provided
+   * @param {Function} options.onProgress - Optional progress callback (progress: number) => void
    * @returns {Promise<void>}
    */
   async loadModel(options = {}) {
@@ -191,45 +134,25 @@ class AIService {
       throw new Error('AI functionality is not available in this browser. Please use a modern browser.')
     }
 
-    const { modelName = null } = options
+    const { modelName = null, onProgress = null } = options
 
     // Initialize worker if needed
     await this.initializeWorker()
-    if (!this.workerReady) {
+    if (!this.workerReady || !this.workerProxy) {
       throw new Error('Worker failed to initialize')
     }
 
-    // Generate requestId for this load request
-    const requestId = ++this.requestIdCounter
-
     try {
-      // Load model in worker (Worker layer handles all state checks)
-      this.worker.postMessage({
-        type: 'load-model',
-        payload: { modelName, requestId }
-      })
+      // Wrap progress callback with Comlink.proxy if provided
+      const progressProxy = onProgress ? Comlink.proxy(onProgress) : null
 
-      // Wait for load to complete with requestId matching
-      return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          this.pendingLoadRequests.delete(requestId)
-          reject(new Error('Model loading timeout'))
-        }, 300000) // 5 minutes timeout
+      // Call loadModel directly via Comlink proxy
+      const result = await this.workerProxy.loadModel(modelName, progressProxy)
 
-        this.pendingLoadRequests.set(requestId, {
-          resolve: () => {
-            clearTimeout(timeout)
-            resolve()
-          },
-          reject: (error) => {
-            clearTimeout(timeout)
-            reject(error)
-          }
-        })
-      })
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load model')
+      }
     } catch (error) {
-      // Clean up pending request on error
-      this.pendingLoadRequests.delete(requestId)
       throw error
     }
   }
@@ -250,43 +173,26 @@ class AIService {
       throw new Error('AI functionality is not available in this browser. Please use a modern browser.')
     }
 
-    if (!this.workerReady) {
+    if (!this.workerReady || !this.workerProxy) {
       throw new Error('Model not loaded. Call loadModel() first.')
     }
 
-    const requestId = ++this.requestIdCounter
     const { onChunk, ...generationOptions } = options
-    const streaming = !!onChunk
 
-    return new Promise((resolve, reject) => {
-      // Store request handlers with optional chunk callback
-      this.pendingRequests.set(requestId, { 
-        resolve, 
-        reject,
-        onChunk: onChunk || null
+    try {
+      // Wrap onChunk callback with Comlink.proxy if provided
+      const onChunkProxy = onChunk ? Comlink.proxy(onChunk) : null
+
+      // Call generateText directly via Comlink proxy
+      const text = await this.workerProxy.generateText(promptOrMessages, {
+        ...generationOptions,
+        onChunk: onChunkProxy
       })
 
-      // Send generation request to worker
-      this.worker.postMessage({
-        type: 'generate',
-        payload: {
-          promptOrMessages,
-          options: {
-            ...generationOptions,
-            streaming
-          },
-          requestId
-        }
-      })
-
-      // Timeout after 60 seconds
-      setTimeout(() => {
-        if (this.pendingRequests.has(requestId)) {
-          this.pendingRequests.delete(requestId)
-          reject(new Error('Generation timeout'))
-        }
-      }, 60000)
-    })
+      return text
+    } catch (error) {
+      throw error
+    }
   }
 
   /**
@@ -294,28 +200,17 @@ class AIService {
    * @returns {Promise<boolean>}
    */
   async isModelLoaded() {
-    if (!this.workerSupported || !this.workerReady) {
+    if (!this.workerSupported || !this.workerReady || !this.workerProxy) {
       return false
     }
 
-    return new Promise((resolve) => {
-      if (!this.worker) {
-        resolve(false)
-        return
-      }
-      this.worker.postMessage({ type: 'check-status' })
-      const checkStatus = (event) => {
-        if (event.data.type === 'status') {
-          this.worker.removeEventListener('message', checkStatus)
-          resolve(event.data.isLoaded)
-        }
-      }
-      this.worker.addEventListener('message', checkStatus)
-      setTimeout(() => {
-        this.worker.removeEventListener('message', checkStatus)
-        resolve(false)
-      }, 1000)
-    })
+    try {
+      const status = await this.workerProxy.getStatus()
+      return status.isLoaded
+    } catch (error) {
+      console.error('Failed to check model status:', error)
+      return false
+    }
   }
 
   /**
@@ -323,7 +218,7 @@ class AIService {
    * @returns {Promise<{modelName: string, backend: string|null, dtype: string|null, modelSize: number, isLoaded: boolean, isLoading: boolean}>}
    */
   async getModelInfo() {
-    if (!this.workerSupported || !this.workerReady) {
+    if (!this.workerSupported || !this.workerReady || !this.workerProxy) {
       return {
         modelName: null,
         backend: null,
@@ -334,45 +229,19 @@ class AIService {
       }
     }
 
-    return new Promise((resolve) => {
-      if (!this.worker) {
-        resolve({
-          modelName: null,
-          backend: null,
-          dtype: null,
-          modelSize: 0,
-          isLoaded: false,
-          isLoading: false
-        })
-        return
+    try {
+      return await this.workerProxy.getModelInfo()
+    } catch (error) {
+      console.error('Failed to get model info:', error)
+      return {
+        modelName: null,
+        backend: null,
+        dtype: null,
+        modelSize: 0,
+        isLoaded: false,
+        isLoading: false
       }
-      this.worker.postMessage({ type: 'get-model-info' })
-      const checkInfo = (event) => {
-        if (event.data.type === 'model-info') {
-          this.worker.removeEventListener('message', checkInfo)
-          resolve({
-            modelName: event.data.modelName,
-            backend: event.data.backend,
-            dtype: event.data.dtype,
-            modelSize: event.data.modelSize,
-            isLoaded: event.data.isLoaded,
-            isLoading: event.data.isLoading
-          })
-        }
-      }
-      this.worker.addEventListener('message', checkInfo)
-      setTimeout(() => {
-        this.worker.removeEventListener('message', checkInfo)
-        resolve({
-          modelName: null,
-          backend: null,
-          dtype: null,
-          modelSize: 0,
-          isLoaded: false,
-          isLoading: false
-        })
-      }, 1000)
-    })
+    }
   }
 
   /**
@@ -405,10 +274,14 @@ class AIService {
   /**
    * Unload the model to free memory
    */
-  unloadModel() {
-    if (this.worker) {
-      this.worker.postMessage({ type: 'unload' })
-      this.workerReady = false
+  async unloadModel() {
+    if (this.workerProxy) {
+      try {
+        await this.workerProxy.unload()
+        this.workerReady = false
+      } catch (error) {
+        console.error('Failed to unload model:', error)
+      }
     }
   }
 
@@ -416,12 +289,15 @@ class AIService {
    * Terminate worker (cleanup)
    */
   terminateWorker() {
+    if (this.workerProxy) {
+      // Release Comlink proxy
+      this.workerProxy[Comlink.releaseProxy]()
+      this.workerProxy = null
+    }
     if (this.worker) {
       this.worker.terminate()
       this.worker = null
       this.workerReady = false
-      this.pendingRequests.clear()
-      this.pendingLoadRequests.clear()
     }
     this.initializingWorker = false
   }
