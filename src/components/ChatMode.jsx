@@ -116,7 +116,7 @@ export default function ChatMode({ currentTopic = null }) {
           聊天式学习
         </h2>
         <p className="text-gray-600 m-0 text-sm sm:text-base">
-          与 AI 助手对话，深入学习编程知识。可以提问任何技术问题，AI 会基于项目内容为你解答。
+          与 AI 助手对话，深入学习前端开发知识。可以提问任何前端技术问题，AI 会基于项目中的前端开发知识库（JavaScript、React、Web3）为你提供专业解答。
         </p>
         {currentTopic && (
           <div className="mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 rounded-xl text-sm text-blue-800 shadow-sm">
@@ -131,7 +131,7 @@ export default function ChatMode({ currentTopic = null }) {
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
           onClear={handleClear}
-          placeholder="输入你的问题，例如：什么是闭包？如何理解 React Hooks？"
+          placeholder="输入你的前端开发问题，例如：什么是闭包？如何理解 React Hooks？Web3 钱包如何连接？"
         />
       </ModelLoader>
     </div>

@@ -55,13 +55,13 @@ export default function InterviewMode() {
   }, [difficulty])
 
   // Build prompt for asking a question
-  const buildQuestionPrompt = useCallback((categoryName, difficultyLevel) => {
-    return buildInterviewQuestionPrompt(categoryName, difficultyLevel)
+  const buildQuestionPrompt = useCallback((categoryName, categoryId, difficultyLevel) => {
+    return buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
   }, [])
 
   // Build prompt for evaluating an answer
-  const buildEvaluationPrompt = useCallback((question, answer) => {
-    return buildInterviewEvaluationPrompt(question, answer)
+  const buildEvaluationPrompt = useCallback((question, answer, categoryId) => {
+    return buildInterviewEvaluationPrompt(question, answer, categoryId)
   }, [])
 
   // Start a new interview
@@ -78,7 +78,7 @@ export default function InterviewMode() {
     setInterviewHistory([])
 
     try {
-      const prompt = buildQuestionPrompt(categoryName, difficulty)
+      const prompt = buildQuestionPrompt(categoryName, category, difficulty)
       const question = await aiService.generate(prompt, {
         maxLength: 256,
         temperature: 0.8,
@@ -132,7 +132,7 @@ export default function InterviewMode() {
 
     try {
       // Evaluate the answer
-      const prompt = buildEvaluationPrompt(currentQuestionValue, userAnswer)
+      const prompt = buildEvaluationPrompt(currentQuestionValue, userAnswer, categoryValue)
       const evaluation = await aiService.generate(prompt, {
         maxLength: 512,
         temperature: 0.7,
@@ -163,7 +163,7 @@ export default function InterviewMode() {
 
       // Ask next question
       const categoryName = INTERVIEW_CATEGORIES.find(c => c.id === categoryValue)?.name || categoryValue
-      const nextQuestionPrompt = buildQuestionPrompt(categoryName, difficultyValue)
+      const nextQuestionPrompt = buildQuestionPrompt(categoryName, categoryValue, difficultyValue)
       const nextQuestion = await aiService.generate(nextQuestionPrompt, {
         maxLength: 256,
         temperature: 0.8,
@@ -230,7 +230,7 @@ export default function InterviewMode() {
             模拟面试
           </h2>
           <p className="text-gray-600 m-0 text-sm sm:text-base">
-            AI 作为面试官，根据你选择的领域提问技术问题，并评估你的回答。
+            AI 作为前端开发技术面试官，根据你选择的领域（JavaScript、React、Web3）提问技术问题，并基于项目知识库评估你的回答。
           </p>
         </div>
 
