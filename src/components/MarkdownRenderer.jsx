@@ -1,6 +1,12 @@
 import ReactMarkdown from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+// Use PrismLight instead of Prism to reduce bundle size by only including needed languages
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import oneLight from 'react-syntax-highlighter/dist/esm/styles/prism/one-light'
+// Only import the languages we actually use to reduce bundle size
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript'
+
+// Register only the languages we need
+SyntaxHighlighter.registerLanguage('javascript', javascript)
 
 /**
  * Default components for markdown rendering
