@@ -112,14 +112,14 @@ export default function ChatMode({ currentTopic = null }) {
   return (
     <div className="w-full">
       <div className="mb-6 sm:mb-8 md:mb-12">
-        <h2 className="text-lg sm:text-xl font-light text-gray-900 mb-3">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           聊天式学习
         </h2>
-        <p className="text-gray-500 m-0 text-xs sm:text-sm">
+        <p className="text-gray-600 m-0 text-sm sm:text-base">
           与 AI 助手对话，深入学习编程知识。可以提问任何技术问题，AI 会基于项目内容为你解答。
         </p>
         {currentTopic && (
-          <div className="mt-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+          <div className="mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 rounded-xl text-sm text-blue-800 shadow-sm">
             <strong>当前主题：</strong>{currentTopic}
           </div>
         )}

@@ -49,14 +49,16 @@ export default function ChatInterface({
   }
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100vh-200px)] bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div className="flex flex-col h-full max-h-[calc(100vh-200px)] bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 shadow-xl">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-        <h3 className="text-sm font-medium text-gray-900">AI 助手</h3>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200/60 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 rounded-t-2xl">
+        <h3 className="text-base font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          AI 助手
+        </h3>
         {onClear && messages.length > 0 && (
           <button
             onClick={onClear}
-            className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+            className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-white/60 transition-all font-medium"
           >
             清除对话
           </button>
@@ -64,33 +66,34 @@ export default function ChatInterface({
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center py-12">
             <div className="text-gray-400">
-              <div className="text-4xl mb-4">💬</div>
-              <p className="text-sm">开始对话吧！输入你的问题，AI 会帮助你学习。</p>
+              <div className="text-5xl mb-4 opacity-60">💬</div>
+              <p className="text-sm sm:text-base">开始对话吧！输入你的问题，AI 会帮助你学习。</p>
             </div>
           </div>
         ) : (
           messages.map((message, index) => (
             <div
               key={index}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               <div
-                className={`max-w-[85%] sm:max-w-[75%] rounded-lg px-4 py-3 ${
+                className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 shadow-md ${
                   message.role === 'user'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                    : 'bg-gradient-to-br from-gray-50 to-indigo-50/30 text-gray-900 border border-gray-200/60'
                 }`}
               >
                 {message.role === 'user' ? (
-                  <p className="text-sm whitespace-pre-wrap break-words m-0">
+                  <p className="text-sm sm:text-base whitespace-pre-wrap break-words m-0 leading-relaxed">
                     {message.content}
                   </p>
                 ) : (
-                  <div className="text-sm">
+                  <div className="text-sm sm:text-base">
                     <MarkdownRenderer content={message.content} />
                   </div>
                 )}
@@ -102,14 +105,14 @@ export default function ChatInterface({
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg px-4 py-3 max-w-[85%] sm:max-w-[75%]">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-2xl px-4 py-3 max-w-[85%] sm:max-w-[75%] border border-gray-200/60 shadow-sm">
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <div className="flex gap-1.5">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
-                <span>AI 正在思考...</span>
+                <span className="font-medium">AI 正在思考...</span>
               </div>
             </div>
           </div>
@@ -119,8 +122,8 @@ export default function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="border-t border-gray-200 bg-gray-50 rounded-b-lg p-4">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="border-t border-gray-200/60 bg-gradient-to-r from-gray-50/80 to-indigo-50/30 rounded-b-2xl p-4">
+        <form onSubmit={handleSubmit} className="flex gap-3">
           <textarea
             ref={inputRef}
             value={input}
@@ -129,9 +132,9 @@ export default function ChatInterface({
             placeholder={placeholder}
             disabled={isLoading}
             rows={1}
-            className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="flex-1 resize-none border-2 border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all bg-white"
             style={{
-              minHeight: '40px',
+              minHeight: '44px',
               maxHeight: '120px',
             }}
             onInput={(e) => {
@@ -143,7 +146,7 @@ export default function ChatInterface({
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shrink-0"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shrink-0"
           >
             发送
           </button>
