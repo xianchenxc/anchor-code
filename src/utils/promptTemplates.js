@@ -44,9 +44,18 @@ export function buildLearningSystemMessage(currentTopic = null, userQuestion = n
     // Use comprehensive frontend content as general knowledge base
     knowledgeBase = getAllFrontendContent()
   }
-
+  console.log('knowledgeBase', knowledgeBase)
   if (knowledgeBase) {
-    systemContent += `\n\n以下是项目中的前端开发知识库内容，请基于这些内容回答问题，确保答案的准确性和专业性：\n\n${knowledgeBase}`
+    systemContent += `\n\n以下是项目中的前端开发知识库内容，请严格按照这些内容回答问题，确保答案的准确性和专业性：
+
+**重要要求**：
+1. 优先使用知识库中的内容来回答问题
+2. 如果知识库中有相关内容，必须基于知识库内容回答，不要添加知识库中没有的信息
+3. 如果知识库中没有相关内容，可以基于你的知识回答，但要明确说明这是通用知识
+4. 回答要准确、简洁，避免过度发散或添加不相关的信息
+
+知识库内容：
+${knowledgeBase}`
   }
   
   return systemContent

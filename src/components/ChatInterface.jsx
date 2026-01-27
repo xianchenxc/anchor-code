@@ -94,7 +94,10 @@ export default function ChatInterface({
                   </p>
                 ) : (
                   <div className="text-sm sm:text-base">
-                    <MarkdownRenderer content={message.content} />
+                    <MarkdownRenderer 
+                      content={message.content} 
+                      isStreaming={isLoading && index === messages.length - 1}
+                    />
                   </div>
                 )}
               </div>
