@@ -30,19 +30,18 @@ export default function MarkdownRenderer({
   style = {}
 }) {
   return (
-    <div 
-      className={`leading-relaxed text-xs sm:text-sm prose prose-sm max-w-none ${className}`}
-      style={{
-        color: 'var(--markdown-text, #374151)',
-        ...style
-      }}
+    <div
+      className={`leading-relaxed text-xs sm:text-sm text-gray-700 dark:text-gray-200 ${className}`}
+      style={style}
     >
       <Streamdown
         plugins={{
-          code,  // Code syntax highlighting with copy button (supports 100+ languages)
-          math,  // Math formula support (LaTeX)
+          code,
+          math,
         }}
+        shikiTheme={['github-light', 'github-dark']}
         isAnimating={isStreaming}
+        className="prose prose-sm dark:prose-invert max-w-none"
       >
         {content}
       </Streamdown>

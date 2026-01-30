@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { BookOpen, FileText, ChevronRight } from 'lucide-react'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 import { useStudyMode } from '../hooks/useStudyMode.js'
@@ -13,7 +14,7 @@ function ContentView({ node, items = [], onSelectChild }) {
       <div className="flex items-center justify-center min-h-[200px] py-12">
         <div className="text-center animate-fade-in">
           <BookOpen className="size-12 mb-3 mx-auto text-gray-300" strokeWidth={1.5} />
-          <p className="text-sm text-gray-400">请从面包屑导航选择分类查看内容</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">请从面包屑导航选择分类查看内容</p>
         </div>
       </div>
     )
@@ -31,9 +32,9 @@ function ContentView({ node, items = [], onSelectChild }) {
             <button
               key={child.id}
               onClick={() => onSelectChild?.(child)}
-              className="p-3 sm:p-3.5 bg-white/90 backdrop-blur-xl rounded-xl border border-gray-200/60 hover:border-indigo-400 hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer text-left"
+              className="p-3 sm:p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 hover:shadow transition-all cursor-pointer text-left"
             >
-              <span className="text-sm font-semibold text-gray-900 line-clamp-2">
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
                 {child.name || child.title}
               </span>
             </button>
@@ -44,30 +45,40 @@ function ContentView({ node, items = [], onSelectChild }) {
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl rounded-xl shadow-lg border border-gray-200/60 p-4 sm:p-6 md:p-8 animate-slide-up min-h-0">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-4 sm:p-6 md:p-8 animate-slide-up min-h-0">
       {hasItems ? (
-        <div className="text-gray-700 flex flex-col gap-5 sm:gap-6 md:gap-7">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="border-l-4 border-indigo-500 pl-4 sm:pl-6 py-3 sm:py-3.5 bg-gradient-to-r from-indigo-50/60 via-purple-50/30 to-transparent rounded-r-lg shadow-sm animate-slide-up"
-              style={{ animationDelay: `${index * 80}ms` }}
+        <>
+          <div className="text-gray-700 dark:text-gray-300 flex flex-col gap-5 sm:gap-6 md:gap-7">
+            {items.map((item, index) => (
+              <div
+                key={item.id}
+                className="border-l-4 border-teal-500 dark:border-teal-400 pl-4 sm:pl-6 py-3 sm:py-3.5 bg-gray-50 dark:bg-gray-700/50 rounded-r-lg animate-slide-up"
+                style={{ animationDelay: `${index * 80}ms` }}
+              >
+                <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3 text-gray-900 dark:text-gray-100">
+                  {item.title}
+                </h3>
+                {item.content ? (
+                  <MarkdownRenderer content={item.content} />
+                ) : (
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">暂无内容</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 pt-4 border-t border-gray-200/60 dark:border-gray-700">
+            <Link
+              to="/practice"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 rounded-xl px-4 py-2.5 border border-teal-200/80 dark:border-teal-700 hover:border-teal-300 dark:hover:border-teal-600 hover:bg-teal-50/50 dark:hover:bg-teal-900/30 transition-all"
             >
-              <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3 text-gray-900">
-                {item.title}
-              </h3>
-              {item.content ? (
-                <MarkdownRenderer content={item.content} />
-              ) : (
-                <p className="text-gray-400 text-sm">暂无内容</p>
-              )}
-            </div>
-          ))}
-        </div>
+              去练习巩固 →
+            </Link>
+          </div>
+        </>
       ) : (
         <div className="text-center py-8 sm:py-10">
           <FileText className="size-10 mb-3 mx-auto text-gray-300" strokeWidth={1.5} />
-          <p className="text-gray-400 text-sm">该节点暂无内容</p>
+          <p className="text-gray-400 dark:text-gray-500 text-sm">该节点暂无内容</p>
         </div>
       )}
     </div>
@@ -76,7 +87,7 @@ function ContentView({ node, items = [], onSelectChild }) {
 
 function SiblingPopover({ siblings, selectedId, onSelect, onClose }) {
   return (
-    <div className="absolute top-full left-0 mt-1 z-50 bg-white/95 backdrop-blur-xl rounded-lg shadow-xl border border-gray-200/60 py-1.5 min-w-[120px] animate-fade-in">
+    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm py-1.5 min-w-[120px] animate-fade-in">
       {siblings.map((sibling) => {
         const isSelected = sibling.id === selectedId
         return (
@@ -88,7 +99,7 @@ function SiblingPopover({ siblings, selectedId, onSelect, onClose }) {
             }}
             type="button"
             className={`w-full px-3 py-1.5 text-left text-sm transition-colors ${
-              isSelected ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-100'
+              isSelected ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
             {sibling.name || sibling.title}
@@ -128,7 +139,7 @@ function Breadcrumb({ path, onSelect, categories, selectedId }) {
         return (
           <div key={node.id} className="flex items-center gap-1.5 relative">
             {index > 0 && (
-              <ChevronRight className="size-3.5 text-gray-400 shrink-0" strokeWidth={2} />
+              <ChevronRight className="size-3.5 text-gray-400 dark:text-gray-500 shrink-0" strokeWidth={2} />
             )}
             <div
               className="relative"
@@ -139,11 +150,10 @@ function Breadcrumb({ path, onSelect, categories, selectedId }) {
                 <>
                   <button
                     type="button"
-                    className="px-2.5 py-1 rounded-md transition-all duration-200 text-sm relative z-10 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold cursor-pointer hover:from-indigo-700 hover:to-purple-700"
+                    className="px-2.5 py-1 rounded-md transition-all duration-200 text-sm relative z-10 text-gray-900 dark:text-gray-100 font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                     aria-current="page"
                   >
                     {node.name || node.title}
-                    <span className="ml-1.5 text-xs opacity-90">▼</span>
                   </button>
                   {showPopover && (
                     <SiblingPopover
@@ -161,8 +171,8 @@ function Breadcrumb({ path, onSelect, categories, selectedId }) {
                     onClick={() => !isLast && onSelect(node)}
                     className={`px-2.5 py-1 rounded-md transition-all duration-200 text-sm relative z-10 ${
                       isLast
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold cursor-default'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600 cursor-pointer'
+                        ? 'text-gray-900 dark:text-gray-100 font-semibold cursor-default'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-teal-600 dark:hover:text-teal-400 cursor-pointer'
                     }`}
                     disabled={isLast}
                     aria-current={isLast ? 'page' : undefined}
@@ -192,7 +202,7 @@ function StudyModeLoading() {
     <div className="flex items-center justify-center min-h-[160px] py-10">
       <div className="text-center animate-fade-in">
         <BookOpen className="size-12 mb-2 mx-auto text-gray-300 animate-pulse" strokeWidth={1.5} />
-        <p className="text-sm text-gray-400">加载中...</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">加载中...</p>
       </div>
     </div>
   )
@@ -200,8 +210,8 @@ function StudyModeLoading() {
 
 function StudyModeCategoryGrid({ categories, onSelect }) {
   return (
-    <div className="bg-white/90 backdrop-blur-xl rounded-xl shadow-lg border border-gray-200/60 p-4 sm:p-6 animate-slide-up">
-      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-4 sm:p-6 animate-slide-up">
+      <h2 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">
         选择分类
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
@@ -210,9 +220,9 @@ function StudyModeCategoryGrid({ categories, onSelect }) {
             key={category.id}
             type="button"
             onClick={() => onSelect(category)}
-            className="p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-xl border border-gray-200/60 hover:border-indigo-400 hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer text-left"
+            className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200/80 dark:border-gray-600 hover:border-teal-300 dark:hover:border-teal-500 hover:shadow-sm transition-all cursor-pointer text-left"
           >
-            <span className="text-sm font-semibold text-gray-900 line-clamp-2">
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
               {category.name || category.title}
             </span>
           </button>
@@ -235,6 +245,10 @@ export default function StudyMode() {
 
   return (
     <div className="w-full h-full flex flex-col min-h-0 relative">
+      <header className="flex-shrink-0 mb-3 sm:mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0">学习模式</h2>
+        <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">按分类浏览知识点，打好基础</p>
+      </header>
       {breadcrumbPath.length > 0 && (
         <div className="flex-shrink-0 mb-2 sm:mb-3">
           <Breadcrumb

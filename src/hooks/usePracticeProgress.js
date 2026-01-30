@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const STORAGE_KEY = 'practice-mode-progress'
+export const PRACTICE_PROGRESS_STORAGE_KEY = 'practice-mode-progress'
 
 /**
  * Custom hook for managing practice mode progress persistence
@@ -17,7 +17,7 @@ export function usePracticeProgress(totalItems) {
     if (totalItems.length === 0) return
 
     try {
-      const savedProgress = localStorage.getItem(STORAGE_KEY)
+      const savedProgress = localStorage.getItem(PRACTICE_PROGRESS_STORAGE_KEY)
       if (savedProgress !== null) {
         const savedIndex = parseInt(savedProgress, 10)
         if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < totalItems.length) {
@@ -33,7 +33,7 @@ export function usePracticeProgress(totalItems) {
   useEffect(() => {
     if (totalItems.length > 0 && currentIndex >= 0 && currentIndex < totalItems.length) {
       try {
-        localStorage.setItem(STORAGE_KEY, currentIndex.toString())
+        localStorage.setItem(PRACTICE_PROGRESS_STORAGE_KEY, currentIndex.toString())
       } catch (error) {
         console.error('Failed to save practice progress:', error)
       }

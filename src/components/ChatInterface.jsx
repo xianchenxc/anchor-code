@@ -52,16 +52,16 @@ export default function ChatInterface({
   }
 
   return (
-    <div className={`flex flex-col h-full min-h-0 ${fillHeight ? '' : 'max-h-[calc(100vh-200px)]'} bg-white/90 backdrop-blur-xl rounded-lg border border-gray-200/60 shadow-md`}>
+    <div className={`flex flex-col h-full min-h-0 ${fillHeight ? '' : 'max-h-[calc(100vh-200px)]'} bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200/60 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 rounded-t-lg flex-shrink-0">
-        <h3 className="text-sm font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200/80 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 rounded-t-xl flex-shrink-0">
+        <h3 className="text-sm font-bold text-teal-600 dark:text-teal-400">
           AI 助手
         </h3>
         {onClear && messages.length > 0 && (
           <button
             onClick={onClear}
-            className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-white/60 transition-all font-medium"
+            className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all font-medium"
           >
             清除对话
           </button>
@@ -72,8 +72,8 @@ export default function ChatInterface({
       <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center py-12">
-            <div className="text-gray-400">
-              <MessageCircle className="size-14 mb-4 mx-auto text-gray-300" strokeWidth={1.5} />
+            <div className="text-gray-400 dark:text-gray-500">
+              <MessageCircle className="size-14 mb-4 mx-auto text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
               <p className="text-sm sm:text-base">开始对话吧！输入你的问题，AI 会帮助你学习。</p>
             </div>
           </div>
@@ -85,10 +85,10 @@ export default function ChatInterface({
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div
-                className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 shadow-md ${
+                className={`max-w-[85%] sm:max-w-[75%] rounded-xl px-4 py-3 shadow-sm ${
                   message.role === 'user'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
-                    : 'bg-gradient-to-br from-gray-50 to-indigo-50/30 text-gray-900 border border-gray-200/60'
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 border border-gray-200/80 dark:border-gray-600'
                 }`}
               >
                 {message.role === 'user' ? (
@@ -111,12 +111,12 @@ export default function ChatInterface({
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-2xl px-4 py-3 max-w-[85%] sm:max-w-[75%] border border-gray-200/60 shadow-sm">
-              <div className="flex items-center gap-3 text-sm text-gray-600">
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3 max-w-[85%] sm:max-w-[75%] border border-gray-200/80 dark:border-gray-600">
+              <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
                 <span className="font-medium">AI 正在思考...</span>
               </div>
@@ -128,7 +128,7 @@ export default function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="flex-shrink-0 border-t border-gray-200/60 bg-gradient-to-r from-gray-50/80 to-indigo-50/30 rounded-b-lg p-3 sm:p-4">
+      <div className="flex-shrink-0 border-t border-gray-200/80 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 rounded-b-xl p-3 sm:p-4">
         <form onSubmit={handleSubmit} className="flex gap-3">
           <textarea
             ref={inputRef}
@@ -138,7 +138,7 @@ export default function ChatInterface({
             placeholder={placeholder}
             disabled={isLoading}
             rows={1}
-            className="flex-1 resize-none border-2 border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all bg-white"
+            className="flex-1 resize-none border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             style={{
               minHeight: '44px',
               maxHeight: '120px',
@@ -152,7 +152,7 @@ export default function ChatInterface({
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shrink-0"
+            className="bg-teal-600 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-sm hover:bg-teal-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0"
           >
             发送
           </button>

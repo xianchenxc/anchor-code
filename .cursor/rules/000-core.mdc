@@ -16,7 +16,7 @@ alwaysApply: true
 - **SHOULD**: One main component per file; extract when reused or file >~250 lines.
 
 ## Styling
-- **MUST**: Tailwind; reuse `src/index.css` (`.btn-primary`, `.card`, `animate-fade-in`). Use `rounded-xl`, `shadow-xl`, `border-gray-200/60`, gradients `from-indigo-600 to-purple-600`. **SHOULD**: Responsive `sm:`, `md:`, `lg:`.
+- **MUST**: Tailwind; reuse `src/index.css` (`.btn-primary`, `.card`, `animate-fade-in`). Use `rounded-xl`, `shadow-xl`, `border-gray-200/60`, gradients `from-teal-600 to-teal-700` (Shore brand). **SHOULD**: Responsive `sm:`, `md:`, `lg:`.
 
 ## Data & Content
 - **MUST**: Content = Markdown in `content/` → Vite plugin → `public/data/` (categories.json, questions.json). Never edit generated JSON by hand. UI reads data/agent/model only via `services/serverService.js`; Worker loads JSON from baseUrl + `data/*.json` and exposes getCategories, getQuestionsBySubcategoryId, getAllPracticeQuestions, build*ChatMessages, generate, loadModel, etc. Shared constants (categories, difficulty) in one place (e.g. in components or a small constants module).

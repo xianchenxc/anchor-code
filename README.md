@@ -85,6 +85,13 @@ pnpm run preview
 - **桌面端（≥ 768px）**：左侧固定侧边栏，可折叠
 - 优化的间距和布局，提升空间利用率
 
+### 样式与主题
+- **品牌色**：Teal（`primary`），见 `tailwind.config.js` 与 `src/index.css` 的 `--color-primary`
+- **深色模式**：通过 `<html>` 的 `.dark` 切换，主题状态持久化在 `localStorage['shore-theme']`
+- **语义类**：`index.css` 提供 `.bg-surface`、`.bg-page`、`.text-body`、`.text-muted`、`.border-default`，统一亮/暗色
+- **组件类**：`.btn-primary`、`.btn-secondary`、`.input-base`、`.card`，支持 dark 变体
+- **Streamdown**：代码块与排版使用 shadcn 风格 CSS 变量（`--primary`、`--muted`、`--border` 等）
+
 ## 部署
 
 项目支持 GitHub Pages 部署（通过 GitHub Actions 自动构建）：

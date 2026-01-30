@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, ClipboardList, PartyPopper, PenLine, CheckCircle2 } from 'lucide-react'
 import serverService from '../services/serverService.js'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
-import { usePracticeProgress } from '../hooks/usePracticeProgress.js'
+import { usePracticeProgress, PRACTICE_PROGRESS_STORAGE_KEY } from '../hooks/usePracticeProgress.js'
 
 // Constants
 const QUESTION_TYPES = {
@@ -11,15 +12,15 @@ const QUESTION_TYPES = {
 }
 
 // Navigation buttons component
-function NavigationButtons({ onPrevious, onNext, onToggleAnswer, showAnswer, canGoPrevious, canGoNext, variant = 'indigo' }) {
+function NavigationButtons({ onPrevious, onNext, onToggleAnswer, showAnswer, canGoPrevious, canGoNext, variant = 'teal' }) {
   const buttonBaseClass = 'p-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all'
   const hoverClass = variant === 'purple' 
     ? 'hover:border-purple-400 hover:text-purple-600'
-    : 'hover:border-indigo-400 hover:text-indigo-600'
+    : 'hover:border-teal-400 hover:text-teal-600'
   
   const toggleButtonClass = variant === 'purple'
-    ? 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:border-purple-400 hover:text-purple-600 transition-all'
-    : 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-400 hover:text-indigo-600 transition-all'
+    ? 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 transition-all'
+    : 'px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 transition-all'
 
   return (
     <div className="flex items-center gap-2">
@@ -50,14 +51,14 @@ function NavigationButtons({ onPrevious, onNext, onToggleAnswer, showAnswer, can
 }
 
 // Answer section component
-function AnswerSection({ content, title = '答案', gradientClass = 'from-indigo-600 to-indigo-600' }) {
+function AnswerSection({ content, title = '答案', barClass = 'bg-teal-500' }) {
   return (
     <div className="flex-shrink-0 pt-4 mt-4 border-t border-gray-200/60 animate-slide-up">
       <div className="flex items-center gap-2 mb-3">
-        <div className={`w-1 h-6 bg-gradient-to-b ${gradientClass} rounded-full`}></div>
-        <h4 className="text-gray-900 text-base font-bold">{title}</h4>
+        <div className={`w-1 h-6 ${barClass} rounded-full`}></div>
+        <h4 className="text-gray-900 dark:text-gray-100 text-base font-bold">{title}</h4>
       </div>
-      <div className="bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-xl p-4 border border-gray-200/60 shadow-sm">
+      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200/80 dark:border-gray-600">
         <MarkdownRenderer content={content} />
       </div>
     </div>
@@ -71,7 +72,7 @@ function QACard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canGoPre
       <div className="flex-shrink-0">
         <div className="mb-4">
           <div className="flex items-center justify-between gap-3">
-            <span className="inline-block px-3 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-xs font-bold rounded-full shadow-sm">
+            <span className="inline-block px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full">
               问答题
             </span>
             <NavigationButtons
@@ -81,11 +82,11 @@ function QACard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canGoPre
               showAnswer={showAnswer}
               canGoPrevious={canGoPrevious}
               canGoNext={canGoNext}
-              variant="indigo"
+              variant="teal"
             />
           </div>
         </div>
-        <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900 leading-relaxed mb-4">
+        <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed mb-4">
           {item.question}
         </div>
       </div>
@@ -110,7 +111,7 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
     <div className="flex flex-col min-h-0">
       <div className="flex-shrink-0 mb-4">
         <div className="flex items-center justify-between gap-3">
-          <span className="inline-block px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs font-bold rounded-full shadow-sm">
+          <span className="inline-block px-3 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full">
             编程题
           </span>
           <NavigationButtons
@@ -124,11 +125,11 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
           />
         </div>
       </div>
-      <div className="flex-shrink-0 text-base sm:text-lg md:text-xl font-bold text-gray-900 leading-relaxed mb-3">
+      <div className="flex-shrink-0 text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed mb-3">
         {item.question}
       </div>
       {item.description && (
-        <div className="flex-shrink-0 text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 p-3 bg-gradient-to-br from-blue-50 to-indigo-50/50 border-l-4 border-blue-500 rounded-r-xl shadow-sm">
+        <div className="flex-shrink-0 text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed mb-4 p-3 bg-sky-50/80 dark:bg-sky-900/30 border-l-4 border-sky-400 dark:border-sky-500 rounded-r-xl shadow-sm">
           <MarkdownRenderer 
             content={item.description} 
             components={{
@@ -139,9 +140,9 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
       )}
       
       <div className="flex-shrink-0 flex flex-col min-h-0 mb-4">
-        <label className="block font-bold mb-2 text-sm text-gray-900">你的代码</label>
+        <label className="block font-bold mb-2 text-sm text-gray-900 dark:text-gray-100">你的代码</label>
         <textarea
-          className="w-full min-h-[180px] sm:min-h-[220px] p-3 font-mono text-xs sm:text-sm leading-relaxed resize-y bg-gray-50 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+          className="w-full min-h-[180px] sm:min-h-[220px] p-3 font-mono text-xs sm:text-sm leading-relaxed resize-y bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-gray-900 dark:text-gray-100"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="在这里编写你的代码..."
@@ -152,10 +153,10 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
       {showAnswer && (
         <div className="flex-shrink-0 pt-4 border-t border-gray-200/60 animate-slide-up">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-6 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full"></div>
-            <h4 className="text-gray-900 text-base font-bold">参考答案</h4>
+            <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+            <h4 className="text-gray-900 dark:text-gray-100 text-base font-bold">参考答案</h4>
           </div>
-          <div className="bg-gradient-to-br from-gray-50 to-purple-50/30 rounded-xl p-4 border border-gray-200/60 shadow-sm max-h-[300px] overflow-y-auto">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200/80 dark:border-gray-600 max-h-[300px] overflow-y-auto">
             <MarkdownRenderer content={item.content} />
           </div>
         </div>
@@ -198,14 +199,14 @@ function PracticeCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, ca
 }
 
 // Progress bar component
-function ProgressBar({ current, total }) {
+function ProgressBar({ current, total, className = '' }) {
   const progressPercent = useMemo(() => {
     return total > 0 ? ((current + 1) / total) * 100 : 0
   }, [current, total])
 
   return (
     <div
-      className="flex-shrink-0 px-4 sm:px-5 md:px-6 lg:px-8 pt-2 pb-1.5 lg:pt-1.5 lg:pb-1 group relative"
+      className={`flex-shrink-0 px-4 sm:px-5 md:px-6 lg:px-8 pt-2 pb-1.5 lg:pt-1.5 lg:pb-1 group relative ${className}`.trim()}
       role="progressbar"
       aria-valuenow={current + 1}
       aria-valuemin={1}
@@ -214,14 +215,14 @@ function ProgressBar({ current, total }) {
     >
       <div className="h-1 sm:h-1.5 bg-gray-200/80 rounded-full overflow-hidden cursor-pointer">
         <div
-          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-[width] duration-300 ease-out"
+          className="h-full bg-teal-500 rounded-full transition-[width] duration-300 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
       {/* Tooltip */}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900/95 backdrop-blur-sm text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-20 shadow-lg">
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-20 shadow-md">
         {current + 1} / {total}
-        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-gray-900/95 rotate-45"></div>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-gray-800 rotate-45"></div>
       </div>
     </div>
   )
@@ -231,7 +232,7 @@ function ProgressBar({ current, total }) {
 function LoadingState() {
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
+      <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
         加载中...
       </div>
     </div>
@@ -243,8 +244,8 @@ function EmptyState() {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="text-6xl mb-4 opacity-20">📝</div>
-        <p className="text-gray-400 text-sm sm:text-base">暂无练习题目</p>
+        <ClipboardList className="size-12 mb-3 mx-auto text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
+        <p className="text-gray-400 dark:text-gray-500 text-sm sm:text-base">暂无练习题目</p>
       </div>
     </div>
   )
@@ -274,6 +275,28 @@ function PracticeMode() {
 
   const canGoPrevious = currentIndex > 0
   const canGoNext = currentIndex < total - 1
+  const isLastQuestion = !canGoNext && total > 0
+
+  const [showCompletion, setShowCompletion] = useState(false)
+  const [showStartPage, setShowStartPage] = useState(true)
+
+  // Whether there is saved progress and user has not completed (has advanced at least one and not at last)
+  const hasProgressAndIncomplete = useMemo(() => {
+    if (total === 0) return false
+    try {
+      const saved = localStorage.getItem(PRACTICE_PROGRESS_STORAGE_KEY)
+      if (saved === null) return false
+      const idx = parseInt(saved, 10)
+      return !isNaN(idx) && idx > 0 && idx < total
+    } catch {
+      return false
+    }
+  }, [total])
+
+  // Reset completion view when navigating away from last question
+  useEffect(() => {
+    if (!isLastQuestion) setShowCompletion(false)
+  }, [isLastQuestion])
 
   // Navigation handlers with useCallback
   const handlePrevious = useCallback(() => {
@@ -287,8 +310,10 @@ function PracticeMode() {
     if (canGoNext) {
       setCurrentIndex(currentIndex + 1)
       setShowAnswer(false)
+    } else if (isLastQuestion) {
+      setShowCompletion(true)
     }
-  }, [currentIndex, canGoNext, setCurrentIndex])
+  }, [currentIndex, canGoNext, isLastQuestion, setCurrentIndex])
 
   const handleToggleAnswer = useCallback(() => {
     setShowAnswer(prev => !prev)
@@ -299,14 +324,25 @@ function PracticeMode() {
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowLeft' && canGoPrevious) {
         handlePrevious()
-      } else if (e.key === 'ArrowRight' && canGoNext) {
-        handleNext()
+      } else if (e.key === 'ArrowRight') {
+        if (canGoNext) handleNext()
+        else if (isLastQuestion) setShowCompletion(true)
       }
     }
     
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [canGoPrevious, canGoNext, handlePrevious, handleNext])
+  }, [canGoPrevious, canGoNext, isLastQuestion, handlePrevious, handleNext])
+
+  const handleStartPractice = useCallback(() => {
+    setShowStartPage(false)
+  }, [])
+
+  const handleRestartPractice = useCallback(() => {
+    setCurrentIndex(0)
+    setShowCompletion(false)
+    setShowStartPage(false)
+  }, [setCurrentIndex])
 
   if (loading) {
     return <LoadingState />
@@ -316,24 +352,144 @@ function PracticeMode() {
     return <EmptyState />
   }
 
+  if (showStartPage) {
+    const savedIndex = hasProgressAndIncomplete
+      ? Math.min(parseInt(localStorage.getItem(PRACTICE_PROGRESS_STORAGE_KEY) || '0', 10), total - 1)
+      : 0
+    const savedProgressLabel = savedIndex + 1
+
+    return (
+      <div className="w-full h-full flex flex-col">
+        <header className="flex-shrink-0 mb-3 sm:mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0">练习模式</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">问答与编程题，巩固所学</p>
+        </header>
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden animate-slide-up flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto min-h-0 flex flex-col items-center justify-center p-6 sm:p-8 lg:p-10 animate-fade-in">
+              <div className="w-full max-w-md flex flex-col items-center text-center">
+                <div className="rounded-2xl bg-teal-50 p-4 mb-5">
+                  <PenLine className="size-10 sm:size-12 text-teal-600" strokeWidth={2} aria-hidden />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 m-0 mb-2">
+                  本组共 {total} 题
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mb-6 max-w-sm">
+                  包含问答题与编程题，可随时显示答案，进度自动保存。
+                </p>
+                {hasProgressAndIncomplete ? (
+                  <>
+                    <div className="w-full rounded-xl border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-700/50 px-4 py-3 mb-6 text-left">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle2 className="size-4 text-teal-500 shrink-0" strokeWidth={2.5} />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">上次进度</span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 m-0 mb-2">
+                        做到第 {savedProgressLabel} / {total} 题
+                      </p>
+                      <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-teal-500 rounded-full transition-[width] duration-300"
+                          style={{ width: `${(savedProgressLabel / total) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      <button
+                        type="button"
+                        onClick={handleStartPractice}
+                        className="btn-primary"
+                      >
+                        继续练习
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRestartPractice}
+                        className="btn-secondary"
+                      >
+                        重新开始
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleStartPractice}
+                    className="btn-primary"
+                  >
+                    开始练习
+                  </button>
+                )}
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-6">
+                  完成后可去模拟面试检验一下
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-full flex flex-col">
+      <header className="flex-shrink-0 mb-3 sm:mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0">练习模式</h2>
+        <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">问答与编程题，巩固所学</p>
+      </header>
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex-1 bg-white/90 backdrop-blur-xl rounded-lg shadow-md border border-gray-200/60 overflow-hidden animate-slide-up flex flex-col min-h-0">
-          <ProgressBar current={currentIndex} total={total} />
-          <div className="flex-1 overflow-y-auto min-h-0 pt-4 px-4 pb-2 sm:pt-5 sm:px-5 sm:pb-3 md:pt-6 md:px-6 md:pb-4 lg:pt-3 lg:px-8 lg:pb-6">
-            {currentItem && (
-              <PracticeCard 
-                item={currentItem} 
-                showAnswer={showAnswer}
-                onToggleAnswer={handleToggleAnswer}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                canGoPrevious={canGoPrevious}
-                canGoNext={canGoNext}
-              />
-            )}
-          </div>
+        <ProgressBar current={currentIndex} total={total} className="mb-2" />
+        <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden animate-slide-up flex flex-col min-h-0">
+          {showCompletion ? (
+            <div className="flex-1 overflow-y-auto min-h-0 flex flex-col items-center justify-center p-6 sm:p-8 animate-fade-in">
+              {/* Confetti row */}
+              <div className="flex justify-center gap-1 sm:gap-1.5 mb-6" aria-hidden>
+                {['bg-teal-400', 'bg-amber-400', 'bg-emerald-400', 'bg-rose-400', 'bg-violet-400', 'bg-sky-400', 'bg-amber-400', 'bg-teal-400'].map((color, i) => (
+                  <span
+                    key={i}
+                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${color} animate-confetti-dot`}
+                    style={{ animationDelay: `${i * 0.08}s` }}
+                  />
+                ))}
+              </div>
+              <PartyPopper className="size-14 sm:size-16 text-teal-500 mb-4 animate-celebrate-icon opacity-0" strokeWidth={2} aria-hidden />
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0 mb-2">
+                祝贺完成练习！
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-6 text-center max-w-sm">
+                本组共 {total} 题已看完，试试模拟面试检验一下 →
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Link
+                  to="/interview"
+                  className="btn-primary inline-flex items-center gap-1.5"
+                >
+                  去模拟面试
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowCompletion(false)}
+                  className="btn-secondary"
+                >
+                  返回做题
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto min-h-0 pt-4 px-4 pb-2 sm:pt-5 sm:px-5 sm:pb-3 md:pt-6 md:px-6 md:pb-4 lg:pt-3 lg:px-8 lg:pb-6">
+              {currentItem && (
+                <PracticeCard 
+                  item={currentItem} 
+                  showAnswer={showAnswer}
+                  onToggleAnswer={handleToggleAnswer}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  canGoPrevious={canGoPrevious}
+                  canGoNext={canGoNext || isLastQuestion}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
