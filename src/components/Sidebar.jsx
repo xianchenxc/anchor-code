@@ -52,24 +52,26 @@ export default function Sidebar() {
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       <aside
         className={`
-          fixed left-0 top-[81px] h-[calc(100vh-81px)]
-          lg:relative lg:top-auto lg:h-full lg:flex-shrink-0
-          z-40 bg-white/90 backdrop-blur-xl border-r border-gray-200/60 shadow-xl
-          transition-all duration-300 ease-in-out flex flex-col
-          ${isCollapsed ? 'w-16' : 'w-64'}
-          lg:translate-x-0
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          fixed inset-x-0 top-0 w-full max-h-[85vh] min-h-0
+          md:inset-auto md:top-auto md:max-h-none md:min-h-0
+          md:relative md:left-0 md:right-auto md:w-64 md:flex-shrink-0 md:h-full
+          z-40
+          bg-white/90 backdrop-blur-xl md:bg-transparent md:backdrop-blur-none
+          transition-transform duration-300 ease-in-out flex flex-col
+          md:transition-all
+          ${isCollapsed ? 'md:w-16' : 'md:w-64'}
+          ${isMobileOpen ? 'translate-y-0' : '-translate-y-full md:translate-y-0 md:translate-x-0'}
         `}
       >
       {/* Mobile close button */}
-      <div className="p-4 border-b border-gray-200/60 flex items-center justify-end lg:hidden">
+      <div className="flex-shrink-0 p-4 border-b border-gray-200/60 flex items-center justify-end md:hidden">
         <button
           onClick={() => setIsMobileOpen(false)}
           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -80,7 +82,7 @@ export default function Sidebar() {
       </div>
 
       {/* Menu items */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto min-h-0 p-4 space-y-6 md:flex-initial">
         {menuItems.map((group) => (
           <div key={group.group} className="space-y-2">
             {!isCollapsed && (
@@ -119,12 +121,12 @@ export default function Sidebar() {
       </nav>
 
       {/* Toggle button at bottom */}
-      <div className="p-4 border-t border-gray-200/60 flex items-center justify-center">
+      <div className="flex-shrink-0 p-4 border-t border-gray-200/60 flex items-center justify-center">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={`
             p-2 rounded-lg hover:bg-gray-100 transition-colors
-            hidden lg:block
+            hidden md:block
           `}
           aria-label={isCollapsed ? '展开侧边栏' : '收起侧边栏'}
         >

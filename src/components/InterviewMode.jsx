@@ -221,29 +221,26 @@ export default function InterviewMode() {
   // If no category selected, show selection screen
   if (!category) {
     return (
-      <div className="w-full">
-        <div className="mb-6 sm:mb-8 md:mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            模拟面试
-          </h2>
-          <p className="text-gray-600 m-0 text-sm sm:text-base">
-            AI 作为前端开发技术面试官，根据你选择的领域（JavaScript、React、Web3）提问技术问题，并基于项目知识库评估你的回答。
+      <div className="w-full h-full flex flex-col">
+        <div className="mb-4 sm:mb-6">
+          <p className="text-gray-600 m-0 text-xs sm:text-sm">
+            AI 作为前端开发技术面试官，根据你选择的领域提问技术问题，并基于项目知识库评估你的回答。
           </p>
         </div>
 
         <ModelLoader autoLoad onModelReady={handleModelReady}>
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Category selection */}
             <div>
-              <h3 className="text-base font-medium text-gray-900 mb-4">选择面试领域</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">选择面试领域</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {INTERVIEW_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setCategory(cat.id)}
-                    className="flex flex-col items-center justify-center p-6 border-2 border-gray-200/60 rounded-xl hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:shadow-md hover:scale-105 active:scale-95 transition-all text-center bg-white/90 backdrop-blur-sm"
+                    className="flex flex-col items-center justify-center p-4 sm:p-5 border-2 border-gray-200/60 rounded-lg hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:shadow-md active:scale-[0.98] transition-all text-center bg-white/90 backdrop-blur-sm"
                   >
-                    <cat.Icon className="size-10 mb-2 text-indigo-600" strokeWidth={2} />
+                    <cat.Icon className="size-8 sm:size-9 mb-2 text-indigo-600" strokeWidth={2} />
                     <span className="text-sm font-semibold text-gray-900">{cat.name}</span>
                   </button>
                 ))}
@@ -252,19 +249,19 @@ export default function InterviewMode() {
 
             {/* Difficulty selection */}
             <div>
-              <h3 className="text-base font-medium text-gray-900 mb-4">选择难度级别</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">选择难度级别</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {DIFFICULTY_LEVELS.map((level) => (
                   <button
                     key={level.id}
                     onClick={() => setDifficulty(level.id)}
-                    className={`p-4 border-2 rounded-xl text-left transition-all ${
+                    className={`p-3 sm:p-4 border-2 rounded-lg text-left transition-all ${
                       difficulty === level.id
-                        ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-md scale-105'
-                        : 'border-gray-200/60 hover:border-indigo-300 hover:bg-gray-50 hover:scale-105 active:scale-95'
+                        ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-md'
+                        : 'border-gray-200/60 hover:border-indigo-300 hover:bg-gray-50 active:scale-[0.98]'
                     } bg-white/90 backdrop-blur-sm`}
                   >
-                    <div className="font-bold text-sm text-gray-900 mb-1">{level.name}</div>
+                    <div className="font-bold text-sm text-gray-900 mb-0.5">{level.name}</div>
                     <div className="text-xs text-gray-600">{level.description}</div>
                   </button>
                 ))}
@@ -281,49 +278,60 @@ export default function InterviewMode() {
   const difficultyName = DIFFICULTY_LEVELS.find(d => d.id === difficulty)?.name || difficulty
 
   return (
-    <div className="w-full">
-      <div className="mb-6 sm:mb-8 md:mb-12">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">模拟面试</h2>
-          <button
-            onClick={handleReset}
-            className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 px-4 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium"
-          >
-            重新选择
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-3 text-xs sm:text-sm mb-4">
-          <span className="px-4 py-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full font-semibold shadow-sm">
-            {categoryName}
-          </span>
-          <span className="px-4 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full font-semibold shadow-sm">
-            {difficultyName}
-          </span>
-          {interviewHistory.length > 0 && (
-            <span className="px-4 py-1.5 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-full font-semibold shadow-sm">
-              已回答 {interviewHistory.length} 题
+    <div className="w-full h-full flex flex-col min-h-0">
+      {/* Compact header: description, tags, buttons */}
+      <div className="flex-shrink-0 mb-4">
+        <p className="text-gray-600 m-0 text-xs sm:text-sm mb-3">
+          AI 作为前端开发技术面试官，根据你选择的领域提问技术问题，并基于项目知识库评估你的回答。
+        </p>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          {/* Tags */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-2.5 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-xs font-semibold">
+              {categoryName}
             </span>
-          )}
+            <span className="px-2.5 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs font-semibold">
+              {difficultyName}
+            </span>
+            {interviewHistory.length > 0 && (
+              <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
+                已答 {interviewHistory.length} 题
+              </span>
+            )}
+          </div>
+          {/* Buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleReset}
+              className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-all font-medium"
+            >
+              重新选择
+            </button>
+            {messages.length === 0 && (
+              <button
+                onClick={handleStartInterview}
+                disabled={isLoading || !modelReady}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                开始面试
+              </button>
+            )}
+          </div>
         </div>
-        {messages.length === 0 && (
-          <button
-            onClick={handleStartInterview}
-            disabled={isLoading || !modelReady}
-            className="mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all"
-          >
-            开始面试
-          </button>
-        )}
       </div>
 
+      {/* Chat area fills remaining space */}
       <ModelLoader autoLoad onModelReady={handleModelReady}>
-        <ChatInterface
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          isLoading={isLoading}
-          onClear={handleClear}
-          placeholder={isWaitingForAnswer ? "输入你的回答..." : "等待问题..."}
-        />
+        <div className="flex-1 min-h-0 flex flex-col">
+          <ChatInterface
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+            onClear={handleClear}
+            placeholder={isWaitingForAnswer ? "输入你的回答..." : "等待问题..."}
+            fillHeight
+          />
+        </div>
       </ModelLoader>
     </div>
   )

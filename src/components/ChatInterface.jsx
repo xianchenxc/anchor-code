@@ -4,20 +4,22 @@ import MarkdownRenderer from './MarkdownRenderer.jsx'
 
 /**
  * Chat interface component for displaying messages and handling user input
- * 
+ *
  * @param {Object} props
  * @param {Array} props.messages - Array of message objects { role: 'user'|'assistant', content: string }
  * @param {Function} props.onSendMessage - Callback when user sends a message (message: string) => void
  * @param {boolean} props.isLoading - Whether AI is generating a response
  * @param {Function} props.onClear - Optional callback to clear chat history
  * @param {string} props.placeholder - Placeholder text for input (default: "输入你的问题...")
+ * @param {boolean} props.fillHeight - If true, fill parent height without max-height cap (e.g. for Interview mode)
  */
 export default function ChatInterface({
   messages = [],
   onSendMessage,
   isLoading = false,
   onClear,
-  placeholder = "输入你的问题..."
+  placeholder = "输入你的问题...",
+  fillHeight = false
 }) {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef(null)
@@ -50,10 +52,10 @@ export default function ChatInterface({
   }
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100vh-200px)] bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 shadow-xl">
+    <div className={`flex flex-col h-full min-h-0 ${fillHeight ? '' : 'max-h-[calc(100vh-200px)]'} bg-white/90 backdrop-blur-xl rounded-lg border border-gray-200/60 shadow-md`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200/60 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 rounded-t-2xl">
-        <h3 className="text-base font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200/60 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 rounded-t-lg flex-shrink-0">
+        <h3 className="text-sm font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           AI 助手
         </h3>
         {onClear && messages.length > 0 && (
@@ -67,7 +69,7 @@ export default function ChatInterface({
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center py-12">
             <div className="text-gray-400">
@@ -126,7 +128,7 @@ export default function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="border-t border-gray-200/60 bg-gradient-to-r from-gray-50/80 to-indigo-50/30 rounded-b-2xl p-4">
+      <div className="flex-shrink-0 border-t border-gray-200/60 bg-gradient-to-r from-gray-50/80 to-indigo-50/30 rounded-b-lg p-3 sm:p-4">
         <form onSubmit={handleSubmit} className="flex gap-3">
           <textarea
             ref={inputRef}
