@@ -8,21 +8,11 @@ export default defineConfig({
     react(),
     markdownDataPlugin({
       contentDir: 'content',
-      outputFile: 'src/data/questions.json'
+      publicDataDir: 'public/data'
     })
   ],
   base: '/anchor-code/',
   build: {
-    outDir: 'dist',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Split react-syntax-highlighter into a separate chunk
-          'syntax-highlighter': ['react-syntax-highlighter'],
-          // Split react-markdown into a separate chunk
-          'markdown': ['react-markdown'],
-        }
-      }
-    }
+    outDir: 'dist'
   }
 })

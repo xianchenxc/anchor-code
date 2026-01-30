@@ -1,0 +1,44 @@
+---
+description: Architecture, dependency direction, data flow, B/S evolution (Anchor Code)
+alwaysApply: true
+---
+
+# Architecture
+
+**Principles**: Separation of concerns; single entry for I/O; UI never talks to workers or Server directly. Workers/utils testable without React/UI.
+
+## Stack
+- **Runtime**: React 19, react-router-dom 6. **Build**: Vite 5, ESM, pnpm. **Styling**: Tailwind 3, `src/index.css`.
+- **AI & Data**: Single entry `services/serverService.js` (Comlink) ↔ `workers/serverWorker.js`. Worker: data (`server/dataService.js`), agent (`server/agentService.js`), model (`modelService.js`). Worker loads JSON from baseUrl + `data/categories.json` and `data/questions.json` via `initOptions({ baseUrl })`.
+- **Content**: `content/*.md` → Vite plugin → `public/data/` (categories.json, questions.json); Worker fetches at runtime.
+
+## Dependency Direction
+```
+UI → services (serverService), utils
+serverService → workers/serverWorker (Comlink)  [or Server API in B/S]
+serverWorker → server/dataService, server/contentExtractor, server/agentService, modelService
+workers → no React/UI   |   utils → no React/workers
+```
+**MUST NOT**: UI import `workers/` or Comlink or call Server/API directly. Workers/utils no React or UI.
+
+## Layers
+| Layer | Responsibility | Do not |
+|-------|----------------|--------|
+| **UI** | Render, input; call serverService and utils | workers, Comlink, Server/API, duplicate parsing |
+| **Services** | serverService only: data (getCategories, getQuestionsBySubcategoryId, getAllPracticeQuestions), agent (buildLearningChatMessages, buildInterview*), model (loadModel, generate, isModelLoaded). Comlink ↔ serverWorker. | Bypass from UI |
+| **Workers** | serverWorker (initOptions, data/agent/model APIs); server/dataService, server/contentExtractor, server/agentService; modelService (transformers) | React, router, UI |
+| **Utils** | conversationHistory, errorMessages | React, workers |
+| **Data** | public/data/ (plugin-generated categories.json, questions.json); Worker loads via fetch | Edit JSON by hand |
+
+## Data Flow
+- **Content**: `content/*.md` → plugin → `public/data/` → Worker fetch(baseUrl + `data/*.json`) in initOptions → dataService.initData → getCategories / getQuestionsBySubcategoryId / agent build*.
+- **AI**: Component → serverService.build*ChatMessages() / serverService.generate() / serverService.loadModel() → Comlink → serverWorker → modelService → stream/callback → setState.
+
+## Routing
+HashRouter; routes only in `App.jsx`: `/`, `/study` → StudyMode; `/practice` → PracticeMode; `/chat` → ChatMode; `/interview` → InterviewMode.
+
+## Conventions
+- **Singleton**: Use exported `serverService` only for data, agent, and model. **Streaming**: Pass `onChunk` to `serverService.generate()`. **Content**: Convention over config (Markdown + plugin → public/data/). **Source-agnostic**: Swap local Worker ↔ Server by changing serverService implementation only; UI unchanged.
+
+## B/S Evolution
+**Server** (future): question bank `getCategories()`, `getContentById(id)`; **Interview agent** (difficulty, resume, recalled questions → mock interview). Client calls only via services (e.g. dataService, interviewService or extended aiService). **Migration**: One entry per concern in services; add Server-backed impl (env/flag); UI does not branch on local vs Server.

@@ -191,96 +191,87 @@ function processMarkdownFiles(contentDir) {
       }
     }
     
-    // Create item from markdown
-    // All types use 'content' field for main content (knowledge content or practice answer)
+    // Create item from markdown; categoryId = subcategory id for association
+    const itemId = frontmatter.id || `${categoryId}-${subcategory}-${fileName}`
+    const subcategoryId = `${categoryId}-${subcategory}`
     const item = {
-      id: frontmatter.id || `${categoryId}-${subcategory}-${fileName}`,
+      id: itemId,
+      categoryId: subcategoryId,
       type: frontmatter.questionType || (frontmatter.type === 'practice' ? 'qa' : undefined),
       title: frontmatter.title || frontmatter.question || fileName,
       question: frontmatter.question || '',
       description: description,
       content: processedContent || frontmatter.content || '',
       template: template,
-      _fileName: fileName, // Store original filename for sorting
+      _fileName: fileName,
     }
-    
     categories[categoryId].children[subcategory].items.push(item)
   }
-  
-  // Sort items by filename (supports numeric prefix for strict ordering)
+
+  // Sort items by filename and build two outputs: categories (with itemIds) and questions (flat with categoryId)
+  const questions = []
   Object.values(categories).forEach(cat => {
     Object.values(cat.children).forEach(subcat => {
-      // Sort by actual filename, not by item id
-      subcat.items.sort((a, b) => {
-        return sortByName(a._fileName, b._fileName)
+      subcat.items.sort((a, b) => sortByName(a._fileName, b._fileName))
+      subcat.itemIds = subcat.items.map((i) => i.id)
+      subcat.items.forEach((item) => {
+        const { _fileName, ...rest } = item
+        questions.push(rest)
       })
-      // Remove internal sorting field before output
-      subcat.items.forEach(item => {
-        delete item._fileName
-      })
+      delete subcat.items
     })
   })
-  
-  // Convert to array format and sort by filename (numeric prefix or alphabetical)
-  return {
-    categories: Object.values(categories)
-      .sort((a, b) => sortByName(a.id, b.id))
-      .map(cat => {
-        // Convert children object to array and sort by directory name
-        const childrenArray = Object.values(cat.children)
-          .sort((a, b) => sortByName(a.subcategory, b.subcategory))
-        
-        return {
-          ...cat,
-          children: childrenArray
-        }
-      })
-  }
+
+  // Categories: tree with itemIds only (no full item bodies)
+  const categoriesArray = Object.values(categories)
+    .sort((a, b) => sortByName(a.id, b.id))
+    .map((cat) => {
+      const childrenArray = Object.values(cat.children)
+        .sort((a, b) => sortByName(a.subcategory, b.subcategory))
+      return { ...cat, children: childrenArray }
+    })
+
+  return { categories: categoriesArray, questions }
 }
 
 /**
  * Vite plugin to process Markdown files at build time
+ * Outputs to publicDataDir: categories.json (tree with itemIds), questions.json (items with categoryId)
+ * Worker loads these via fetch(baseUrl + 'data/categories.json').
  */
 export default function markdownDataPlugin(options = {}) {
   const {
     contentDir = 'content',
-    outputFile = 'src/data/questions.json'
+    publicDataDir = 'public/data'
   } = options
-  
-  let config
+
   let root
-  
+
+  function writeOutputs(data) {
+    const outputDir = resolve(root, publicDataDir)
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true })
+    }
+    writeFileSync(resolve(outputDir, 'categories.json'), JSON.stringify({ categories: data.categories }, null, 2), 'utf-8')
+    writeFileSync(resolve(outputDir, 'questions.json'), JSON.stringify({ items: data.questions }, null, 2), 'utf-8')
+  }
+
   return {
     name: 'vite-plugin-markdown-data',
-    
+
     configResolved(resolvedConfig) {
-      config = resolvedConfig
       root = resolvedConfig.root
     },
-    
+
     async buildStart() {
       const fullContentDir = resolve(root, contentDir)
-      const fullOutputFile = resolve(root, outputFile)
-      
-      // Ensure output directory exists
-      const outputDir = resolve(fullOutputFile, '..')
-      if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true })
-      }
-      
-      // Process markdown files (no config needed - convention over configuration)
       const data = processMarkdownFiles(fullContentDir)
-      
-      // Write output file
-      writeFileSync(fullOutputFile, JSON.stringify(data, null, 2), 'utf-8')
-      
-      console.log(`✓ Processed ${data.categories.length} categories from Markdown files`)
+      writeOutputs(data)
+      console.log(`✓ Processed ${data.categories.length} categories, ${data.questions.length} items`)
     },
-    
+
     configureServer(server) {
-      // Watch the entire content directory for changes (including directory renames)
       const contentPath = resolve(root, contentDir)
-      const fullOutputFile = resolve(root, outputFile)
       
       // Use Vite's watcher to monitor directory structure changes
       // This is needed to catch directory renames, which handleHotUpdate doesn't catch
@@ -314,10 +305,8 @@ export default function markdownDataPlugin(options = {}) {
           // Small delay to ensure file system operations are complete
           // This is especially important for directory renames
           await new Promise(resolve => setTimeout(resolve, 150))
-          
-          // Reprocess all markdown files
           const data = processMarkdownFiles(contentPath)
-          writeFileSync(fullOutputFile, JSON.stringify(data, null, 2), 'utf-8')
+          writeOutputs(data)
           
           // Determine change type for better logging
           let changeType = 'file'
@@ -368,18 +357,11 @@ export default function markdownDataPlugin(options = {}) {
     },
     
     handleHotUpdate({ file, server }) {
-      // Watch for markdown file changes in content directory
       const contentPath = resolve(root, contentDir)
       const filePath = resolve(root, file)
-      
-      // Handle markdown file changes (this is faster for file edits)
       if (filePath.startsWith(contentPath) && file.endsWith('.md')) {
-        // Reprocess all markdown files
-        const fullContentDir = resolve(root, contentDir)
-        const fullOutputFile = resolve(root, outputFile)
-        const data = processMarkdownFiles(fullContentDir)
-        writeFileSync(fullOutputFile, JSON.stringify(data, null, 2), 'utf-8')
-        
+        const data = processMarkdownFiles(contentPath)
+        writeOutputs(data)
         console.log(`✓ Updated data from Markdown file: ${relative(contentPath, filePath)}`)
         
         // Trigger HMR

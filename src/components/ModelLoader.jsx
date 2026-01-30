@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useEffectEvent, useMemo } from 'react'
-import aiService from '../services/aiService.js'
+import serverService from '../services/serverService.js'
 
 // Loading spinner component
 const LoadingSpinner = () => (
@@ -98,7 +98,7 @@ export default function ModelLoader({
   
   // isSupported is a stable value that doesn't change during component lifecycle
   // Use useMemo to compute it once per component instance
-  const isSupported = useMemo(() => aiService.isSupported(), [])
+  const isSupported = useMemo(() => serverService.isSupported(), [])
   
   // Use a ref to track initialization state (handles StrictMode double execution)
   // In StrictMode, effect runs twice: first execution sets this to true,
@@ -132,10 +132,10 @@ export default function ModelLoader({
 
     try {
       // Worker layer handles duplicate load prevention
-      await aiService.loadModel()
+      await serverService.loadModel()
       
       // Verify model is actually loaded
-      const loaded = await aiService.isModelLoaded()
+      const loaded = await serverService.isModelLoaded()
       
       setIsLoading(false)
       setIsReady(loaded)

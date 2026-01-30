@@ -1,6 +1,6 @@
 /**
- * Prompt templates for AI chat and interview modes
- * Provides reusable prompt generation functions for different scenarios
+ * Agent layer inside Worker: system prompts, prompt templates, knowledge-base orchestration.
+ * Uses contentExtractor (same process); inference is done via model in serverWorker.
  */
 
 import {
@@ -14,7 +14,7 @@ import {
 
 /**
  * Build system message for learning/chat mode
- * @param {string|null} currentTopic - Optional current learning topic for context
+ * @param {string|null} currentTopic - Optional current learning topic
  * @param {string|null} userQuestion - Optional user question for extracting relevant content
  * @returns {string} System message content
  */
@@ -27,24 +27,21 @@ export function buildLearningSystemMessage(currentTopic = null, userQuestion = n
 - 前端工程化、性能优化、最佳实践
 
 请用清晰易懂的中文回答，可以结合代码示例。回答要准确、简洁、有针对性，重点突出前端开发岗位的实际应用场景。`
-  
+
   if (currentTopic) {
     systemContent += `\n\n当前学习主题：${currentTopic}`
   }
 
-  // Add relevant content from knowledge base
   let knowledgeBase = ''
   if (userQuestion) {
-    // Extract relevant content based on user question
     const relevantItems = getRelevantContent(userQuestion, null, 8)
     if (relevantItems.length > 0) {
       knowledgeBase = formatContentForPrompt(relevantItems, 2000)
     }
   } else {
-    // Use comprehensive frontend content as general knowledge base
     knowledgeBase = getAllFrontendContent()
   }
-  console.log('knowledgeBase', knowledgeBase)
+
   if (knowledgeBase) {
     systemContent += `\n\n以下是项目中的前端开发知识库内容，请严格按照这些内容回答问题，确保答案的准确性和专业性：
 
@@ -57,17 +54,12 @@ export function buildLearningSystemMessage(currentTopic = null, userQuestion = n
 知识库内容：
 ${knowledgeBase}`
   }
-  
+
   return systemContent
 }
 
 /**
  * Build chat messages for learning mode with conversation history
- * @param {string} userQuestion - Current user question
- * @param {Array<{role: string, content: string}>} conversationHistory - Previous conversation messages
- * @param {string|null} currentTopic - Optional current learning topic
- * @param {number} maxHistoryLength - Maximum number of history messages to include (default: 6)
- * @returns {Array<{role: string, content: string}>} Formatted chat messages
  */
 export function buildLearningChatMessages(
   userQuestion,
@@ -76,40 +68,23 @@ export function buildLearningChatMessages(
   maxHistoryLength = 6
 ) {
   const messages = []
-
-  // Add system message with context, including user question for relevant content extraction
   const systemContent = buildLearningSystemMessage(currentTopic, userQuestion)
   messages.push({ role: 'system', content: systemContent })
-
-  // Add conversation history (limited to keep context manageable)
   const recentHistory = conversationHistory.slice(-maxHistoryLength)
   recentHistory.forEach((msg) => {
     if (msg.role === 'user' || msg.role === 'assistant') {
       messages.push({ role: msg.role, content: msg.content })
     }
   })
-
-  // Add current user question
   messages.push({ role: 'user', content: userQuestion })
-
   return messages
 }
 
 /**
  * Build prompt for interview question generation
- * @param {string} categoryName - Interview category (e.g., "JavaScript", "React", "Web3")
- * @param {string} categoryId - Category ID (e.g., "javascript", "react", "web3")
- * @param {string} difficultyLevel - Difficulty level ("easy", "medium", "hard")
- * @returns {string} Prompt for generating interview question
  */
 export function buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel) {
-  const difficultyMap = {
-    easy: '简单',
-    medium: '中等',
-    hard: '困难'
-  }
-
-  // Get category-specific content and interview questions
+  const difficultyMap = { easy: '简单', medium: '中等', hard: '困难' }
   const categoryContent = getCategoryContentForPrompt(categoryId)
   const interviewQuestions = getCategoryInterviewQuestions(categoryId)
   const questionsContext = formatInterviewQuestionsForPrompt(interviewQuestions, 10)
@@ -127,25 +102,17 @@ export function buildInterviewQuestionPrompt(categoryName, categoryId, difficult
   if (categoryContent) {
     prompt += `\n\n以下是 ${categoryName} 领域的知识点，可以作为问题设计的参考：\n\n${categoryContent}`
   }
-
   if (questionsContext) {
     prompt += `\n\n${questionsContext}`
   }
-
   prompt += `\n\n请直接输出问题，不要包含其他说明文字。`
-
   return prompt
 }
 
 /**
  * Build prompt for evaluating interview answers
- * @param {string} question - The interview question
- * @param {string} answer - The candidate's answer
- * @param {string} categoryId - Category ID for getting relevant knowledge base
- * @returns {string} Prompt for evaluating the answer
  */
 export function buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
-  // Get relevant content for evaluation reference
   let knowledgeBase = ''
   if (categoryId) {
     const categoryContent = getCategoryContentForPrompt(categoryId)
@@ -153,7 +120,6 @@ export function buildInterviewEvaluationPrompt(question, answer, categoryId = nu
       knowledgeBase = `\n\n以下是相关的知识点和标准答案，可以作为评估参考：\n\n${categoryContent}`
     }
   } else {
-    // Try to extract relevant content from question
     const relevantItems = getRelevantContent(question, null, 5)
     if (relevantItems.length > 0) {
       knowledgeBase = `\n\n以下是相关的知识点，可以作为评估参考：\n\n${formatContentForPrompt(relevantItems, 1500)}`
@@ -188,14 +154,7 @@ export function buildInterviewEvaluationPrompt(question, answer, categoryId = nu
 }
 
 /**
- * Build chat messages for interview mode
- * @param {string} categoryName - Interview category
- * @param {string} difficultyLevel - Difficulty level
- * @param {string} question - Current interview question
- * @param {string} answer - User's answer (optional, for evaluation)
- * @param {Array<{role: string, content: string}>} conversationHistory - Previous conversation messages
- * @param {number} maxHistoryLength - Maximum number of history messages to include (default: 4)
- * @returns {Array<{role: string, content: string}>} Formatted chat messages
+ * Build chat messages for interview mode (system + history + question/answer)
  */
 export function buildInterviewChatMessages(
   categoryName,
@@ -205,32 +164,19 @@ export function buildInterviewChatMessages(
   conversationHistory = [],
   maxHistoryLength = 4
 ) {
+  const difficultyMap = { easy: '简单', medium: '中等', hard: '困难' }
   const messages = []
-
-  // Add system message
-  const difficultyMap = {
-    easy: '简单',
-    medium: '中等',
-    hard: '困难'
-  }
-  const systemContent = `你是一个技术面试官，擅长 ${categoryName} 领域的面试。当前面试难度为${difficultyMap[difficultyLevel] || '中等'}。`
-  messages.push({ role: 'system', content: systemContent })
-
-  // Add limited conversation history
+  messages.push({
+    role: 'system',
+    content: `你是一个技术面试官，擅长 ${categoryName} 领域的面试。当前面试难度为${difficultyMap[difficultyLevel] || '中等'}。`
+  })
   const recentHistory = conversationHistory.slice(-maxHistoryLength)
   recentHistory.forEach((msg) => {
     if (msg.role === 'user' || msg.role === 'assistant') {
       messages.push({ role: msg.role, content: msg.content })
     }
   })
-
-  // Add current question and answer if provided
-  if (question) {
-    messages.push({ role: 'assistant', content: `问题：${question}` })
-  }
-  if (answer) {
-    messages.push({ role: 'user', content: answer })
-  }
-
+  if (question) messages.push({ role: 'assistant', content: `问题：${question}` })
+  if (answer) messages.push({ role: 'user', content: answer })
   return messages
 }

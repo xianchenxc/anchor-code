@@ -1,11 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import ModelLoader from './ModelLoader.jsx'
 import ChatInterface from './ChatInterface.jsx'
-import aiService from '../services/aiService.js'
-import {
-  buildInterviewQuestionPrompt,
-  buildInterviewEvaluationPrompt
-} from '../utils/promptTemplates.js'
+import serverService from '../services/serverService.js'
 import { formatErrorMessage } from '../utils/errorMessages.js'
 
 /**
@@ -54,14 +50,14 @@ export default function InterviewMode() {
     difficultyRef.current = difficulty
   }, [difficulty])
 
-  // Build prompt for asking a question
-  const buildQuestionPrompt = useCallback((categoryName, categoryId, difficultyLevel) => {
-    return buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
+  // Build prompt for asking a question (async from serverService)
+  const buildQuestionPrompt = useCallback(async (categoryName, categoryId, difficultyLevel) => {
+    return serverService.buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
   }, [])
 
-  // Build prompt for evaluating an answer
-  const buildEvaluationPrompt = useCallback((question, answer, categoryId) => {
-    return buildInterviewEvaluationPrompt(question, answer, categoryId)
+  // Build prompt for evaluating an answer (async from serverService)
+  const buildEvaluationPrompt = useCallback(async (question, answer, categoryId) => {
+    return serverService.buildInterviewEvaluationPrompt(question, answer, categoryId)
   }, [])
 
   // Start a new interview
@@ -78,8 +74,8 @@ export default function InterviewMode() {
     setInterviewHistory([])
 
     try {
-      const prompt = buildQuestionPrompt(categoryName, category, difficulty)
-      const question = await aiService.generate(prompt, {
+      const prompt = await buildQuestionPrompt(categoryName, category, difficulty)
+      const question = await serverService.generate(prompt, {
         maxLength: 256,
         temperature: 0.8,
         topK: 50,
@@ -132,8 +128,8 @@ export default function InterviewMode() {
 
     try {
       // Evaluate the answer
-      const prompt = buildEvaluationPrompt(currentQuestionValue, userAnswer, categoryValue)
-      const evaluation = await aiService.generate(prompt, {
+      const prompt = await buildEvaluationPrompt(currentQuestionValue, userAnswer, categoryValue)
+      const evaluation = await serverService.generate(prompt, {
         maxLength: 512,
         temperature: 0.7,
         topK: 50,
@@ -163,8 +159,8 @@ export default function InterviewMode() {
 
       // Ask next question
       const categoryName = INTERVIEW_CATEGORIES.find(c => c.id === categoryValue)?.name || categoryValue
-      const nextQuestionPrompt = buildQuestionPrompt(categoryName, categoryValue, difficultyValue)
-      const nextQuestion = await aiService.generate(nextQuestionPrompt, {
+      const nextQuestionPrompt = await buildQuestionPrompt(categoryName, categoryValue, difficultyValue)
+      const nextQuestion = await serverService.generate(nextQuestionPrompt, {
         maxLength: 256,
         temperature: 0.8,
         topK: 50,

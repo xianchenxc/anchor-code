@@ -1,0 +1,33 @@
+---
+description: Folder structure by zone and where to put new work (Anchor Code)
+alwaysApply: true
+---
+
+# Folder Structure
+
+**Principles**: One zone per responsibility. Naming: 000-core (PascalCase components, camelCase utils/services). App code under `src/`; Server = future zone (`server/` or separate repo). Client uses Server only via services.
+
+## Zones
+| Zone | Path(s) | Role | Boundaries |
+|------|---------|------|------------|
+| **Content** | `content/` | Knowledge base (Markdown); nav & prompts; can feed Server later | No JS/JSX; edit only here for content |
+| **Client** | `src/components/`, `App.jsx`, `main.jsx`, `index.css` | UI: routing, layout, pages, shared components, styles | serverService, utils OK; no workers, Comlink, Server/API |
+| **Data (generated)** | `public/data/` | Plugin writes categories.json, questions.json; Worker fetches at runtime via baseUrl + `data/*.json` | Read-only; no hand-edit JSON; gitignore `public/data` optional |
+| **Services & workers** | `src/services/`, `src/workers/` | serverService (single entry: data + agent + model); serverWorker + server/dataService, server/contentExtractor, server/agentService; modelService. B/S: same interface → Server | One service; workers no React/UI |
+| **Shared logic** | `src/utils/` | conversationHistory, errorMessages | No React, workers |
+| **Build & config** | Root: vite, tailwind, postcss, vite-plugin-markdown-data.js, package.json, index.html | Build & tooling; plugin outputs to public/data/ | No app runtime |
+| **Server (B/S)** | `server/` or separate repo | API: getCategories, getContentById; Interview agent (difficulty, resume, recalled Qs) | Client via serverService only; stable API; env/flag for local vs Server |
+
+## Path Detail
+- **content/** — `content/<category>/<subcategory>/<file>.md`; numeric prefix order; kebab-case; frontmatter: type, questionType, title, question, template, description (see plugin).
+- **Client** — components/: page + shared UI (PascalCase, default export; extract if reused/large). App.jsx: router, layout, Routes. main.jsx: root, StrictMode. index.css: globals.
+- **public/data/** — Plugin writes categories.json (tree with itemIds), questions.json (flat items); Worker loads via fetch(baseUrl + `data/categories.json`, `data/questions.json`) after initOptions({ baseUrl }).
+- **Services** — serverService.js only (getCategories, getQuestionsBySubcategoryId, getAllPracticeQuestions, buildLearningChatMessages, buildInterview*, loadModel, generate, isModelLoaded, etc.). **Workers** — serverWorker.js (Comlink API + initOptions); server/dataService.js, server/contentExtractor.js, server/agentService.js; modelService.js. Workers no React/UI.
+
+## Where to Put New Work
+- **Page/route** → components/, route in App.jsx.
+- **AI capability** → modelService (in workers/) → serverWorker exposes loadModel/generate; serverService forwards; B/S: same interface → Server.
+- **Prompt / agent** → workers/server/agentService.js (uses server/contentExtractor for knowledge base); exposed via serverWorker + serverService.
+- **Data query** → workers/server/dataService.js; add get* or initFromBaseUrl logic; expose via serverWorker + serverService.
+- **Content type/field** → content/ + plugin (output to public/data/); B/S: Server can ingest and expose getCategories/getContentById.
+- **Server (B/S)** → Question bank API + Interview agent; client uses serverService only; UI unchanged.

@@ -393,7 +393,19 @@ export class ModelService {
       // Return final text (this value is accessible via generator's return value)
       return fullText.trim()
     } catch (error) {
-      throw new Error(`Streaming generation failed: ${error.message}`)
+      const raw =
+        error instanceof Error
+          ? error.message
+          : (error && typeof error === 'object' && 'message' in error)
+            ? error.message
+            : typeof error === 'string'
+              ? error
+              : String(error != null ? error : 'Unknown error')
+      const isInternalCode = /^\d+$/.test(String(raw).trim())
+      const msg = isInternalCode
+        ? `Model inference failed. Please reload the model and try again. (code: ${raw})`
+        : raw
+      throw new Error(`Streaming generation failed: ${msg}`)
     }
   }
 

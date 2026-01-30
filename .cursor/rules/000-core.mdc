@@ -1,0 +1,28 @@
+---
+description: Core conventions and quality bar (Anchor Code)
+alwaysApply: true
+---
+
+# Core Conventions
+
+**Principles**: Single source of truth, DRY, thin presentational layer. Doc comments in English; UI copy in Chinese. UI does not depend on data/AI source (local vs Server) — use services only.
+
+## Naming & Files
+- **MUST**: Doc comments English (JSDoc). Git commits English, concise. Components → PascalCase, default export, name matches file. Utils/services → camelCase.
+- **SHOULD**: UI text (buttons, placeholders, headings) in Chinese.
+
+## Components
+- **MUST**: Functional components + hooks only. Presentational: props in, callbacks out; no business logic, prompts, or I/O in UI. Use `utils/`, `services/`, custom hooks (e.g. `useInterviewFlow`, `useChat`).
+- **SHOULD**: One main component per file; extract when reused or file >~250 lines.
+
+## Styling
+- **MUST**: Tailwind; reuse `src/index.css` (`.btn-primary`, `.card`, `animate-fade-in`). Use `rounded-xl`, `shadow-xl`, `border-gray-200/60`, gradients `from-indigo-600 to-purple-600`. **SHOULD**: Responsive `sm:`, `md:`, `lg:`.
+
+## Data & Content
+- **MUST**: Content = Markdown in `content/` → Vite plugin → `public/data/` (categories.json, questions.json). Never edit generated JSON by hand. UI reads data/agent/model only via `services/serverService.js`; Worker loads JSON from baseUrl + `data/*.json` and exposes getCategories, getQuestionsBySubcategoryId, getAllPracticeQuestions, build*ChatMessages, generate, loadModel, etc. Shared constants (categories, difficulty) in one place (e.g. in components or a small constants module).
+
+## MUST NOT
+- `console.log` in production paths; heavy logic in page components; UI importing `workers/` or Comlink or calling Server/API directly; raw `error.message` in UI (use `formatErrorMessage(error, action)` from `utils/errorMessages.js`).
+
+## When Touching
+- **Vite**: `manualChunks` must match real deps; remove stale refs. **Refactors**: Split large pages (e.g. InterviewMode → selectors + chat + `useInterviewFlow`; StudyMode → extract `TreeNode`/`ContentView` when reused or large).

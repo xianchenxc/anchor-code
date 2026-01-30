@@ -1,8 +1,7 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import ModelLoader from './ModelLoader.jsx'
 import ChatInterface from './ChatInterface.jsx'
-import aiService from '../services/aiService.js'
-import { buildLearningChatMessages } from '../utils/promptTemplates.js'
+import serverService from '../services/serverService.js'
 import { limitConversationHistory } from '../utils/conversationHistory.js'
 import { formatErrorMessage } from '../utils/errorMessages.js'
 
@@ -18,9 +17,9 @@ export default function ChatMode({ currentTopic = null }) {
   const [isLoading, setIsLoading] = useState(false)
   const [modelReady, setModelReady] = useState(false)
 
-  // Build chat messages with context
-  const buildChatMessages = useCallback((userQuestion, conversationHistory = []) => {
-    return buildLearningChatMessages(userQuestion, conversationHistory, currentTopic, 6)
+  // Build chat messages with context (async from serverService)
+  const buildChatMessages = useCallback(async (userQuestion, conversationHistory = []) => {
+    return serverService.buildLearningChatMessages(userQuestion, conversationHistory, currentTopic, 6)
   }, [currentTopic])
 
   // Handle sending a message
@@ -46,11 +45,10 @@ export default function ChatMode({ currentTopic = null }) {
 
     try {
       // Build chat messages with conversation context
-      const chatMessages = buildChatMessages(userMessage, conversationHistory)
+      const chatMessages = await buildChatMessages(userMessage, conversationHistory)
       
       // Generate response with streaming support
-      // Use ref to access setMessages to avoid closure serialization issues with Comlink.proxy
-      const response = await aiService.generate(chatMessages, {
+      const response = await serverService.generate(chatMessages, {
         maxLength: 512,
         temperature: 0.7,
         topK: 50,

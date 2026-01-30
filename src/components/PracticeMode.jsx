@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import questionsData from '../data/loadData.js'
+import serverService from '../services/serverService.js'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 
 function QACard({ item, showAnswer, onToggleAnswer }) {
@@ -108,27 +108,15 @@ function PracticeCard({ item, showAnswer, onToggleAnswer }) {
 }
 
 function PracticeMode() {
-  // 收集所有练习题目
-  const collectPracticeItems = (node) => {
-    let items = []
-    if (node.type === 'practice' && node.items) {
-      items = node.items
-    }
-    if (node.children) {
-      node.children.forEach(child => {
-        items = items.concat(collectPracticeItems(child))
-      })
-    }
-    return items
-  }
-  
-  const allItems = questionsData.categories.reduce((acc, category) => {
-    return acc.concat(collectPracticeItems(category))
-  }, [])
-  
+  const [allItems, setAllItems] = useState([])
+  const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
-  
+
+  useEffect(() => {
+    serverService.getAllPracticeQuestions().then(setAllItems).finally(() => setLoading(false))
+  }, [])
+
   const currentItem = allItems[currentIndex]
   const total = allItems.length
   
@@ -161,6 +149,22 @@ function PracticeMode() {
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [currentIndex, total])
+
+  if (loading) {
+    return (
+      <div className="w-full">
+        <div className="mb-6 sm:mb-8 md:mb-12">
+          <h2 className="mb-2 sm:mb-3 text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            练习模式
+          </h2>
+          <p className="text-gray-600 m-0 text-sm sm:text-base">练习面试题，先思考再看答案</p>
+        </div>
+        <div className="flex items-center justify-center py-12 sm:py-16 md:py-20 text-gray-500 text-sm">
+          加载中...
+        </div>
+      </div>
+    )
+  }
   
   if (total === 0) {
     return (

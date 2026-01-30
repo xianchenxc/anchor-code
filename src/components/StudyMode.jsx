@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import questionsData from '../data/loadData.js'
+import serverService from '../services/serverService.js'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 
 function TreeNode({ node, level = 0, selectedId, onSelect }) {
@@ -92,7 +92,7 @@ function TreeNode({ node, level = 0, selectedId, onSelect }) {
   )
 }
 
-function ContentView({ node }) {
+function ContentView({ node, items = [] }) {
   if (!node) {
     return (
       <div className="flex items-center justify-center py-16 sm:py-24 md:py-32">
@@ -104,7 +104,7 @@ function ContentView({ node }) {
     )
   }
 
-  const hasItems = node.items && node.items.length > 0
+  const hasItems = items.length > 0
   const hasChildren = node.children && node.children.length > 0
 
   return (
@@ -117,7 +117,7 @@ function ContentView({ node }) {
 
       {hasItems ? (
         <div className="text-gray-700 flex flex-col gap-8 sm:gap-10 md:gap-12">
-          {node.items.map((item, index) => (
+          {items.map((item, index) => (
             <div 
               key={item.id} 
               className="border-l-4 border-indigo-500 pl-6 sm:pl-8 md:pl-10 py-4 bg-gradient-to-r from-indigo-50/60 via-purple-50/30 to-transparent rounded-r-xl shadow-sm animate-slide-up"
@@ -158,8 +158,23 @@ function ContentView({ node }) {
 }
 
 function StudyMode() {
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
   const [selectedNode, setSelectedNode] = useState(null)
+  const [nodeItems, setNodeItems] = useState([])
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    serverService.getCategories().then(setCategories).catch(() => setCategories([])).finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!selectedNode?.id) {
+      setNodeItems([])
+      return
+    }
+    serverService.getQuestionsBySubcategoryId(selectedNode.id).then(setNodeItems).catch(() => setNodeItems([]))
+  }, [selectedNode?.id])
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -235,19 +250,23 @@ function StudyMode() {
           `}
         >
           <div className="space-y-1">
-            {questionsData.categories.map(category => (
-              <TreeNode
-                key={category.id}
-                node={category}
-                selectedId={selectedNode?.id}
-                onSelect={handleNodeSelect}
-              />
-            ))}
+            {loading ? (
+              <div className="flex items-center justify-center py-8 text-gray-500 text-sm">加载中...</div>
+            ) : (
+              categories.map(category => (
+                <TreeNode
+                  key={category.id}
+                  node={category}
+                  selectedId={selectedNode?.id}
+                  onSelect={handleNodeSelect}
+                />
+              ))
+            )}
           </div>
         </div>
 
         <div className="flex-1 w-full md:min-w-[400px]">
-          <ContentView node={selectedNode} />
+          <ContentView node={selectedNode} items={nodeItems} />
         </div>
       </div>
     </div>
