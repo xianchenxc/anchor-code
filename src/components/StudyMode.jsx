@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { BookOpen, FileText, Menu, X } from 'lucide-react'
 import serverService from '../services/serverService.js'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 
@@ -97,7 +98,7 @@ function ContentView({ node, items = [] }) {
     return (
       <div className="flex items-center justify-center py-16 sm:py-24 md:py-32">
         <div className="text-center animate-fade-in">
-          <div className="text-6xl mb-4 opacity-20">📚</div>
+          <BookOpen className="size-16 mb-4 mx-auto text-gray-300" strokeWidth={1.5} />
           <p className="text-sm text-gray-400">请从左侧选择一个节点查看内容</p>
         </div>
       </div>
@@ -149,7 +150,7 @@ function ContentView({ node, items = [] }) {
         </div>
       ) : (
         <div className="text-center py-12 sm:py-14 md:py-16">
-          <div className="text-4xl mb-4 opacity-20">📝</div>
+          <FileText className="size-12 mb-4 mx-auto text-gray-300" strokeWidth={1.5} />
           <p className="text-gray-400 text-sm">该节点暂无内容</p>
         </div>
       )}
@@ -212,10 +213,10 @@ function StudyMode() {
             <p className="text-gray-600 m-0 text-sm sm:text-base">按分类树形结构浏览知识点</p>
           </div>
           <button
-            className="sidebar-toggle md:hidden px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95"
+            className="sidebar-toggle md:hidden px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
-            {isSidebarOpen ? '✕' : '☰'}
+            {isSidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
       </div>

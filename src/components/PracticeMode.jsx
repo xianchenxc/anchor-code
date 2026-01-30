@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import serverService from '../services/serverService.js'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 
@@ -216,19 +217,21 @@ function PracticeMode() {
         {/* 导航按钮 */}
         <div className="flex items-center justify-between mt-6 sm:mt-8 gap-3 sm:gap-4">
           <button
-            className="flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 text-sm sm:text-base font-semibold hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-400 hover:shadow-md hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all"
+            className="flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 text-sm sm:text-base font-semibold hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-400 hover:shadow-md hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all flex items-center justify-center gap-2"
             onClick={handlePrevious}
             disabled={currentIndex === 0}
           >
-            ← 上一题
+            <ChevronLeft className="size-5 flex-shrink-0" />
+            上一题
           </button>
           
           <button
-            className="flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 text-sm sm:text-base font-semibold hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-400 hover:shadow-md hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all"
+            className="flex-1 sm:flex-none px-6 sm:px-8 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 text-sm sm:text-base font-semibold hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-400 hover:shadow-md hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all flex items-center justify-center gap-2"
             onClick={handleNext}
             disabled={currentIndex === total - 1}
           >
-            下一题 →
+            下一题
+            <ChevronRight className="size-5 flex-shrink-0" />
           </button>
         </div>
       </div>

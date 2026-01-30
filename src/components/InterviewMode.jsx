@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { FileCode, Atom, Link2 } from 'lucide-react'
 import ModelLoader from './ModelLoader.jsx'
 import ChatInterface from './ChatInterface.jsx'
 import serverService from '../services/serverService.js'
@@ -11,9 +12,9 @@ import { formatErrorMessage } from '../utils/errorMessages.js'
  * Interview categories: JavaScript, React, Web3
  */
 const INTERVIEW_CATEGORIES = [
-  { id: 'javascript', name: 'JavaScript', icon: '📜' },
-  { id: 'react', name: 'React', icon: '⚛️' },
-  { id: 'web3', name: 'Web3', icon: '⛓️' }
+  { id: 'javascript', name: 'JavaScript', Icon: FileCode },
+  { id: 'react', name: 'React', Icon: Atom },
+  { id: 'web3', name: 'Web3', Icon: Link2 }
 ]
 
 const DIFFICULTY_LEVELS = [
@@ -242,7 +243,7 @@ export default function InterviewMode() {
                     onClick={() => setCategory(cat.id)}
                     className="flex flex-col items-center justify-center p-6 border-2 border-gray-200/60 rounded-xl hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:shadow-md hover:scale-105 active:scale-95 transition-all text-center bg-white/90 backdrop-blur-sm"
                   >
-                    <span className="text-4xl mb-2">{cat.icon}</span>
+                    <cat.Icon className="size-10 mb-2 text-indigo-600" strokeWidth={2} />
                     <span className="text-sm font-semibold text-gray-900">{cat.name}</span>
                   </button>
                 ))}

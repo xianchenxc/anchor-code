@@ -50,7 +50,7 @@
   }
 
   #root {
-    @apply min-h-screen;
+    @apply h-screen overflow-hidden;
   }
 
   /* Smooth scrolling */

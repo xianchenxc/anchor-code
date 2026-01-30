@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { MessageCircle } from 'lucide-react'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 
 /**
@@ -70,7 +71,7 @@ export default function ChatInterface({
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center py-12">
             <div className="text-gray-400">
-              <div className="text-5xl mb-4 opacity-60">💬</div>
+              <MessageCircle className="size-14 mb-4 mx-auto text-gray-300" strokeWidth={1.5} />
               <p className="text-sm sm:text-base">开始对话吧！输入你的问题，AI 会帮助你学习。</p>
             </div>
           </div>
