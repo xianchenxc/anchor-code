@@ -31,18 +31,18 @@ export default function Sidebar() {
 
   const menuItems = [
     {
-      group: 'Dashboard',
+      group: '学习 & 刷题',
       Icon: LayoutDashboard,
       items: [
-        { path: '/study', Icon: BookOpen, label: '学习模式' },
-        { path: '/practice', Icon: Dumbbell, label: '练习模式' }
+        { path: '/study', Icon: BookOpen, label: '学习模式', badge: '推荐' },
+        { path: '/practice', Icon: Dumbbell, label: '练习模式', badge: '预览' }
       ]
     },
     {
-      group: 'Tools',
+      group: '进阶工具',
       Icon: Wrench,
       items: [
-        { path: '/interview', Icon: Target, label: '模拟面试' }
+        { path: '/interview', Icon: Target, label: '模拟面试', badge: '实验' }
       ]
     }
   ]
@@ -110,7 +110,24 @@ export default function Sidebar() {
                   >
                     <item.Icon className="size-5 flex-shrink-0" strokeWidth={2.5} />
                     {!isCollapsed && (
-                      <span className="font-medium text-sm">{item.label}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{item.label}</span>
+                        {item.badge && (
+                          <span
+                            className={`
+                              text-[10px] px-1.5 py-0.5 rounded-full border
+                              ${item.badge === '推荐'
+                                ? 'border-teal-200 bg-teal-50 text-teal-700'
+                                : item.badge === '预览'
+                                  ? 'border-gray-200 bg-gray-50 text-gray-500'
+                                  : 'border-amber-200 bg-amber-50 text-amber-700'
+                              }
+                            `}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </span>
                     )}
                   </Link>
                 )

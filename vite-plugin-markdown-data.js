@@ -78,22 +78,35 @@ function sortByName(a, b) {
 }
 
 /**
- * Recursively get all markdown files from a directory
+ * Slugify subcategory for stable ids (lowercase, spaces to hyphen, alphanumeric + hyphen only)
+ * @param {string} s
+ * @returns {string}
  */
-function getMarkdownFiles(dir, baseDir = dir, files = []) {
-  const entries = readdirSync(dir)
-  
+function slugifySubcategory(s) {
+  if (typeof s !== 'string' || !s.trim()) return 'default'
+  return s.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'default'
+}
+
+/**
+ * Get markdown files in flat structure: content/<category>/*.md only (one level of subdir)
+ * @param {string} contentDir
+ * @returns {string[]} Paths relative to contentDir, e.g. ['javascript/01-var-let-const.md']
+ */
+function getMarkdownFilesFlat(contentDir) {
+  const files = []
+  const entries = readdirSync(contentDir)
   for (const entry of entries) {
-    const fullPath = join(dir, entry)
+    const fullPath = join(contentDir, entry)
     const stat = statSync(fullPath)
-    
-    if (stat.isDirectory()) {
-      getMarkdownFiles(fullPath, baseDir, files)
-    } else if (entry.endsWith('.md')) {
-      files.push(relative(baseDir, fullPath))
+    if (!stat.isDirectory()) continue
+    const categoryDir = fullPath
+    const mdEntries = readdirSync(categoryDir)
+    for (const md of mdEntries) {
+      if (md.endsWith('.md')) {
+        files.push(relative(contentDir, join(categoryDir, md)))
+      }
     }
   }
-  
   return files
 }
 
@@ -128,90 +141,190 @@ function removeCodeBlocks(content) {
 }
 
 /**
- * Process markdown files and generate structured data
- * Uses convention-over-configuration: directory names are auto-formatted to display names
+ * Slug for section ids. Allows non-Latin titles by falling back to s{index}.
+ * @param {string} title
+ * @param {number} index
+ * @returns {string}
+ */
+function slugifySection(title, index) {
+  if (typeof title !== 'string' || !title.trim()) {
+    return `s${index + 1}`
+  }
+  const base = title.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  return base || `s${index + 1}`
+}
+
+/**
+ * Split markdown body into logical sections for knowledge cards.
+ * Default rule: use `##` as card-level heading; if none, treat whole body as one section.
+ * Each section has { title, body } where title comes from the H2 text when present.
+ */
+function splitIntoSections(body, fallbackTitle) {
+  const text = (body || '').trim()
+  if (!text) return []
+
+  const lines = text.split('\n')
+  const sections = []
+  let currentTitle = null
+  let currentLines = []
+
+  const pushSection = () => {
+    const raw = currentLines.join('\n').trim()
+    if (!raw) return
+    sections.push({
+      title: currentTitle || fallbackTitle,
+      body: raw
+    })
+  }
+
+  for (const line of lines) {
+    const match = line.match(/^##\s+(.+)\s*$/)
+    if (match) {
+      if (currentLines.length > 0) {
+        pushSection()
+      }
+      currentTitle = match[1].trim()
+      currentLines = []
+    } else {
+      currentLines.push(line)
+    }
+  }
+
+  if (currentLines.length > 0) {
+    pushSection()
+  }
+
+  if (sections.length === 0) {
+    return [
+      {
+        title: fallbackTitle,
+        body: text
+      }
+    ]
+  }
+
+  return sections
+}
+
+/**
+ * Process markdown files (flat: content/<category>/*.md) and generate structured data.
+ * Subcategory comes from frontmatter.subcategory; id is auto-generated.
  */
 function processMarkdownFiles(contentDir) {
   const categories = {}
-  const files = getMarkdownFiles(contentDir)
-  
+  const files = getMarkdownFilesFlat(contentDir)
+
   for (const file of files) {
     const filePath = join(contentDir, file)
     const rawContent = readFileSync(filePath, 'utf-8')
     const { data: frontmatter, content: body } = matter(rawContent)
-    
-    // Extract category and subcategory from path
-    // e.g., javascript/basics/var-let-const.md
+
     const pathParts = file.split('/')
-    const fileName = pathParts[pathParts.length - 1].replace('.md', '')
-    const subcategory = pathParts[pathParts.length - 2]
-    const categoryId = pathParts[pathParts.length - 3]
-    
-    // Initialize category if not exists
+    const categoryId = pathParts[0]
+    const fileName = pathParts[pathParts.length - 1].replace(/\.md$/, '')
+    const subcategoryRaw = frontmatter.subcategory || fileName || 'default'
+    const subcategorySlug = slugifySubcategory(subcategoryRaw)
+    const subcategoryId = `${categoryId}-${subcategorySlug}`
+
     if (!categories[categoryId]) {
-      // Priority: frontmatter.category > formatted directory name
-      const categoryName = frontmatter.category || formatCategoryName(categoryId)
       categories[categoryId] = {
         id: categoryId,
-        name: categoryName,
+        name: frontmatter.category || formatCategoryName(categoryId),
         children: {}
       }
     }
-    
-    // Initialize subcategory if not exists
-    if (!categories[categoryId].children[subcategory]) {
-      // Priority: frontmatter.subcategory > formatted directory name
-      const subcategoryName = frontmatter.subcategory || formatCategoryName(subcategory)
-      categories[categoryId].children[subcategory] = {
-        id: `${categoryId}-${subcategory}`,
-        name: subcategoryName,
-        type: frontmatter.type || 'knowledge',
-        subcategory: subcategory, // Store original subcategory name for sorting
+    if (!categories[categoryId].children[subcategorySlug]) {
+      categories[categoryId].children[subcategorySlug] = {
+        id: subcategoryId,
+        name: formatCategoryName(subcategorySlug),
+        type: 'knowledge',
+        subcategory: subcategorySlug,
         items: []
       }
     }
-    
-    // Process content based on type
+
     let processedContent = body.trim()
     let template = frontmatter.template ? frontmatter.template.trim() : ''
     let description = frontmatter.description || ''
-    
-    // For coding questions, extract code from markdown and use remaining content as description
+
     if (frontmatter.type === 'practice' && frontmatter.questionType === 'coding') {
       const codeBlocks = extractCodeBlocks(processedContent)
       if (codeBlocks.length > 0) {
-        // Use first code block's full block (with ``` markers) as content (answer)
-        // This preserves the code block format for ReactMarkdown to render correctly
         processedContent = codeBlocks[0].fullBlock
         const remainingContent = removeCodeBlocks(body.trim()).trim()
-        // Use remaining content as description if description is not in frontmatter
-        if (!description && remainingContent) {
-          description = remainingContent
-        }
+        if (!description && remainingContent) description = remainingContent
       }
     }
-    
-    // Create item from markdown; categoryId = subcategory id for association
-    const itemId = frontmatter.id || `${categoryId}-${subcategory}-${fileName}`
-    const subcategoryId = `${categoryId}-${subcategory}`
-    const item = {
-      id: itemId,
-      categoryId: subcategoryId,
-      type: frontmatter.questionType || (frontmatter.type === 'practice' ? 'qa' : undefined),
-      title: frontmatter.title || frontmatter.question || fileName,
-      question: frontmatter.question || '',
-      description: description,
-      content: processedContent || frontmatter.content || '',
-      template: template,
-      _fileName: fileName,
+
+    const itemType = frontmatter.type === 'practice' ? 'practice' : 'knowledge'
+    if (categories[categoryId].children[subcategorySlug].items.length === 0) {
+      categories[categoryId].children[subcategorySlug].type = itemType
     }
-    categories[categoryId].children[subcategory].items.push(item)
+
+    const cardMode = frontmatter.cardMode || (itemType === 'practice' ? 'single' : 'section')
+
+    // Practice 内容或显式 single 模式：整篇作为一张卡（保持现有行为）
+    if (cardMode === 'single' || itemType === 'practice') {
+      const itemId = `${categoryId}-${subcategorySlug}-${fileName}`
+      const item = {
+        id: itemId,
+        categoryId: subcategoryId,
+        type: itemType,
+        questionType: itemType === 'practice' ? (frontmatter.questionType || 'qa') : undefined,
+        title: frontmatter.title || frontmatter.question || fileName,
+        question: frontmatter.question || '',
+        summary: frontmatter.summary ?? '',
+        difficulty: frontmatter.difficulty || 'basic',
+        frequency: frontmatter.frequency || 'medium',
+        description,
+        content: processedContent || frontmatter.content || '',
+        template,
+        _fileName: fileName
+      }
+      categories[categoryId].children[subcategorySlug].items.push(item)
+    } else {
+      // section 模式：按 H2 拆成多张知识卡片
+      const baseTitle = frontmatter.title || frontmatter.question || fileName
+      const sections = splitIntoSections(processedContent, baseTitle)
+
+      sections.forEach((section, index) => {
+        const sectionTitle = section.title || baseTitle
+        const sectionSlug = slugifySection(sectionTitle, index)
+
+        // 简单从首段提取摘要（如无 frontmatter.summary）
+        let sectionSummary = frontmatter.summary || ''
+        if (!sectionSummary) {
+          const paragraphs = section.body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+          if (paragraphs.length > 0) {
+            sectionSummary = paragraphs[0].replace(/^#+\s*/, '').slice(0, 160)
+          }
+        }
+
+        const itemId = `${categoryId}-${subcategorySlug}-${fileName}-${sectionSlug}`
+        const item = {
+          id: itemId,
+          categoryId: subcategoryId,
+          type: itemType,
+          questionType: undefined,
+          title: sectionTitle,
+          question: '',
+          summary: sectionSummary,
+          difficulty: frontmatter.difficulty || 'basic',
+          frequency: frontmatter.frequency || 'medium',
+          description,
+          content: section.body,
+          template,
+          _fileName: `${fileName}-${index + 1}`,
+          sourceFileId: `${categoryId}-${subcategorySlug}-${fileName}`
+        }
+        categories[categoryId].children[subcategorySlug].items.push(item)
+      })
+    }
   }
 
-  // Sort items by filename and build two outputs: categories (with itemIds) and questions (flat with categoryId)
   const questions = []
-  Object.values(categories).forEach(cat => {
-    Object.values(cat.children).forEach(subcat => {
+  Object.values(categories).forEach((cat) => {
+    Object.values(cat.children).forEach((subcat) => {
       subcat.items.sort((a, b) => sortByName(a._fileName, b._fileName))
       subcat.itemIds = subcat.items.map((i) => i.id)
       subcat.items.forEach((item) => {
@@ -222,12 +335,10 @@ function processMarkdownFiles(contentDir) {
     })
   })
 
-  // Categories: tree with itemIds only (no full item bodies)
   const categoriesArray = Object.values(categories)
     .sort((a, b) => sortByName(a.id, b.id))
     .map((cat) => {
-      const childrenArray = Object.values(cat.children)
-        .sort((a, b) => sortByName(a.subcategory, b.subcategory))
+      const childrenArray = Object.values(cat.children).sort((a, b) => sortByName(a.subcategory, b.subcategory))
       return { ...cat, children: childrenArray }
     })
 

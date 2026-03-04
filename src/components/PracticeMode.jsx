@@ -112,7 +112,7 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
       <div className="flex-shrink-0 mb-4">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-block px-3 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full">
-            编程题
+            练习题
           </span>
           <NavigationButtons
             onPrevious={onPrevious}
@@ -167,7 +167,7 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
 
 // PracticeCard component
 function PracticeCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canGoPrevious, canGoNext }) {
-  if (item.type === QUESTION_TYPES.QA) {
+  if (item.questionType === QUESTION_TYPES.QA) {
     return (
       <QACard
         item={item}
@@ -181,7 +181,7 @@ function PracticeCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, ca
     )
   }
   
-  if (item.type === QUESTION_TYPES.CODING) {
+  if (item.questionType === QUESTION_TYPES.CODING) {
     return (
       <CodingCard
         item={item}
@@ -362,7 +362,7 @@ function PracticeMode() {
       <div className="w-full h-full flex flex-col">
         <header className="flex-shrink-0 mb-3 sm:mb-4">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0">练习模式</h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">问答与编程题，巩固所学</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">通过练习题巩固所学</p>
         </header>
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden animate-slide-up flex flex-col min-h-0">
@@ -375,7 +375,7 @@ function PracticeMode() {
                   本组共 {total} 题
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mb-6 max-w-sm">
-                  包含问答题与编程题，可随时显示答案，进度自动保存。
+                  包含不同形式的练习题，可随时显示答案，进度自动保存。建议先在学习模式看过对应章节，再来这里刷题巩固。
                 </p>
                 {hasProgressAndIncomplete ? (
                   <>
@@ -421,7 +421,7 @@ function PracticeMode() {
                   </button>
                 )}
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-6">
-                  完成后可去模拟面试检验一下
+                  完成这一组后，可以去模拟面试尝试口述表达。
                 </p>
               </div>
             </div>
@@ -435,7 +435,7 @@ function PracticeMode() {
     <div className="w-full h-full flex flex-col">
       <header className="flex-shrink-0 mb-3 sm:mb-4">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0">练习模式</h2>
-        <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">问答与编程题，巩固所学</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm m-0 mt-1">通过练习题巩固所学</p>
       </header>
       <div className="flex-1 flex flex-col min-h-0">
         <ProgressBar current={currentIndex} total={total} className="mb-2" />
@@ -457,21 +457,21 @@ function PracticeMode() {
                 祝贺完成练习！
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-6 text-center max-w-sm">
-                本组共 {total} 题已看完，试试模拟面试检验一下 →
+                本组共 {total} 题已看完，可以试试模拟面试检验一下，看看口述表达还有哪些可以优化。
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link
                   to="/interview"
                   className="btn-primary inline-flex items-center gap-1.5"
                 >
-                  去模拟面试
+                  去模拟面试检验表达
                 </Link>
                 <button
                   type="button"
                   onClick={() => setShowCompletion(false)}
                   className="btn-secondary"
                 >
-                  返回做题
+                  回到本组题目
                 </button>
               </div>
             </div>

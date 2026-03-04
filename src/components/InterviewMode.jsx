@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { FileCode, Atom, Link2 } from 'lucide-react'
 import ModelLoader from './ModelLoader.jsx'
 import ChatInterface from './ChatInterface.jsx'
@@ -75,6 +76,25 @@ function InterviewSummary({ interviewHistory, categoryName, difficultyName, onRe
             </div>
           </div>
         ))}
+      </div>
+      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200/80 bg-gray-50/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <p className="text-xs text-gray-500 m-0">
+          觉得某些题目答得不顺？可以回到学习模式或练习模式针对性补一补。
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/study"
+            className="text-xs px-3 py-1.5 rounded-lg border border-gray-200/80 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+          >
+            回到学习模式
+          </Link>
+          <Link
+            to="/practice"
+            className="text-xs px-3 py-1.5 rounded-lg border border-gray-200/80 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+          >
+            回到练习模式
+          </Link>
+        </div>
       </div>
     </div>
   )
@@ -301,6 +321,9 @@ export default function InterviewMode() {
           <p className="text-gray-600 dark:text-gray-400 m-0 mt-1 text-xs sm:text-sm">
             AI 作为前端开发技术面试官，根据你选择的领域提问技术问题，并基于项目知识库评估你的回答。
           </p>
+          <p className="text-gray-500 dark:text-gray-400 m-0 mt-1 text-[11px] sm:text-xs">
+            实验功能 · 推荐在完成「学习模式」与「练习模式」后使用，结合刷题结果进行口述练习和查漏补缺。
+          </p>
         </header>
 
         <ModelLoader autoLoad onModelReady={handleModelReady}>
@@ -372,6 +395,9 @@ export default function InterviewMode() {
             </span>
             <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">
               {difficultyName}
+            </span>
+            <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-[11px] font-semibold">
+              步骤 3 / 3：模拟面试
             </span>
             {interviewHistory.length > 0 && (
               <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">

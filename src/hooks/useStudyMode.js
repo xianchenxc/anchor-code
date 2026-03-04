@@ -33,6 +33,35 @@ export function useStudyMode() {
     }
     const path = findNodePath(categories, selectedNode.id)
     setBreadcrumbPath(path || [])
+
+    if (!path) {
+      setNodeItems([])
+      return
+    }
+
+    const isTopLevelCategory = path.length === 1
+    if (isTopLevelCategory) {
+      const categoryNode = path[0]
+      const children = categoryNode.children || []
+      if (!children.length) {
+        setNodeItems([])
+        return
+      }
+      Promise.all(
+        children.map((child) =>
+          serverService
+            .getQuestionsBySubcategoryId(child.id)
+            .catch(() => [])
+        )
+      )
+        .then((results) => {
+          const merged = results.flat().filter(Boolean)
+          setNodeItems(merged)
+        })
+        .catch(() => setNodeItems([]))
+      return
+    }
+
     serverService
       .getQuestionsBySubcategoryId(selectedNode.id)
       .then(setNodeItems)
@@ -40,8 +69,6 @@ export function useStudyMode() {
   }, [selectedNode?.id, categories])
 
   const handleNodeSelect = (node) => setSelectedNode(node)
-  const handleBreadcrumbSelect = (node) => setSelectedNode(node)
-
   return {
     categories,
     loading,
@@ -49,6 +76,5 @@ export function useStudyMode() {
     nodeItems,
     breadcrumbPath,
     handleNodeSelect,
-    handleBreadcrumbSelect,
   }
 }
