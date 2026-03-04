@@ -1,12 +1,11 @@
 # Anchor Code
 
-一个面向面试的学习和练习工具，支持按分类收集知识点和面试题，提供学习模式、练习模式和 AI 辅助学习。
+一个面向技术面试的学习和练习工具，支持按分类梳理知识点、刷题和模拟面试，围绕「学习 → 练习 → 模拟面试」完整路径设计。
 
 ## 核心功能
 
-- 📚 **学习模式**：按分类树级展示知识点，系统学习
-- 💪 **练习模式**：问答题和编程题练习，支持代码编辑器，自动保存学习进度
-- 💬 **聊天学习**：基于本地 AI 模型的智能问答，支持流式输出
+- 📚 **学习模式**：按领域（CSS / JavaScript / React / Web3 / Coding …）聚合知识点，单卡片专注学习，支持掌握度标记、薄弱筛选和进度条
+- 💪 **练习模式**：问答题和编程题练习，支持代码编辑器，自动保存做题进度
 - 🎯 **模拟面试**：AI 驱动的模拟面试场景，支持 JavaScript、React、Web3 领域
 
 ## 技术架构
@@ -60,38 +59,6 @@ pnpm run preview
 
 **注意**：首次加载 AI 模型需要下载约 500MB 文件，会自动缓存到 IndexedDB，后续加载会更快。
 
-## 功能特性
-
-### 学习模式
-- 分类树导航，支持展开/折叠
-- 面包屑导航
-- 内容支持 Markdown 渲染，包括代码高亮和数学公式
-
-### 练习模式
-- 问答题和编程题两种类型
-- 代码编辑器支持语法高亮
-- **进度自动保存**：使用 localStorage 保存当前题目位置，下次打开自动恢复
-- 进度条可视化，hover 显示当前进度
-- 键盘快捷键支持（左右箭头切换题目）
-
-### 模拟面试
-- 支持选择面试领域（JavaScript、React、Web3）
-- 支持选择难度级别（简单、中等、困难）
-- AI 自动提问和评估回答
-- 面试历史记录
-
-### 响应式设计
-- **移动端（< 768px）**：侧边栏从顶部落下，全屏宽度，高度自适应
-- **桌面端（≥ 768px）**：左侧固定侧边栏，可折叠
-- 优化的间距和布局，提升空间利用率
-
-### 样式与主题
-- **品牌色**：Teal（`primary`），见 `tailwind.config.js` 与 `src/index.css` 的 `--color-primary`
-- **深色模式**：通过 `<html>` 的 `.dark` 切换，主题状态持久化在 `localStorage['shore-theme']`
-- **语义类**：`index.css` 提供 `.bg-surface`、`.bg-page`、`.text-body`、`.text-muted`、`.border-default`，统一亮/暗色
-- **组件类**：`.btn-primary`、`.btn-secondary`、`.input-base`、`.card`，支持 dark 变体
-- **Streamdown**：代码块与排版使用 shadcn 风格 CSS 变量（`--primary`、`--muted`、`--border` 等）
-
 ## 部署
 
 项目支持 GitHub Pages 部署（通过 GitHub Actions 自动构建）：
@@ -99,79 +66,6 @@ pnpm run preview
 1. 确保仓库名称与 `vite.config.js` 中的 `base` 配置一致
 2. 在 GitHub 仓库设置中启用 GitHub Pages，选择 GitHub Actions 作为部署源
 3. 推送代码到 `main` 分支即可自动部署
-
-## 内容管理
-
-内容使用 Markdown 文件存储在 `content/` 目录，按分类组织。构建时自动处理为 JSON 数据。
-
-### 目录结构
-```
-content/
-  ├── javascript/
-  │   ├── basics/        # 知识点
-  │   ├── advanced/
-  │   └── questions/     # 面试题
-  ├── react/
-  │   ├── basics/
-  │   ├── hooks/
-  │   └── questions/
-  └── web3/
-      ├── basics/
-      └── questions/
-```
-
-### 文件格式
-
-**知识点** (`type: knowledge`)：
-```markdown
----
-id: unique-id
-category: JavaScript
-subcategory: 基础语法
-type: knowledge
-title: 知识点标题
----
-
-内容支持 Markdown 格式。
-```
-
-**问答题** (`type: practice`, `questionType: qa`)：
-```markdown
----
-id: question-id
-type: practice
-questionType: qa
-question: 问题内容
----
-
-答案内容。
-```
-
-**编程题** (`type: practice`, `questionType: coding`)：
-```markdown
----
-id: coding-id
-type: practice
-questionType: coding
-question: 题目
-template: |
-  function example() {
-    // 你的代码
-  }
-description: 题目描述（可选）
----
-
-```javascript
-function solution() {
-  // 参考答案（第一个代码块）
-}
-```
-```
-
-### 约定优于配置
-- 分类名称：自动从目录名格式化（`javascript` → `JavaScript`）
-- 排序：使用数字前缀控制顺序（`01-basics/` 优先于 `advanced/`）
-- 显示名称：优先使用 frontmatter，否则使用目录名
 
 ## 项目结构
 
@@ -182,9 +76,11 @@ src/
   │   ├── PracticeMode.jsx # 练习模式
   │   ├── InterviewMode.jsx # 模拟面试
   │   ├── ChatMode.jsx    # 聊天学习
+  │   ├── MasteryStatusControl.jsx # 学习模式中的掌握度状态控件
   │   └── ...
   ├── hooks/              # 自定义 Hooks
   │   ├── useStudyMode.js
+  │   ├── useStudyMastery.js      # 学习模式掌握度管理（全局共享状态）
   │   └── usePracticeProgress.js
   ├── services/           # 服务层（统一入口）
   │   └── serverService.js
