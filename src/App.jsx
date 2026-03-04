@@ -1,4 +1,5 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Menu, Sun, Moon } from 'lucide-react'
 import { LogoIcon, LogoFull } from './components/Logo.jsx'
 import { SidebarProvider, useSidebar } from './contexts/SidebarContext'
@@ -9,9 +10,25 @@ import ChatMode from './components/ChatMode'
 import InterviewMode from './components/InterviewMode'
 import Sidebar from './components/Sidebar'
 
+function usePageViewTracking() {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
+      return
+    }
+    const pagePath = location.pathname + location.search + location.hash
+    window.gtag('event', 'page_view', {
+      page_path: pagePath
+    })
+  }, [location])
+}
+
 function AppContent() {
   const { setIsMobileOpen, isCollapsed } = useSidebar()
   const { isDark, toggleTheme } = useTheme()
+
+  usePageViewTracking()
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">

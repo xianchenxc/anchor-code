@@ -18,6 +18,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # 在仓库 Settings → Secrets and variables → Actions 中配置名为 VITE_GA_ID 的变量或机密
+      VITE_GA_ID: ${{ vars.VITE_GA_ID != '' && vars.VITE_GA_ID || secrets.VITE_GA_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
