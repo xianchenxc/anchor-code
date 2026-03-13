@@ -16,9 +16,9 @@ import {
  * Build system message for learning/chat mode
  * @param {string|null} currentTopic - Optional current learning topic
  * @param {string|null} userQuestion - Optional user question for extracting relevant content
- * @returns {string} System message content
+ * @returns {Promise<string>} System message content
  */
-export function buildLearningSystemMessage(currentTopic = null, userQuestion = null) {
+export async function buildLearningSystemMessage(currentTopic = null, userQuestion = null) {
   let systemContent = `你是一个专业的前端开发技术专家，擅长用中文解释前端开发相关的技术概念。
 你的专长领域包括：
 - JavaScript（ES6+、异步编程、闭包、原型链等）
@@ -34,8 +34,8 @@ export function buildLearningSystemMessage(currentTopic = null, userQuestion = n
 
   let knowledgeBase = ''
   if (userQuestion) {
-    const relevantItems = getRelevantContent(userQuestion, null, 8)
-    if (relevantItems.length > 0) {
+    const relevantItems = await getRelevantContent(userQuestion, null, 8)
+    if (Array.isArray(relevantItems) && relevantItems.length > 0) {
       knowledgeBase = formatContentForPrompt(relevantItems, 2000)
     }
   } else {
@@ -61,14 +61,14 @@ ${knowledgeBase}`
 /**
  * Build chat messages for learning mode with conversation history
  */
-export function buildLearningChatMessages(
+export async function buildLearningChatMessages(
   userQuestion,
   conversationHistory = [],
   currentTopic = null,
   maxHistoryLength = 6
 ) {
   const messages = []
-  const systemContent = buildLearningSystemMessage(currentTopic, userQuestion)
+  const systemContent = await buildLearningSystemMessage(currentTopic, userQuestion)
   messages.push({ role: 'system', content: systemContent })
   const recentHistory = conversationHistory.slice(-maxHistoryLength)
   recentHistory.forEach((msg) => {
@@ -112,7 +112,7 @@ export function buildInterviewQuestionPrompt(categoryName, categoryId, difficult
 /**
  * Build prompt for evaluating interview answers
  */
-export function buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
+export async function buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
   let knowledgeBase = ''
   if (categoryId) {
     const categoryContent = getCategoryContentForPrompt(categoryId)
@@ -120,8 +120,8 @@ export function buildInterviewEvaluationPrompt(question, answer, categoryId = nu
       knowledgeBase = `\n\n以下是相关的知识点和标准答案，可以作为评估参考：\n\n${categoryContent}`
     }
   } else {
-    const relevantItems = getRelevantContent(question, null, 5)
-    if (relevantItems.length > 0) {
+    const relevantItems = await getRelevantContent(question, null, 5)
+    if (Array.isArray(relevantItems) && relevantItems.length > 0) {
       knowledgeBase = `\n\n以下是相关的知识点，可以作为评估参考：\n\n${formatContentForPrompt(relevantItems, 1500)}`
     }
   }

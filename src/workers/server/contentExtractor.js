@@ -1,9 +1,10 @@
 /**
  * Content extractor inside Worker: format content from catalog for AI prompts.
- * Uses dataService (same process) for data access.
+ * Uses dataService (same process) for data access and vectorService for semantic search.
  */
 
 import * as dataService from './dataService.js'
+import * as vectorService from './vectorService.js'
 
 /**
  * Get all content items from a specific category
@@ -15,13 +16,36 @@ export function getCategoryContent(categoryId) {
 }
 
 /**
- * Get relevant content items based on query keywords
+ * Get relevant content items based on query.
+ * Prefer vector search when embeddings are available, otherwise fall back to keywords.
  * @param {string} query - User query or question
  * @param {string|null} categoryId - Optional category ID to limit search
  * @param {number} maxItems - Maximum number of items to return (default: 10)
- * @returns {Array} Array of relevant items
+ * @returns {Promise<Array>} Promise of relevant items
  */
-export function getRelevantContent(query, categoryId = null, maxItems = 10) {
+export async function getRelevantContent(query, categoryId = null, maxItems = 10) {
+  if (vectorService.hasEmbeddings()) {
+    try {
+      const items = await vectorService.getRelevantContentByEmbedding(query, categoryId, maxItems)
+      if (Array.isArray(items) && items.length > 0) {
+        return items
+      }
+    } catch {
+      // Fall through to keyword search on any vector error.
+    }
+  }
+
+  return getRelevantContentByKeyword(query, categoryId, maxItems)
+}
+
+/**
+ * Keyword-based relevant content search (original implementation).
+ * @param {string} query
+ * @param {string|null} categoryId
+ * @param {number} maxItems
+ * @returns {Array}
+ */
+export function getRelevantContentByKeyword(query, categoryId = null, maxItems = 10) {
   const searchTerms = query.toLowerCase().split(/\s+/).filter(term => term.length > 1)
   if (searchTerms.length === 0) return []
 

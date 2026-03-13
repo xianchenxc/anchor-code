@@ -8,6 +8,7 @@ import * as Comlink from 'comlink'
 import { env } from '@huggingface/transformers'
 import * as dataService from './server/dataService.js'
 import * as agentService from './server/agentService.js'
+import * as vectorService from './server/vectorService.js'
 import { ModelService } from './modelService.js'
 
 env.allowLocalModels = false
@@ -25,6 +26,7 @@ const workerAPI = {
     const basePath = BASE_PATH.endsWith('/') ? BASE_PATH : BASE_PATH + '/'
     const baseUrl = (self.location?.origin || '') + basePath
     await dataService.initFromBaseUrl(baseUrl)
+    await vectorService.initFromBaseUrl(baseUrl)
   },
 
   getCategories() {
@@ -39,7 +41,7 @@ const workerAPI = {
     return dataService.getAllPracticeQuestions()
   },
 
-  buildLearningChatMessages(userQuestion, conversationHistory = [], currentTopic = null, maxHistoryLength = 6) {
+  async buildLearningChatMessages(userQuestion, conversationHistory = [], currentTopic = null, maxHistoryLength = 6) {
     return agentService.buildLearningChatMessages(userQuestion, conversationHistory, currentTopic, maxHistoryLength)
   },
 
@@ -47,7 +49,7 @@ const workerAPI = {
     return agentService.buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
   },
 
-  buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
+  async buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
     return agentService.buildInterviewEvaluationPrompt(question, answer, categoryId)
   },
 
