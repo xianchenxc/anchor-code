@@ -7,9 +7,7 @@ import {
   getAllFrontendContent,
   getRelevantContent,
   formatContentForPrompt,
-  getCategoryContentForPrompt,
-  getCategoryInterviewQuestions,
-  formatInterviewQuestionsForPrompt
+  getCategoryContentForPrompt
 } from './contentExtractor.js'
 
 /**
@@ -85,26 +83,16 @@ export async function buildLearningChatMessages(
  */
 export function buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel) {
   const difficultyMap = { easy: '简单', medium: '中等', hard: '困难' }
-  const categoryContent = getCategoryContentForPrompt(categoryId)
-  const interviewQuestions = getCategoryInterviewQuestions(categoryId)
-  const questionsContext = formatInterviewQuestionsForPrompt(interviewQuestions, 10)
-
   let prompt = `你是一个专业的前端开发技术面试官，专门负责 ${categoryName} 领域的面试。
 当前面试难度为：${difficultyMap[difficultyLevel] || '中等'}。
 
 请用中文提问一个技术问题，要求：
-1. 针对 ${categoryName} 领域的核心知识点和实际应用场景
+1. 只根据 ${categoryName} 这个领域本身来出题，不需要额外的背景资料
 2. 难度符合${difficultyMap[difficultyLevel] || '中等'}级别，适合考察前端开发岗位候选人的理解程度
 3. 问题表述清晰，有明确的考察点
 4. 可以涉及概念、原理、应用场景、最佳实践或代码实现
 5. 问题应该贴近真实的前端开发工作场景`
 
-  if (categoryContent) {
-    prompt += `\n\n以下是 ${categoryName} 领域的知识点，可以作为问题设计的参考：\n\n${categoryContent}`
-  }
-  if (questionsContext) {
-    prompt += `\n\n${questionsContext}`
-  }
   prompt += `\n\n请直接输出问题，不要包含其他说明文字。`
   return prompt
 }
