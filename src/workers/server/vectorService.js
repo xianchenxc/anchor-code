@@ -101,6 +101,41 @@ function toEmbeddingList(output) {
   return []
 }
 
+function heapifyUp(heap, index) {
+  let i = index
+  while (i > 0) {
+    const parent = Math.floor((i - 1) / 2)
+    if (heap[i].score >= heap[parent].score) break
+    const tmp = heap[i]
+    heap[i] = heap[parent]
+    heap[parent] = tmp
+    i = parent
+  }
+}
+
+function heapifyDown(heap, index) {
+  const length = heap.length
+  let i = index
+  while (true) {
+    const left = 2 * i + 1
+    const right = 2 * i + 2
+    let smallest = i
+
+    if (left < length && heap[left].score < heap[smallest].score) {
+      smallest = left
+    }
+    if (right < length && heap[right].score < heap[smallest].score) {
+      smallest = right
+    }
+    if (smallest === i) break
+
+    const tmp = heap[i]
+    heap[i] = heap[smallest]
+    heap[smallest] = tmp
+    i = smallest
+  }
+}
+
 /**
  * Get relevant items using vector search when embeddings are available.
  * Falls back to empty array if embeddings or extractor are not ready.
@@ -122,17 +157,30 @@ export async function getRelevantContentByEmbedding(query, categoryId = null, ma
   if (!Array.isArray(queryVec) || !queryVec.length) return []
 
   const normQuery = normalizeVector(queryVec)
-  const scored = []
+  const heap = []
   for (const item of itemsToSearch) {
     const emb = embeddingsById.get(item.id)
     if (!emb || !Array.isArray(emb) || !emb.length) continue
     const score = cosineSimilarity(normQuery, emb)
-    scored.push({ item, score })
+
+    if (heap.length < maxItems) {
+      heap.push({ item, score })
+      heapifyUp(heap, heap.length - 1)
+      continue
+    }
+
+    if (!heap.length || score <= heap[0].score) {
+      continue
+    }
+
+    heap[0] = { item, score }
+    heapifyDown(heap, 0)
   }
 
-  return scored
+  // heap 中是按 score 升序的小顶堆，转换为按 score 降序输出
+  return heap
+    .slice()
     .sort((a, b) => b.score - a.score)
-    .slice(0, maxItems)
     .map(({ item }) => item)
 }
 
