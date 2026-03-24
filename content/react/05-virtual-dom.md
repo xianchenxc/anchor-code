@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: basics
 type: knowledge
 title: 虚拟 DOM
 ---

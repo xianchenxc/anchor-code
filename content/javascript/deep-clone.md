@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: coding
 question: 实现一个深拷贝函数

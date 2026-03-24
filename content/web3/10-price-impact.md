@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 什么是价格影响（Price Impact）？在 DEX 前端如何计算和显示？

@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: coding
 question: '手写 Promise 实现(实现状态管理, 实现 then、catch、finally 方法)'

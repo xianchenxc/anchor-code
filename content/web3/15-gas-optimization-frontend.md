@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在前端层面，如何优化 DApp 的 gas 使用？有哪些优化策略？

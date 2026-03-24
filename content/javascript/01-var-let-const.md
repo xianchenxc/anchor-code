@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: basics
 type: knowledge
 title: var、let、const 的区别
 ---

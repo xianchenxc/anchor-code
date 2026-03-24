@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: basics
 type: knowledge
 title: 性能优化
 ---

@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 如何实现多链 DApp？前端需要处理哪些多链相关的逻辑？

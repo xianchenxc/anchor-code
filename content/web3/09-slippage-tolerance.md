@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 什么是滑点（Slippage）？在 DEX 前端中如何设置和显示滑点容忍度？

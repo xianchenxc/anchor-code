@@ -77,66 +77,32 @@ function getItemsByIds(ids) {
 }
 
 /**
- * @param {string} subcategoryId - Subcategory id
- * @returns {Array} Questions for that subcategory
- */
-export function getQuestionsBySubcategoryId(subcategoryId) {
-  ensureInited()
-  function findSubcategory(nodes) {
-    if (!nodes || !Array.isArray(nodes)) return []
-    for (const node of nodes) {
-      if (node.id === subcategoryId && node.itemIds?.length) {
-        return getItemsByIds(node.itemIds)
-      }
-      if (node.children?.length) {
-        const found = findSubcategory(node.children)
-        if (found.length > 0) return found
-      }
-    }
-    return []
-  }
-  return findSubcategory(categories)
-}
-
-/**
  * @param {string} categoryId - Top-level category id
- * @returns {Array} Questions in tree order for that category
+ * @returns {Array} Questions in order for that category
  */
 export function getQuestionsByCategoryId(categoryId) {
   ensureInited()
   const category = categories.find((c) => c.id === categoryId)
-  if (!category?.children?.length) return []
-  const ids = category.children.flatMap((child) => child.itemIds || [])
+  if (!category?.itemIds?.length) return []
+  const ids = category.itemIds
   return getItemsByIds(ids)
 }
 
 /**
- * @returns {Array} All questions from subcategories with type === 'practice'
+ * @returns {Array} All questions with type === 'practice'
  */
 export function getAllPracticeQuestions() {
   ensureInited()
-  const ids = []
-  for (const cat of categories) {
-    for (const child of cat.children || []) {
-      if (child.type === 'practice' && child.itemIds?.length) {
-        ids.push(...child.itemIds)
-      }
-    }
-  }
-  return getItemsByIds(ids)
+  return items.filter((item) => item.type === 'practice')
 }
 
 /**
  * @param {string} categoryId - Top-level category id
- * @returns {Array} Items from the "面试题" / questions subcategory only
+ * @returns {Array} Interview practice items for this category
  */
 export function getInterviewQuestionsByCategoryId(categoryId) {
   ensureInited()
-  const category = categories.find((c) => c.id === categoryId)
-  if (!category?.children?.length) return []
-  const sub = category.children.find(
-    (s) => s.subcategory === 'questions' || s.name === '面试题'
+  return items.filter(
+    (item) => item.categoryId === categoryId && item.type === 'practice'
   )
-  if (!sub?.itemIds?.length) return []
-  return sub.itemIds.map((id) => itemsById.get(id)).filter(Boolean)
 }

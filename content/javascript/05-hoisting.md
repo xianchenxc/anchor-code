@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: basics
 type: knowledge
 title: 变量提升和函数提升
 ---

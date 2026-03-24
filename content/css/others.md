@@ -1,6 +1,5 @@
 ---
 category: CSS
-subcategory: basics
 type: knowledge
 title: basics
 ---

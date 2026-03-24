@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: qa
 question: 解释 JavaScript 中 this 的绑定规则

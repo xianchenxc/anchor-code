@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: advanced
 type: knowledge
 title: Proxy 和 Reflect
 ---

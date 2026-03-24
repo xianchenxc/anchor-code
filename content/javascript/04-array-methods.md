@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: basics
 type: knowledge
 title: 数组常用方法
 ---

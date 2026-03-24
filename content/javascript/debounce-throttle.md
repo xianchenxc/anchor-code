@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: advanced
 type: knowledge
 title: 防抖和节流
 ---

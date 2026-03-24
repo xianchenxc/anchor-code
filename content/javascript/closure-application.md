@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: qa
 question: 闭包的应用场景有哪些？

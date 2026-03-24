@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DApp 前端中，如何管理 Web3 Provider？有哪些常见的 Provider 库？

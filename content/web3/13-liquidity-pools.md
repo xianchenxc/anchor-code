@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DeFi DApp 前端中，如何显示和管理流动性池（Liquidity Pool）信息？

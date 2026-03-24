@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: coding
 question: 实现一个 useFetch Hook

@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: basics
 type: knowledge
 title: 钱包与签名
 ---

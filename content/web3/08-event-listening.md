@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DApp 前端中，如何监听区块链事件？有哪些实现方式？

@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: useEffect 的依赖数组有什么作用？如何正确使用？

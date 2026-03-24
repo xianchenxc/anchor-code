@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: hooks
 type: knowledge
 title: useState Hook
 ---

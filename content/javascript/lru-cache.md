@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: coding
 question: 实现 LRU 缓存

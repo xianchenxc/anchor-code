@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: React 中 key 的作用是什么？

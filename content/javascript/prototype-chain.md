@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: qa
 question: 什么是原型链？如何实现继承？

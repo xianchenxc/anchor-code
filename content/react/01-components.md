@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: basics
 type: knowledge
 title: 组件和 JSX
 ---

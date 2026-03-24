@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DApp 前端中，如何处理交易状态（pending、success、failed）？如何优化用户体验？

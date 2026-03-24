@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: advanced
 type: knowledge
 title: WeakMap 和 WeakSet
 ---

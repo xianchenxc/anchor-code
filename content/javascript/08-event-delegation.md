@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: basics
 type: knowledge
 title: 事件委托
 ---

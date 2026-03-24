@@ -18,7 +18,7 @@ export function useStudyMode() {
       .getCategories()
       .then((cats) => {
         setCategories(cats)
-        const first = findFirstNodeWithContent(cats)
+        const first = findFirstNodeWithContent(cats.filter((cat) => cat.itemIds?.length > 0))
         if (first) setSelectedNode(first)
       })
       .catch(() => setCategories([]))
@@ -39,31 +39,8 @@ export function useStudyMode() {
       return
     }
 
-    const isTopLevelCategory = path.length === 1
-    if (isTopLevelCategory) {
-      const categoryNode = path[0]
-      const children = categoryNode.children || []
-      if (!children.length) {
-        setNodeItems([])
-        return
-      }
-      Promise.all(
-        children.map((child) =>
-          serverService
-            .getQuestionsBySubcategoryId(child.id)
-            .catch(() => [])
-        )
-      )
-        .then((results) => {
-          const merged = results.flat().filter(Boolean)
-          setNodeItems(merged)
-        })
-        .catch(() => setNodeItems([]))
-      return
-    }
-
     serverService
-      .getQuestionsBySubcategoryId(selectedNode.id)
+      .getQuestionsByCategoryId(selectedNode.id)
       .then(setNodeItems)
       .catch(() => setNodeItems([]))
   }, [selectedNode?.id, categories])

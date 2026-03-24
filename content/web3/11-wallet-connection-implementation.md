@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: coding
 question: 实现一个钱包连接功能，支持检测 MetaMask、连接钱包、监听账户和网络变化，并处理各种错误情况。

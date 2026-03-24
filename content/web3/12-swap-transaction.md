@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: coding
 question: 实现一个 DEX swap 交易功能，包括获取报价、检查余额和批准、执行交易，并处理各种错误情况。

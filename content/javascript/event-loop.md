@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: questions
 type: practice
 questionType: qa
 question: 解释 JavaScript 中的事件循环（Event Loop）机制

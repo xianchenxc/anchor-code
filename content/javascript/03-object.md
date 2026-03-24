@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: basics
 type: knowledge
 title: 对象和属性描述符
 ---

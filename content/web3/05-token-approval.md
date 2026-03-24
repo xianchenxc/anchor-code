@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DEX 中，为什么需要 token approval？如何优化 approval 的用户体验？

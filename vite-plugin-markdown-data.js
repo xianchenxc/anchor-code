@@ -78,16 +78,6 @@ function sortByName(a, b) {
 }
 
 /**
- * Slugify subcategory for stable ids (lowercase, spaces to hyphen, alphanumeric + hyphen only)
- * @param {string} s
- * @returns {string}
- */
-function slugifySubcategory(s) {
-  if (typeof s !== 'string' || !s.trim()) return 'default'
-  return s.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'default'
-}
-
-/**
  * Get markdown files in flat structure: content/<category>/*.md only (one level of subdir)
  * @param {string} contentDir
  * @returns {string[]} Paths relative to contentDir, e.g. ['javascript/01-var-let-const.md']
@@ -208,10 +198,11 @@ function splitIntoSections(body, fallbackTitle) {
 
 /**
  * Process markdown files (flat: content/<category>/*.md) and generate structured data.
- * Subcategory comes from frontmatter.subcategory; id is auto-generated.
+ * Model: categories are top-level only; each category directly owns itemIds.
  */
 function processMarkdownFiles(contentDir) {
   const categories = {}
+  const rawQuestions = []
   const files = getMarkdownFilesFlat(contentDir)
 
   for (const file of files) {
@@ -222,24 +213,12 @@ function processMarkdownFiles(contentDir) {
     const pathParts = file.split('/')
     const categoryId = pathParts[0]
     const fileName = pathParts[pathParts.length - 1].replace(/\.md$/, '')
-    const subcategoryRaw = frontmatter.subcategory || fileName || 'default'
-    const subcategorySlug = slugifySubcategory(subcategoryRaw)
-    const subcategoryId = `${categoryId}-${subcategorySlug}`
 
     if (!categories[categoryId]) {
       categories[categoryId] = {
         id: categoryId,
         name: frontmatter.category || formatCategoryName(categoryId),
-        children: {}
-      }
-    }
-    if (!categories[categoryId].children[subcategorySlug]) {
-      categories[categoryId].children[subcategorySlug] = {
-        id: subcategoryId,
-        name: formatCategoryName(subcategorySlug),
-        type: 'knowledge',
-        subcategory: subcategorySlug,
-        items: []
+        itemIds: []
       }
     }
 
@@ -257,18 +236,14 @@ function processMarkdownFiles(contentDir) {
     }
 
     const itemType = frontmatter.type === 'practice' ? 'practice' : 'knowledge'
-    if (categories[categoryId].children[subcategorySlug].items.length === 0) {
-      categories[categoryId].children[subcategorySlug].type = itemType
-    }
-
     const cardMode = frontmatter.cardMode || (itemType === 'practice' ? 'single' : 'section')
 
     // Practice 内容或显式 single 模式：整篇作为一张卡（保持现有行为）
     if (cardMode === 'single' || itemType === 'practice') {
-      const itemId = `${categoryId}-${subcategorySlug}-${fileName}`
+      const itemId = `${categoryId}-${fileName}`
       const item = {
         id: itemId,
-        categoryId: subcategoryId,
+        categoryId,
         type: itemType,
         questionType: itemType === 'practice' ? (frontmatter.questionType || 'qa') : undefined,
         title: frontmatter.title || frontmatter.question || fileName,
@@ -281,7 +256,8 @@ function processMarkdownFiles(contentDir) {
         template,
         _fileName: fileName
       }
-      categories[categoryId].children[subcategorySlug].items.push(item)
+      categories[categoryId].itemIds.push(itemId)
+      rawQuestions.push(item)
     } else {
       // section 模式：按 H2 拆成多张知识卡片
       const baseTitle = frontmatter.title || frontmatter.question || fileName
@@ -300,10 +276,10 @@ function processMarkdownFiles(contentDir) {
           }
         }
 
-        const itemId = `${categoryId}-${subcategorySlug}-${fileName}-${sectionSlug}`
+        const itemId = `${categoryId}-${fileName}-${sectionSlug}`
         const item = {
           id: itemId,
-          categoryId: subcategoryId,
+          categoryId,
           type: itemType,
           questionType: undefined,
           title: sectionTitle,
@@ -315,34 +291,49 @@ function processMarkdownFiles(contentDir) {
           content: section.body,
           template,
           _fileName: `${fileName}-${index + 1}`,
-          sourceFileId: `${categoryId}-${subcategorySlug}-${fileName}`
+          sourceFileId: `${categoryId}-${fileName}`
         }
-        categories[categoryId].children[subcategorySlug].items.push(item)
+        categories[categoryId].itemIds.push(itemId)
+        rawQuestions.push(item)
       })
     }
   }
 
-  const questions = []
-  Object.values(categories).forEach((cat) => {
-    Object.values(cat.children).forEach((subcat) => {
-      subcat.items.sort((a, b) => sortByName(a._fileName, b._fileName))
-      subcat.itemIds = subcat.items.map((i) => i.id)
-      subcat.items.forEach((item) => {
-        const { _fileName, ...rest } = item
-        questions.push(rest)
-      })
-      delete subcat.items
-    })
-  })
+  const questions = questionsSortAndStripMeta(rawQuestions)
 
   const categoriesArray = Object.values(categories)
     .sort((a, b) => sortByName(a.id, b.id))
-    .map((cat) => {
-      const childrenArray = Object.values(cat.children).sort((a, b) => sortByName(a.subcategory, b.subcategory))
-      return { ...cat, children: childrenArray }
-    })
+    .map((cat) => ({
+      ...cat,
+      itemIds: sortItemIdsByFileName(cat.itemIds, rawQuestions)
+    }))
 
   return { categories: categoriesArray, questions }
+}
+
+/**
+ * Sort questions by generated file key and remove build-only fields.
+ * @param {Array} questions
+ * @returns {Array}
+ */
+function questionsSortAndStripMeta(questions) {
+  return [...questions]
+    .sort((a, b) => sortByName(a._fileName, b._fileName))
+    .map((item) => {
+      const { _fileName, ...rest } = item
+      return rest
+    })
+}
+
+/**
+ * Sort category item ids by corresponding question order.
+ * @param {string[]} itemIds
+ * @param {Array} questions
+ * @returns {string[]}
+ */
+function sortItemIdsByFileName(itemIds, rawQuestions) {
+  const keyById = new Map(rawQuestions.map((q) => [q.id, q._fileName || q.id]))
+  return [...itemIds].sort((a, b) => sortByName(keyById.get(a) || a, keyById.get(b) || b))
 }
 
 /**

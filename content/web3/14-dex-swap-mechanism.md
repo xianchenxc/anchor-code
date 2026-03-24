@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DEX 前端中，swap 交易的完整流程是什么？如何实现？

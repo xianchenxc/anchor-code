@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: basics
 type: knowledge
 title: 滑点与价格影响
 ---

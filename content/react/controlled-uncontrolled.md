@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: 受控组件和非受控组件的区别

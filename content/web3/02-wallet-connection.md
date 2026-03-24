@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DApp 前端中，如何实现钱包连接？有哪些常见的钱包连接方式？

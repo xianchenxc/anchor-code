@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: advanced
 type: knowledge
 title: this 绑定规则
 ---

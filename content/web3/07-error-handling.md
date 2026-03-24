@@ -1,6 +1,5 @@
 ---
 category: Web3
-subcategory: questions
 type: practice
 questionType: qa
 question: 在 DApp 前端中，如何处理常见的错误情况？如何给用户友好的错误提示？

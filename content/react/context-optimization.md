@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: 如何优化 Context 的性能问题？

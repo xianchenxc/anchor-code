@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: coding
 question: 实现一个自定义 Hook useCounter

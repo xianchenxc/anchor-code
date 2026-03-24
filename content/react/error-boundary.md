@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: 什么是错误边界（Error Boundary）？如何使用？

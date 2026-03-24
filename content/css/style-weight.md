@@ -1,6 +1,5 @@
 ---
 category: CSS
-subcategory: questions
 type: practice
 questionType: qa
 question: CSS 优先级算法如何计算？

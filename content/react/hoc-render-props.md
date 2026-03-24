@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: HOC 和 Render Props 的区别？现在更推荐哪种方式？

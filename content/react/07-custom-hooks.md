@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: hooks
 type: knowledge
 title: 自定义 Hooks
 ---

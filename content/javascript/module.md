@@ -1,6 +1,5 @@
 ---
 category: JavaScript
-subcategory: advanced
 type: knowledge
 title: 模块化
 ---

@@ -1,6 +1,5 @@
 ---
 category: React
-subcategory: questions
 type: practice
 questionType: qa
 question: React 中 setState 是同步还是异步的？如何获取更新后的值？
