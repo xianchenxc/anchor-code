@@ -2,7 +2,6 @@
 category: Browser
 type: knowledge
 title: 浏览器存储
-cardMode: single
 ---
 
 浏览器存储用于在客户端持久化数据。常见方案包括 `Cookie`、`localStorage`、`sessionStorage`、`IndexedDB`。它们在容量、生命周期、是否自动携带到服务端、性能特性上差异很大。

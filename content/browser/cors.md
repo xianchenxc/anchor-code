@@ -2,7 +2,6 @@
 category: Browser
 type: knowledge
 title: CORS (跨域资源共享)
-cardMode: single
 ---
 
 CORS（Cross-Origin Resource Sharing，跨域资源共享）是浏览器的安全机制扩展，用来在“同源策略”限制下，允许服务器声明哪些跨域请求可以被浏览器放行。

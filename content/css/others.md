@@ -2,6 +2,7 @@
 category: CSS
 type: knowledge
 title: basics
+cardMode: section
 ---
 
 ## 现代布局方案（面试高频）

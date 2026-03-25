@@ -6,7 +6,9 @@ title: useContext Hook
 
 `useContext` 用于在函数组件中订阅 React Context。
 
-```javascript
+```jsx
+import { useContext } from 'react';
+
 const value = useContext(MyContext);
 ```
 

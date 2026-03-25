@@ -2,7 +2,6 @@
 category: Browser
 type: knowledge
 title: 浏览器请求网页的过程
-cardMode: single
 ---
 
 当我们在浏览器地址栏输入一个 URL 并回车后，浏览器会经历“网络请求 + 页面渲染”两个大阶段。常见流程如下。

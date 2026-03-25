@@ -2,6 +2,7 @@
 category: CSS
 type: knowledge
 title: CSS 基础
+cardMode: section
 ---
 
 ## 引入 CSS 的方式

@@ -236,7 +236,7 @@ function processMarkdownFiles(contentDir) {
     }
 
     const itemType = frontmatter.type === 'practice' ? 'practice' : 'knowledge'
-    const cardMode = frontmatter.cardMode || (itemType === 'practice' ? 'single' : 'section')
+    const cardMode = frontmatter.cardMode || 'single'
 
     // Practice 内容或显式 single 模式：整篇作为一张卡（保持现有行为）
     if (cardMode === 'single' || itemType === 'practice') {

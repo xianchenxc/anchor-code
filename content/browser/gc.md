@@ -2,7 +2,6 @@
 category: Browser
 type: knowledge
 title: 垃圾回收
-cardMode: single
 ---
 
 垃圾回收（GC, Garbage Collection）是 JavaScript 引擎自动管理内存的机制。开发者不需要手动 `free` 内存，但仍需要理解“对象为什么会被回收、为什么有时回收不掉”。
