@@ -33,8 +33,8 @@ const workerAPI = {
     return dataService.getCategories()
   },
 
-  getQuestionsByCategoryId(categoryId) {
-    return dataService.getQuestionsByCategoryId(categoryId)
+  getQuestionsByCategoryId(categoryId, types = null) {
+    return dataService.getQuestionsByCategoryId(categoryId, types)
   },
 
   getAllPracticeQuestions() {

@@ -78,14 +78,32 @@ function getItemsByIds(ids) {
 
 /**
  * @param {string} categoryId - Top-level category id
- * @returns {Array} Questions in order for that category
+ * @param {string[]|string|null} types - Optional item types to include (e.g. ['knowledge']). If null, returns all.
+ * @returns {Array} Items in order for that category
  */
-export function getQuestionsByCategoryId(categoryId) {
+export function getQuestionsByCategoryId(categoryId, types = null) {
   ensureInited()
   const category = categories.find((c) => c.id === categoryId)
   if (!category?.itemIds?.length) return []
+
   const ids = category.itemIds
-  return getItemsByIds(ids)
+
+  if (!types) {
+    return getItemsByIds(ids)
+  }
+
+  const allowed =
+    typeof types === 'string'
+      ? new Set([types])
+      : Array.isArray(types)
+        ? new Set(types)
+        : null
+
+  if (!allowed) {
+    return getItemsByIds(ids)
+  }
+
+  return ids.map((id) => itemsById.get(id)).filter(Boolean).filter((item) => allowed.has(item.type))
 }
 
 /**

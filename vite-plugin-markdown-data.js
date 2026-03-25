@@ -78,9 +78,11 @@ function sortByName(a, b) {
 }
 
 /**
- * Get markdown files in flat structure: content/<category>/*.md only (one level of subdir)
+ * Get markdown files in 1-level subdir structure:
+ * - content/<category>/*.md
+ * - content/<category>/<subdir>/*.md (only one extra level)
  * @param {string} contentDir
- * @returns {string[]} Paths relative to contentDir, e.g. ['javascript/01-var-let-const.md']
+ * @returns {string[]} Paths relative to contentDir, e.g. ['javascript/01-var-let-const.md', 'javascript/qa/foo.md']
  */
 function getMarkdownFilesFlat(contentDir) {
   const files = []
@@ -90,10 +92,30 @@ function getMarkdownFilesFlat(contentDir) {
     const stat = statSync(fullPath)
     if (!stat.isDirectory()) continue
     const categoryDir = fullPath
-    const mdEntries = readdirSync(categoryDir)
-    for (const md of mdEntries) {
-      if (md.endsWith('.md')) {
-        files.push(relative(contentDir, join(categoryDir, md)))
+
+    // Root md files: content/<category>/*.md
+    const categoryEntries = readdirSync(categoryDir)
+    for (const entryName of categoryEntries) {
+      const entryPath = join(categoryDir, entryName)
+      const entryStat = statSync(entryPath)
+      if (entryStat.isFile() && entryName.endsWith('.md')) {
+        files.push(relative(contentDir, join(categoryDir, entryName)))
+      }
+    }
+
+    // One-level subdir md files: content/<category>/<subdir>/*.md
+    for (const entryName of categoryEntries) {
+      const entryPath = join(categoryDir, entryName)
+      const entryStat = statSync(entryPath)
+      if (!entryStat.isDirectory()) continue
+
+      const subdirEntries = readdirSync(entryPath)
+      for (const md of subdirEntries) {
+        if (!md.endsWith('.md')) continue
+        const mdPath = join(entryPath, md)
+        if (statSync(mdPath).isFile()) {
+          files.push(relative(contentDir, join(entryPath, md)))
+        }
       }
     }
   }
@@ -213,6 +235,11 @@ function processMarkdownFiles(contentDir) {
     const pathParts = file.split('/')
     const categoryId = pathParts[0]
     const fileName = pathParts[pathParts.length - 1].replace(/\.md$/, '')
+    // baseKey for item ids/sort keys should be unique within category:
+    // - root: <fileName> => e.g. css-basics
+    // - one-level subdir: <subdir>-<fileName> => e.g. css-qa-foo
+    const subdirParts = pathParts.length > 2 ? pathParts.slice(1, -1) : []
+    const baseKey = subdirParts.length ? `${subdirParts.join('-')}-${fileName}` : fileName
 
     if (!categories[categoryId]) {
       categories[categoryId] = {
@@ -240,7 +267,7 @@ function processMarkdownFiles(contentDir) {
 
     // Practice 内容或显式 single 模式：整篇作为一张卡（保持现有行为）
     if (cardMode === 'single' || itemType === 'practice') {
-      const itemId = `${categoryId}-${fileName}`
+      const itemId = `${categoryId}-${baseKey}`
       const item = {
         id: itemId,
         categoryId,
@@ -254,7 +281,7 @@ function processMarkdownFiles(contentDir) {
         description,
         content: processedContent || frontmatter.content || '',
         template,
-        _fileName: fileName
+        _fileName: baseKey
       }
       categories[categoryId].itemIds.push(itemId)
       rawQuestions.push(item)
@@ -276,7 +303,7 @@ function processMarkdownFiles(contentDir) {
           }
         }
 
-        const itemId = `${categoryId}-${fileName}-${sectionSlug}`
+        const itemId = `${categoryId}-${baseKey}-${sectionSlug}`
         const item = {
           id: itemId,
           categoryId,
@@ -290,8 +317,8 @@ function processMarkdownFiles(contentDir) {
           description,
           content: section.body,
           template,
-          _fileName: `${fileName}-${index + 1}`,
-          sourceFileId: `${categoryId}-${fileName}`
+          _fileName: `${baseKey}-${index + 1}`,
+          sourceFileId: `${categoryId}-${baseKey}`
         }
         categories[categoryId].itemIds.push(itemId)
         rawQuestions.push(item)

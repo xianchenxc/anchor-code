@@ -40,7 +40,7 @@ export function useStudyMode() {
     }
 
     serverService
-      .getQuestionsByCategoryId(selectedNode.id)
+      .getQuestionsByCategoryId(selectedNode.id, ['knowledge'])
       .then(setNodeItems)
       .catch(() => setNodeItems([]))
   }, [selectedNode?.id, categories])

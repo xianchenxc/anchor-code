@@ -90,9 +90,9 @@ class ServerService {
     return this.workerProxy.getCategories()
   }
 
-  async getQuestionsByCategoryId(categoryId) {
+  async getQuestionsByCategoryId(categoryId, types = null) {
     await this._ensureWorker()
-    return this.workerProxy.getQuestionsByCategoryId(categoryId)
+    return this.workerProxy.getQuestionsByCategoryId(categoryId, types)
   }
 
   async getAllPracticeQuestions() {
