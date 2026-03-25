@@ -6,9 +6,8 @@ import MasteryStatusControl from './MasteryStatusControl.jsx'
 import { useStudyMode } from '../hooks/useStudyMode.js'
 import { useStudyMastery } from '../hooks/useStudyMastery.js'
 
-function KnowledgeCard({ item, index, showRecallHint }) {
+function KnowledgeCard({ item, index, showRecallHint, expanded, onExpandedChange }) {
   const { masteryLevels, getMastery, setMastery } = useStudyMastery()
-  const [expanded, setExpanded] = useState(false)
 
   const mastery = getMastery(item.id)
 
@@ -27,7 +26,7 @@ function KnowledgeCard({ item, index, showRecallHint }) {
     >
       <header
         className="flex items-start justify-between gap-2 mb-2 sm:mb-3 cursor-pointer group"
-        onClick={() => setExpanded((prev) => !prev)}
+        onClick={() => onExpandedChange(!expanded)}
       >
         <div className="flex-1 min-w-0">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-1.5 text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
@@ -66,7 +65,7 @@ function KnowledgeCard({ item, index, showRecallHint }) {
       {expanded ? (
         <div className="mt-2 text-gray-700 dark:text-gray-200">
           {item.content ? (
-            <MarkdownRenderer content={item.content} />
+            <MarkdownRenderer key={item.id} content={item.content} />
           ) : (
             <p className="text-gray-400 dark:text-gray-500 text-sm">暂无内容</p>
           )}
@@ -74,7 +73,7 @@ function KnowledgeCard({ item, index, showRecallHint }) {
       ) : (
         <button
           type="button"
-          onClick={() => setExpanded(true)}
+          onClick={() => onExpandedChange(true)}
           className="mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-teal-700 dark:text-teal-300 hover:text-teal-800 dark:hover:text-teal-200"
         >
           展开内容查看讲解
@@ -84,7 +83,7 @@ function KnowledgeCard({ item, index, showRecallHint }) {
   )
 }
 
-function ContentView({ node, items = [], onSelectChild }) {
+function ContentView({ node, items = [], onSelectChild, contentExpanded, onContentExpandedChange }) {
   if (!node) {
     return (
       <div className="flex items-center justify-center min-h-[200px] py-12">
@@ -131,6 +130,8 @@ function ContentView({ node, items = [], onSelectChild }) {
                 item={item}
                 index={index}
                 showRecallHint={index === 0}
+                expanded={contentExpanded}
+                onExpandedChange={onContentExpandedChange}
               />
             ))}
           </div>
@@ -225,6 +226,8 @@ export default function StudyMode() {
   const [sessionCompleted, setSessionCompleted] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [filterMode, setFilterMode] = useState('all') // 'all' | 'weak'
+  /** Shared expand/collapse for all knowledge cards in the current study view */
+  const [studyContentExpanded, setStudyContentExpanded] = useState(false)
 
   const hasSelectedNodeWithItems = !!selectedNode && Array.isArray(nodeItems) && nodeItems.length > 0
 
@@ -256,6 +259,7 @@ export default function StudyMode() {
   useEffect(() => {
     setCurrentIndex(0)
     setSessionCompleted(false)
+    setStudyContentExpanded(false)
   }, [selectedNode?.id, filterMode, nodeItems.length])
 
   const handlePrevCard = () => {
@@ -439,7 +443,14 @@ export default function StudyMode() {
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-4 sm:p-6 md:p-8 animate-slide-up min-h-0 flex flex-col gap-4">
               <div className="flex-1 min-h-0">
-                <KnowledgeCard item={currentItem} index={0} showRecallHint />
+                <KnowledgeCard
+                  key={currentItem.id}
+                  item={currentItem}
+                  index={0}
+                  showRecallHint
+                  expanded={studyContentExpanded}
+                  onExpandedChange={setStudyContentExpanded}
+                />
               </div>
               <div className="mt-2 pt-3 border-t border-gray-200/60 dark:border-gray-700">
                 <div className="flex flex-row items-center justify-between gap-3 flex-nowrap">
@@ -461,6 +472,8 @@ export default function StudyMode() {
             node={selectedNode}
             items={nodeItems}
             onSelectChild={handleNodeSelect}
+            contentExpanded={studyContentExpanded}
+            onContentExpandedChange={setStudyContentExpanded}
           />
         )}
       </div>
