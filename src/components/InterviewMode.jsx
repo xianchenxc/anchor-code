@@ -129,16 +129,6 @@ export default function InterviewMode() {
     difficultyRef.current = difficulty
   }, [difficulty])
 
-  // Build prompt for asking a question (async from serverService)
-  const buildQuestionPrompt = useCallback(async (categoryName, categoryId, difficultyLevel) => {
-    return serverService.buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
-  }, [])
-
-  // Build prompt for evaluating an answer (async from serverService)
-  const buildEvaluationPrompt = useCallback(async (question, answer, categoryId) => {
-    return serverService.buildInterviewEvaluationPrompt(question, answer, categoryId)
-  }, [])
-
   // Start a new interview
   const handleStartInterview = useCallback(async () => {
     if (!category || !modelReady || isLoading) {
@@ -153,15 +143,18 @@ export default function InterviewMode() {
     setInterviewHistory([])
 
     try {
-      const prompt = await buildQuestionPrompt(categoryName, category, difficulty)
-      const question = await serverService.generate(prompt, {
+      const result = await serverService.generateInterviewQuestion({
+        categoryName,
+        categoryId: category,
+        difficultyLevel: difficulty
+      }, {
         maxLength: 256,
         temperature: 0.8,
         topK: 50,
         topP: 0.9
       })
 
-      const questionText = question.trim()
+      const questionText = (result?.question || '').trim()
       setCurrentQuestion(questionText)
       setIsWaitingForAnswer(true)
 
@@ -180,7 +173,7 @@ export default function InterviewMode() {
     } finally {
       setIsLoading(false)
     }
-  }, [category, difficulty, modelReady, isLoading, buildQuestionPrompt])
+  }, [category, difficulty, modelReady, isLoading])
 
   // Handle sending an answer
   const handleSendMessage = useCallback(async (userAnswer) => {
@@ -207,15 +200,18 @@ export default function InterviewMode() {
 
     try {
       // Evaluate the answer
-      const prompt = await buildEvaluationPrompt(currentQuestionValue, userAnswer, categoryValue)
-      const evaluation = await serverService.generate(prompt, {
+      const evaluationResult = await serverService.evaluateInterviewAnswer({
+        question: currentQuestionValue,
+        answer: userAnswer,
+        categoryId: categoryValue
+      }, {
         maxLength: 512,
         temperature: 0.7,
         topK: 50,
         topP: 0.9
       })
 
-      const evaluationText = evaluation.trim()
+      const evaluationText = (evaluationResult?.evaluation || '').trim()
       
       // Add evaluation message
       setMessages((prevMessages) => {
@@ -238,15 +234,18 @@ export default function InterviewMode() {
 
       // Ask next question
       const categoryName = INTERVIEW_CATEGORIES.find(c => c.id === categoryValue)?.name || categoryValue
-      const nextQuestionPrompt = await buildQuestionPrompt(categoryName, categoryValue, difficultyValue)
-      const nextQuestion = await serverService.generate(nextQuestionPrompt, {
+      const nextQuestionResult = await serverService.generateInterviewQuestion({
+        categoryName,
+        categoryId: categoryValue,
+        difficultyLevel: difficultyValue
+      }, {
         maxLength: 256,
         temperature: 0.8,
         topK: 50,
         topP: 0.9
       })
 
-      const nextQuestionText = nextQuestion.trim()
+      const nextQuestionText = (nextQuestionResult?.question || '').trim()
       setCurrentQuestion(nextQuestionText)
       setIsWaitingForAnswer(true)
 
@@ -272,7 +271,7 @@ export default function InterviewMode() {
     } finally {
       setIsLoading(false)
     }
-  }, [isWaitingForAnswer, isLoading, buildEvaluationPrompt, buildQuestionPrompt])
+  }, [isWaitingForAnswer, isLoading])
 
   // Handle clearing interview
   const handleClear = useCallback(() => {

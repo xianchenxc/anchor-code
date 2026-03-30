@@ -4,79 +4,10 @@
  */
 
 import {
-  getAllFrontendContent,
   getRelevantContent,
   formatContentForPrompt,
   getCategoryContentForPrompt
 } from './contentExtractor.js'
-
-/**
- * Build system message for learning/chat mode
- * @param {string|null} currentTopic - Optional current learning topic
- * @param {string|null} userQuestion - Optional user question for extracting relevant content
- * @returns {Promise<string>} System message content
- */
-export async function buildLearningSystemMessage(currentTopic = null, userQuestion = null) {
-  let systemContent = `你是一个专业的前端开发技术专家，擅长用中文解释前端开发相关的技术概念。
-你的专长领域包括：
-- JavaScript（ES6+、异步编程、闭包、原型链等）
-- React（Hooks、组件设计、性能优化、虚拟DOM等）
-- Web3（区块链基础、智能合约、DEX、钱包连接等）
-- 前端工程化、性能优化、最佳实践
-
-请用清晰易懂的中文回答，可以结合代码示例。回答要准确、简洁、有针对性，重点突出前端开发岗位的实际应用场景。`
-
-  if (currentTopic) {
-    systemContent += `\n\n当前学习主题：${currentTopic}`
-  }
-
-  let knowledgeBase = ''
-  if (userQuestion) {
-    const relevantItems = await getRelevantContent(userQuestion, null, 8)
-    if (Array.isArray(relevantItems) && relevantItems.length > 0) {
-      knowledgeBase = formatContentForPrompt(relevantItems, 2000)
-    }
-  } else {
-    knowledgeBase = getAllFrontendContent()
-  }
-
-  if (knowledgeBase) {
-    systemContent += `\n\n以下是项目中的前端开发知识库内容，请严格按照这些内容回答问题，确保答案的准确性和专业性：
-
-**重要要求**：
-1. 优先使用知识库中的内容来回答问题
-2. 如果知识库中有相关内容，必须基于知识库内容回答，不要添加知识库中没有的信息
-3. 如果知识库中没有相关内容，可以基于你的知识回答，但要明确说明这是通用知识
-4. 回答要准确、简洁，避免过度发散或添加不相关的信息
-
-知识库内容：
-${knowledgeBase}`
-  }
-
-  return systemContent
-}
-
-/**
- * Build chat messages for learning mode with conversation history
- */
-export async function buildLearningChatMessages(
-  userQuestion,
-  conversationHistory = [],
-  currentTopic = null,
-  maxHistoryLength = 6
-) {
-  const messages = []
-  const systemContent = await buildLearningSystemMessage(currentTopic, userQuestion)
-  messages.push({ role: 'system', content: systemContent })
-  const recentHistory = conversationHistory.slice(-maxHistoryLength)
-  recentHistory.forEach((msg) => {
-    if (msg.role === 'user' || msg.role === 'assistant') {
-      messages.push({ role: msg.role, content: msg.content })
-    }
-  })
-  messages.push({ role: 'user', content: userQuestion })
-  return messages
-}
 
 /**
  * Build prompt for interview question generation
@@ -139,6 +70,60 @@ export async function buildInterviewEvaluationPrompt(question, answer, categoryI
 - （可选，如果回答中遗漏了重要知识点，可以补充说明）
 
 请用中文回答，评价要客观、专业、有建设性，重点评估是否符合前端开发岗位的要求。`
+}
+
+/**
+ * Build prompt for evaluating practice answers (10-point scoring).
+ * The output must strictly follow the "【评分】X/10" format for UI parsing.
+ *
+ * @param {string} question - Practice question text
+ * @param {string} answer - User provided answer
+ * @param {string} referenceAnswer - Reference answer used as the evaluation baseline
+ * @param {string} questionType - Question type ("qa" | "coding")
+ * @param {string|null} categoryId - Optional category id for knowledge-base grounding
+ * @returns {Promise<string>} Prompt text
+ */
+export async function buildPracticeEvaluationPrompt(
+  question,
+  answer,
+  referenceAnswer,
+  questionType = 'qa',
+  categoryId = null
+) {
+  let knowledgeBase = ''
+  if (categoryId) {
+    const categoryContent = getCategoryContentForPrompt(categoryId)
+    if (categoryContent) {
+      knowledgeBase = `\n\n以下是相关的知识点和标准答案，可以作为评估参考：\n\n${categoryContent}`
+    }
+  } else {
+    const relevantItems = await getRelevantContent(question, null, 5)
+    if (Array.isArray(relevantItems) && relevantItems.length > 0) {
+      knowledgeBase = `\n\n以下是相关的知识点，可以作为评估参考：\n\n${formatContentForPrompt(relevantItems, 1500)}`
+    }
+  }
+
+  const typeLabel = questionType === 'qa' ? '问答题' : '练习题'
+
+  return `你是一个专业的前端开发技术练习题判分专家，具有丰富的前端开发经验与题目评估经验。
+请对用户回答进行判分与反馈，题目类型为：${typeLabel}。
+
+请严格基于“参考答案”评估用户回答的覆盖度、准确性与表述质量；如用户回答与参考答案存在偏差，请指出原因并给出改进建议。
+
+问题：${question}
+参考答案：${referenceAnswer}
+你的回答：${answer}${knowledgeBase}
+
+请严格按下面模板输出，不要输出模板外任何内容：
+【评分】X/10
+【扣分点】
+- ...
+
+正确示例（仅作格式参考）：
+【评分】8/10
+【扣分点】
+- 回答中没有提及关键知识点
+`
 }
 
 /**

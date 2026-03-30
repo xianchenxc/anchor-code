@@ -9,6 +9,11 @@ import { env } from '@huggingface/transformers'
 import * as dataService from './server/dataService.js'
 import * as agentService from './server/agentService.js'
 import * as vectorService from './server/vectorService.js'
+import {
+  generateInterviewQuestion,
+  evaluateInterviewAnswer
+} from './server/interviewService.js'
+import { evaluatePracticeAnswer } from './server/practiceEvaluationService.js'
 import { ModelService } from './modelService.js'
 
 env.allowLocalModels = false
@@ -41,18 +46,6 @@ const workerAPI = {
     return dataService.getAllPracticeQuestions()
   },
 
-  async buildLearningChatMessages(userQuestion, conversationHistory = [], currentTopic = null, maxHistoryLength = 6) {
-    return agentService.buildLearningChatMessages(userQuestion, conversationHistory, currentTopic, maxHistoryLength)
-  },
-
-  buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel) {
-    return agentService.buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
-  },
-
-  async buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
-    return agentService.buildInterviewEvaluationPrompt(question, answer, categoryId)
-  },
-
   buildInterviewChatMessages(categoryName, difficultyLevel, question, answer = null, conversationHistory = [], maxHistoryLength = 4) {
     return agentService.buildInterviewChatMessages(categoryName, difficultyLevel, question, answer, conversationHistory, maxHistoryLength)
   },
@@ -62,7 +55,24 @@ const workerAPI = {
     return await modelService.loadModel(modelName, progressCallback)
   },
 
-  async generateTextStream(promptOrMessages, options = {}) {
+  async evaluatePracticeAnswer(input, options = {}) {
+    const { requestId, ...generationOptions } = options
+
+    const onChunk = requestId
+      ? (chunk, fullText) => {
+          self.postMessage({ type: 'streaming-chunk', requestId, chunk, fullText })
+        }
+      : null
+
+    return evaluatePracticeAnswer({
+      input,
+      generationOptions,
+      modelService,
+      onChunk
+    })
+  },
+
+  async generateInterviewQuestion(input, options = {}) {
     const { requestId, ...generationOptions } = options
     const onChunk = requestId
       ? (chunk, fullText) => {
@@ -70,13 +80,28 @@ const workerAPI = {
         }
       : null
 
-    let fullText = ''
-    const stream = modelService.generateTextStream(promptOrMessages, generationOptions)
-    for await (const { chunk, fullText: newFullText } of stream) {
-      fullText = newFullText
-      if (onChunk) onChunk(chunk, fullText)
-    }
-    return fullText
+    return generateInterviewQuestion({
+      input,
+      generationOptions,
+      modelService,
+      onChunk
+    })
+  },
+
+  async evaluateInterviewAnswer(input, options = {}) {
+    const { requestId, ...generationOptions } = options
+    const onChunk = requestId
+      ? (chunk, fullText) => {
+          self.postMessage({ type: 'streaming-chunk', requestId, chunk, fullText })
+        }
+      : null
+
+    return evaluateInterviewAnswer({
+      input,
+      generationOptions,
+      modelService,
+      onChunk
+    })
   },
 
   async getStatus() {

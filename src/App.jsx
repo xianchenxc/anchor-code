@@ -6,7 +6,6 @@ import { SidebarProvider, useSidebar } from './contexts/SidebarContext'
 import { useTheme } from './hooks/useTheme'
 import StudyMode from './components/StudyMode'
 import PracticeMode from './components/PracticeMode'
-import ChatMode from './components/ChatMode'
 import InterviewMode from './components/InterviewMode'
 import Sidebar from './components/Sidebar'
 
@@ -82,7 +81,6 @@ function AppContent() {
             <Route path="/" element={<StudyMode />} />
             <Route path="/study" element={<StudyMode />} />
             <Route path="/practice" element={<PracticeMode />} />
-            <Route path="/chat" element={<ChatMode />} />
             <Route path="/interview" element={<InterviewMode />} />
           </Routes>
         </main>

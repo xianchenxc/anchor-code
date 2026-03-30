@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, ClipboardList, PartyPopper, PenLine, CheckCircle2 } from 'lucide-react'
 import serverService from '../services/serverService.js'
 import MarkdownRenderer from './MarkdownRenderer.jsx'
 import { usePracticeProgress, PRACTICE_PROGRESS_STORAGE_KEY } from '../hooks/usePracticeProgress.js'
+import { formatErrorMessage } from '../utils/errorMessages.js'
 
 // Constants
 const QUESTION_TYPES = {
@@ -66,7 +67,21 @@ function AnswerSection({ content, title = '答案', barClass = 'bg-teal-500' }) 
 }
 
 // QACard component
-function QACard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canGoPrevious, canGoNext }) {
+function QACard({
+  item,
+  showAnswer,
+  onToggleAnswer,
+  onPrevious,
+  onNext,
+  canGoPrevious,
+  canGoNext,
+  qaAnswer,
+  onQaAnswerChange,
+  onSubmitQAAnswer,
+  qaIsScoring,
+  qaEvaluation,
+  qaError
+}) {
   return (
     <div className="flex flex-col min-h-0">
       <div className="flex-shrink-0">
@@ -90,10 +105,49 @@ function QACard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canGoPre
           {item.question}
         </div>
       </div>
-      
-      {showAnswer && (
-        <AnswerSection content={item.content} />
+
+      <div className="flex-shrink-0 flex flex-col min-h-0 mb-4">
+        <label className="block font-bold mb-2 text-sm text-gray-900 dark:text-gray-100">你的答案</label>
+        <textarea
+          className="w-full min-h-[160px] sm:min-h-[200px] p-3 text-sm leading-relaxed resize-y bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-gray-900 dark:text-gray-100"
+          value={qaAnswer}
+          onChange={(e) => onQaAnswerChange(e.target.value)}
+          placeholder="在这里输入你的答案..."
+          spellCheck={false}
+        />
+        <div className="flex items-center justify-end mt-3">
+          <button
+            type="button"
+            className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
+            onClick={() => onSubmitQAAnswer(qaAnswer)}
+            disabled={qaIsScoring || !qaAnswer.trim()}
+          >
+            {qaIsScoring ? '正在判分...' : '提交判分'}
+          </button>
+        </div>
+        {qaError && (
+          <p className="text-xs text-red-600 dark:text-red-400 mt-2 whitespace-pre-wrap">
+            {qaError}
+          </p>
+        )}
+      </div>
+
+      {qaEvaluation && (
+        <div className="flex-shrink-0 pt-4 mt-4 border-t border-gray-200/60 animate-slide-up">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
+            <h4 className="text-gray-900 dark:text-gray-100 text-base font-bold">AI 评分</h4>
+            <span className="ml-auto text-xs font-semibold text-gray-700 dark:text-gray-200 bg-amber-50 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-500/30 px-2.5 py-1 rounded-full">
+              得分：{qaEvaluation.score === null ? '—' : qaEvaluation.score}/10
+            </span>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200/80 dark:border-gray-600">
+            <MarkdownRenderer content={qaEvaluation.text} />
+          </div>
+        </div>
       )}
+
+      {showAnswer && <AnswerSection content={item.content} />}
     </div>
   )
 }
@@ -166,7 +220,21 @@ function CodingCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canG
 }
 
 // PracticeCard component
-function PracticeCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, canGoPrevious, canGoNext }) {
+function PracticeCard({
+  item,
+  showAnswer,
+  onToggleAnswer,
+  onPrevious,
+  onNext,
+  canGoPrevious,
+  canGoNext,
+  qaAnswer,
+  onQaAnswerChange,
+  onSubmitQAAnswer,
+  qaIsScoring,
+  qaEvaluation,
+  qaError
+}) {
   if (item.questionType === QUESTION_TYPES.QA) {
     return (
       <QACard
@@ -177,6 +245,12 @@ function PracticeCard({ item, showAnswer, onToggleAnswer, onPrevious, onNext, ca
         onNext={onNext}
         canGoPrevious={canGoPrevious}
         canGoNext={canGoNext}
+        qaAnswer={qaAnswer}
+        onQaAnswerChange={onQaAnswerChange}
+        onSubmitQAAnswer={onSubmitQAAnswer}
+        qaIsScoring={qaIsScoring}
+        qaEvaluation={qaEvaluation}
+        qaError={qaError}
       />
     )
   }
@@ -257,6 +331,11 @@ function PracticeMode() {
   const [loading, setLoading] = useState(true)
   const [showAnswer, setShowAnswer] = useState(false)
   const [currentIndex, setCurrentIndex] = usePracticeProgress(allItems)
+  const [qaAnswer, setQaAnswer] = useState('')
+  const [qaIsScoring, setQaIsScoring] = useState(false)
+  const [qaEvaluation, setQaEvaluation] = useState(null)
+  const [qaError, setQaError] = useState(null)
+  const scoringRequestIdRef = useRef(0)
 
   // Load questions
   useEffect(() => {
@@ -272,6 +351,15 @@ function PracticeMode() {
   const currentItem = useMemo(() => {
     return allItems[currentIndex] || null
   }, [allItems, currentIndex])
+
+  // Reset per-question QA state when switching items
+  useEffect(() => {
+    scoringRequestIdRef.current += 1
+    setQaAnswer('')
+    setQaIsScoring(false)
+    setQaEvaluation(null)
+    setQaError(null)
+  }, [currentItem?.id])
 
   const canGoPrevious = currentIndex > 0
   const canGoNext = currentIndex < total - 1
@@ -303,6 +391,10 @@ function PracticeMode() {
     if (canGoPrevious) {
       setCurrentIndex(currentIndex - 1)
       setShowAnswer(false)
+      setQaAnswer('')
+      setQaEvaluation(null)
+      setQaError(null)
+      setQaIsScoring(false)
     }
   }, [currentIndex, canGoPrevious, setCurrentIndex])
 
@@ -310,6 +402,10 @@ function PracticeMode() {
     if (canGoNext) {
       setCurrentIndex(currentIndex + 1)
       setShowAnswer(false)
+      setQaAnswer('')
+      setQaEvaluation(null)
+      setQaError(null)
+      setQaIsScoring(false)
     } else if (isLastQuestion) {
       setShowCompletion(true)
     }
@@ -342,7 +438,52 @@ function PracticeMode() {
     setCurrentIndex(0)
     setShowCompletion(false)
     setShowStartPage(false)
+    setShowAnswer(false)
+    setQaAnswer('')
+    setQaEvaluation(null)
+    setQaError(null)
+    setQaIsScoring(false)
   }, [setCurrentIndex])
+
+  const handleSubmitQAAnswer = useCallback(async (userAnswer) => {
+    if (!currentItem || currentItem.questionType !== QUESTION_TYPES.QA) return
+    const trimmed = userAnswer.trim()
+    if (!trimmed) return
+
+    const requestId = ++scoringRequestIdRef.current
+    setQaIsScoring(true)
+    setQaError(null)
+    try {
+      const result = await serverService.evaluatePracticeAnswer({
+        question: currentItem.question,
+        answer: trimmed,
+        referenceAnswer: currentItem.content,
+        questionType: currentItem.questionType,
+        categoryId: currentItem.categoryId || null
+      }, {
+        maxLength: 512,
+        temperature: 0.7,
+        topK: 50,
+        topP: 0.9
+      })
+
+      // Ignore stale results if user has switched to another question
+      if (scoringRequestIdRef.current !== requestId) return
+
+      setQaEvaluation({
+        score: result?.score ?? null,
+        text: result?.normalizedText || ''
+      })
+    } catch (error) {
+      if (scoringRequestIdRef.current !== requestId) return
+      setQaEvaluation(null)
+      setQaError(formatErrorMessage(error, '判分'))
+    } finally {
+      if (scoringRequestIdRef.current === requestId) {
+        setQaIsScoring(false)
+      }
+    }
+  }, [currentItem])
 
   if (loading) {
     return <LoadingState />
@@ -486,6 +627,12 @@ function PracticeMode() {
                   onNext={handleNext}
                   canGoPrevious={canGoPrevious}
                   canGoNext={canGoNext || isLastQuestion}
+                  qaAnswer={qaAnswer}
+                  onQaAnswerChange={setQaAnswer}
+                  onSubmitQAAnswer={handleSubmitQAAnswer}
+                  qaIsScoring={qaIsScoring}
+                  qaEvaluation={qaEvaluation}
+                  qaError={qaError}
                 />
               )}
             </div>

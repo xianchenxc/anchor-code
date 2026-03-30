@@ -101,19 +101,64 @@ class ServerService {
   }
 
   // --- Agent ---
-  async buildLearningChatMessages(userQuestion, conversationHistory = [], currentTopic = null, maxHistoryLength = 6) {
+  async evaluatePracticeAnswer(input, options = {}) {
+    const { onChunk, ...rest } = options
     await this._ensureWorker()
-    return this.workerProxy.buildLearningChatMessages(userQuestion, conversationHistory, currentTopic, maxHistoryLength)
+
+    let requestId = null
+    if (onChunk) {
+      requestId = `stream-${++this.requestIdCounter}`
+      this.streamingCallbacks.set(requestId, onChunk)
+    }
+
+    try {
+      const result = await this.workerProxy.evaluatePracticeAnswer(input, { ...rest, requestId })
+      if (requestId) this.streamingCallbacks.delete(requestId)
+      return result
+    } catch (e) {
+      if (requestId) this.streamingCallbacks.delete(requestId)
+      throw e
+    }
   }
 
-  async buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel) {
+  async generateInterviewQuestion(input, options = {}) {
+    const { onChunk, ...rest } = options
     await this._ensureWorker()
-    return this.workerProxy.buildInterviewQuestionPrompt(categoryName, categoryId, difficultyLevel)
+
+    let requestId = null
+    if (onChunk) {
+      requestId = `stream-${++this.requestIdCounter}`
+      this.streamingCallbacks.set(requestId, onChunk)
+    }
+
+    try {
+      const result = await this.workerProxy.generateInterviewQuestion(input, { ...rest, requestId })
+      if (requestId) this.streamingCallbacks.delete(requestId)
+      return result
+    } catch (e) {
+      if (requestId) this.streamingCallbacks.delete(requestId)
+      throw e
+    }
   }
 
-  async buildInterviewEvaluationPrompt(question, answer, categoryId = null) {
+  async evaluateInterviewAnswer(input, options = {}) {
+    const { onChunk, ...rest } = options
     await this._ensureWorker()
-    return this.workerProxy.buildInterviewEvaluationPrompt(question, answer, categoryId)
+
+    let requestId = null
+    if (onChunk) {
+      requestId = `stream-${++this.requestIdCounter}`
+      this.streamingCallbacks.set(requestId, onChunk)
+    }
+
+    try {
+      const result = await this.workerProxy.evaluateInterviewAnswer(input, { ...rest, requestId })
+      if (requestId) this.streamingCallbacks.delete(requestId)
+      return result
+    } catch (e) {
+      if (requestId) this.streamingCallbacks.delete(requestId)
+      throw e
+    }
   }
 
   async buildInterviewChatMessages(categoryName, difficultyLevel, question, answer = null, conversationHistory = [], maxHistoryLength = 4) {
@@ -128,24 +173,6 @@ class ServerService {
     const progressProxy = onProgress ? Comlink.proxy(onProgress) : null
     const result = await this.workerProxy.loadModel(modelName, progressProxy)
     if (!result.success) throw new Error(result.message || 'Failed to load model')
-  }
-
-  async generate(promptOrMessages, options = {}) {
-    const { onChunk, ...rest } = options
-    await this._ensureWorker()
-    let requestId = null
-    if (onChunk) {
-      requestId = `stream-${++this.requestIdCounter}`
-      this.streamingCallbacks.set(requestId, onChunk)
-    }
-    try {
-      const fullText = await this.workerProxy.generateTextStream(promptOrMessages, { ...rest, requestId })
-      if (requestId) this.streamingCallbacks.delete(requestId)
-      return fullText
-    } catch (e) {
-      if (requestId) this.streamingCallbacks.delete(requestId)
-      throw e
-    }
   }
 
   async isModelLoaded() {
